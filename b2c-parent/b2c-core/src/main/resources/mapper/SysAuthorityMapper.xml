@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.SysAuthorityMapper">
+    <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.SysAuthority">
+        <id column="authority_code" jdbcType="VARCHAR" property="authorityCode"/>
+        <result column="authority_name" jdbcType="VARCHAR" property="authorityName"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from sys_authority
+        where authority_code = #{authorityCode,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="org.javamaster.b2c.core.entity.SysAuthority">
+        insert into sys_authority (authority_code, authority_name)
+        values (#{authorityCode,jdbcType=VARCHAR}, #{authorityName,jdbcType=VARCHAR})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="org.javamaster.b2c.core.entity.SysAuthority">
+        update sys_authority
+        set authority_name = #{authorityName,jdbcType=VARCHAR}
+        where authority_code = #{authorityCode,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select authority_code, authority_name
+        from sys_authority
+        where authority_code = #{authorityCode,jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select authority_code, authority_name
+        from sys_authority
+    </select>
+</mapper>

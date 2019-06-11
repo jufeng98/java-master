@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <jmxConfigurator/>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
+        </layout>
+    </appender>
+    <appender name="b2c-core"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/home/logs/b2c-core/b2c-core.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>/home/logs/b2c-core/b2c-core.%d{yyyy-MM-dd-HH}.log.zip</FileNamePattern>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
+        </layout>
+    </appender>
+    <appender name="b2c-core-mybatis"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>/home/logs/b2c-core/b2c-core-mybatis.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>/home/logs/b2c-core/b2c-core-mybatis.%d{yyyy-MM-dd-HH}.log.zip</FileNamePattern>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
+        </layout>
+    </appender>
+    <root>
+        <level value="info"/>
+        <appender-ref ref="stdout"/>
+    </root>
+    <logger name="org.javamaster.b2c.core" level="info">
+        <appender-ref ref="b2c-core"/>
+    </logger>
+    <logger name="org.javamaster.b2c.core.mapper" level="debug" additivity="false">
+        <appender-ref ref="b2c-core-mybatis"/>
+    </logger>
+</configuration>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.SysUserMapper">
+    <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.SysUser">
+        <id column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="enabled" jdbcType="BIT" property="enabled"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from sys_user
+        where username = #{username,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="org.javamaster.b2c.core.entity.SysUser">
+        insert into sys_user (username, password, enabled)
+        values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{enabled,jdbcType=BIT})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="org.javamaster.b2c.core.entity.SysUser">
+        update sys_user
+        set password = #{password,jdbcType=VARCHAR},
+            enabled  = #{enabled,jdbcType=BIT}
+        where username = #{username,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select username, password, enabled
+        from sys_user
+        where username = #{username,jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select username, password, enabled
+        from sys_user
+    </select>
+</mapper>

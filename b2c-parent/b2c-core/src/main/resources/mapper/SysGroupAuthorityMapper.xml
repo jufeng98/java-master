@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.SysGroupAuthorityMapper">
+    <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.SysGroupAuthority">
+        <result column="group_code" jdbcType="CHAR" property="groupCode"/>
+        <result column="authority_code" jdbcType="VARCHAR" property="authorityCode"/>
+    </resultMap>
+    <insert id="insert" parameterType="org.javamaster.b2c.core.entity.SysGroupAuthority">
+        insert into sys_group_authority (group_code, authority_code)
+        values (#{groupCode,jdbcType=CHAR}, #{authorityCode,jdbcType=VARCHAR})
+    </insert>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select group_code, authority_code
+        from sys_group_authority
+    </select>
+</mapper>

@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: b2c-core
+server:
+  port: 9988
+info:
+  service-name: ${spring.application.name}
+  ip: ${spring.cloud.client.ip-address}
+  env: ${active.profile.name}
+  system: ${os.name}

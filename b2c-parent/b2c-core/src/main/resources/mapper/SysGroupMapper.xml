@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.SysGroupMapper">
+    <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.SysGroup">
+        <id column="group_code" jdbcType="CHAR" property="groupCode"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from sys_group
+        where group_code = #{groupCode,jdbcType=CHAR}
+    </delete>
+    <insert id="insert" parameterType="org.javamaster.b2c.core.entity.SysGroup">
+        insert into sys_group (group_code, group_name)
+        values (#{groupCode,jdbcType=CHAR}, #{groupName,jdbcType=VARCHAR})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="org.javamaster.b2c.core.entity.SysGroup">
+        update sys_group
+        set group_name = #{groupName,jdbcType=VARCHAR}
+        where group_code = #{groupCode,jdbcType=CHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select group_code, group_name
+        from sys_group
+        where group_code = #{groupCode,jdbcType=CHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select group_code, group_name
+        from sys_group
+    </select>
+</mapper>

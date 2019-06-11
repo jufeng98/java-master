@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.MicrowebsiteExamUserMapper">
+    <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.MicrowebsiteExamUser">
+        <result column="exam_code" jdbcType="CHAR" property="examCode"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+    </resultMap>
+    <insert id="insert" parameterType="org.javamaster.b2c.core.entity.MicrowebsiteExamUser">
+        insert into microwebsite_exam_user (exam_code, username)
+        values (#{examCode,jdbcType=CHAR}, #{username,jdbcType=VARCHAR})
+    </insert>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select exam_code, username
+        from microwebsite_exam_user
+    </select>
+</mapper>

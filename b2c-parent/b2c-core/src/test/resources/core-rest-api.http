@@ -1,0 +1,17 @@
+POST http://localhost:9080/core/login
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+username=1050106266&password=123456&submit=Login
+
+### 把上面/core/login接口返回的cookie信息复制到Cookie头字段
+POST http://localhost:9080/json/exam/getExamList
+Content-Type:application/json
+Accept: application/json
+Cookie: JSESSIONID=94CDBABDA233FE3318DF8ABF1E60048B
+
+{
+  "examType": 1
+}
+
+###

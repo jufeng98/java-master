@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.ManualMicrowebsiteMapper">
+    <resultMap id="microwebsiteExamResultMap" type="org.javamaster.b2c.core.entity.MicrowebsiteExam">
+        <result column="exam_code" property="examCode"/>
+        <result column="exam_name" property="examName"/>
+        <result column="exam_type" property="examType"/>
+        <result column="exam_status" property="examStatus"/>
+        <result column="del_flag" property="delFlag"/>
+    </resultMap>
+    <select id="select" resultMap="microwebsiteExamResultMap">
+        select me.exam_code, me.exam_name, me.exam_type, me.exam_status, me.del_flag
+        from microwebsite_exam_user meu
+                 inner join microwebsite_exam me on me.exam_code = meu.exam_code
+        where me.exam_type = #{examType}
+          and meu.username = #{username}
+    </select>
+</mapper>

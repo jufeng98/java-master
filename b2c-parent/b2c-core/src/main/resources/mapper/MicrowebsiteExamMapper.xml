@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.MicrowebsiteExamMapper">
+  <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.MicrowebsiteExam">
+    <result column="exam_code" jdbcType="CHAR" property="examCode" />
+    <result column="exam_name" jdbcType="VARCHAR" property="examName" />
+    <result column="exam_type" jdbcType="TINYINT" property="examType" />
+    <result column="exam_status" jdbcType="TINYINT" property="examStatus" />
+    <result column="del_flag" jdbcType="TINYINT" property="delFlag" />
+  </resultMap>
+  <insert id="insert" parameterType="org.javamaster.b2c.core.entity.MicrowebsiteExam">
+    insert into microwebsite_exam (exam_code, exam_name, exam_type,
+      exam_status, del_flag)
+    values (#{examCode,jdbcType=CHAR}, #{examName,jdbcType=VARCHAR}, #{examType,jdbcType=TINYINT},
+      #{examStatus,jdbcType=TINYINT}, #{delFlag,jdbcType=TINYINT})
+  </insert>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select exam_code, exam_name, exam_type, exam_status, del_flag
+    from microwebsite_exam
+  </select>
+</mapper>
