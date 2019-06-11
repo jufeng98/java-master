@@ -1,10 +1,11 @@
 package org.javamaster.b2c.core.java8;
 
-import static java.util.stream.Collectors.toList;
 import org.javamaster.b2c.core.model.java8.Apple;
 import org.junit.Test;
 
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author yudong
