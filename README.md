@@ -9,3 +9,5 @@ Java高手之路
 
 可以通过运行ExamControllerTest测试类查看项目运行效果或者启动项目，通过core-rest-api.http文件去调用接口查看运行效果（仅适用IDEA）
 非IDEA等可使用postman或其它工具来调用接口
+
+Java 8示例代码位于测试包下
