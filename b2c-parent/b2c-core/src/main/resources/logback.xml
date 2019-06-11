@@ -36,5 +36,6 @@
     </logger>
     <logger name="org.javamaster.b2c.core.mapper" level="debug" additivity="false">
         <appender-ref ref="b2c-core-mybatis"/>
+        <appender-ref ref="stdout"/>
     </logger>
 </configuration>
