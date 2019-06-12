@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.core.mapper.SysRememberMeMapper">
+    <resultMap id="BaseResultMap" type="org.javamaster.b2c.core.entity.SysRememberMe">
+        <id column="series" jdbcType="VARCHAR" property="series"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="token" jdbcType="VARCHAR" property="token"/>
+        <result column="last_used" jdbcType="TIMESTAMP" property="lastUsed"/>
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from sys_remember_me
+        where series = #{series,jdbcType=VARCHAR}
+    </delete>
+    <delete id="deleteByUsername" parameterType="java.lang.String">
+        delete
+        from sys_remember_me
+        where username = #{username,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="org.javamaster.b2c.core.entity.SysRememberMe">
+        insert into sys_remember_me (series, username, token, last_used)
+        values (#{series,jdbcType=VARCHAR},
+                #{username,jdbcType=VARCHAR},
+                #{token,jdbcType=VARCHAR},
+                #{lastUsed,jdbcType=TIMESTAMP})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="org.javamaster.b2c.core.entity.SysRememberMe">
+        update sys_remember_me
+        set token     = #{token,jdbcType=VARCHAR},
+            last_used = #{lastUsed,jdbcType=TIMESTAMP}
+        where series = #{series,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select series, username, token, last_used
+        from sys_remember_me
+        where series = #{series,jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select series, username, token, last_used
+        from sys_remember_me
+    </select>
+</mapper>

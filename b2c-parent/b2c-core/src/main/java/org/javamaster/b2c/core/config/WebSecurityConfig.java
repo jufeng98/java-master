@@ -4,6 +4,7 @@ import org.javamaster.b2c.core.enums.BizExceptionEnum;
 import org.javamaster.b2c.core.exception.BizException;
 import org.javamaster.b2c.core.handler.LoginHandler;
 import org.javamaster.b2c.core.mapper.ManualSecurityMapper;
+import org.javamaster.b2c.core.rememberme.RememberMeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -22,6 +23,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private ManualSecurityMapper manualSecurityMapper;
     @Autowired
     private LoginHandler loginHandler;
+    @Autowired
+    private RememberMeRepository rememberMeRepository;
+
+    private static final int SECONDS_OF_A_WEEK = 7 * 86400;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -35,6 +40,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(loginHandler::onAuthenticationSuccess)
                 .failureHandler(loginHandler::onAuthenticationFailure)
                 .and()
+                .rememberMe()
+                .rememberMeCookieName("CORE_REMEMBER_ME")
+                .rememberMeParameter("coreRememberMe")
+                .key("coreKey")
+                .tokenValiditySeconds(SECONDS_OF_A_WEEK)
+                .tokenRepository(rememberMeRepository)
+                .and()
                 .logout()
                 .clearAuthentication(true)
                 .logoutSuccessHandler(loginHandler::onLogoutSuccess)
@@ -44,13 +56,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(username -> {
-            UserDetails userDetails = manualSecurityMapper.selectUser(username);
-            if (userDetails == null) {
-                throw new BizException(BizExceptionEnum.INVALID_USER);
-            }
-            return userDetails;
-        }).passwordEncoder(new BCryptPasswordEncoder());
+        auth.userDetailsService(this::loadUserByUsername).passwordEncoder(new BCryptPasswordEncoder());
     }
 
+    private UserDetails loadUserByUsername(String username) {
+        UserDetails userDetails = manualSecurityMapper.selectUser(username);
+        if (userDetails == null) {
+            throw new BizException(BizExceptionEnum.INVALID_USER);
+        }
+        return userDetails;
+    }
 }
+
