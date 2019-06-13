@@ -19,4 +19,9 @@
                  inner join sys_authority sa on sa.authority_code = sga.authority_code
         where su.username = #{username}
     </select>
+    <delete id="deleteByUsername" parameterType="java.lang.String">
+        delete
+        from sys_remember_me
+        where username = #{username,jdbcType=VARCHAR}
+    </delete>
 </mapper>

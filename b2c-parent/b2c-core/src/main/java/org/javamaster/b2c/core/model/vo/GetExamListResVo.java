@@ -13,7 +13,7 @@ public class GetExamListResVo {
     private String examName;
     private ExamTypeEnum examType;
     private ExamStatusEnum examStatus;
-    private Boolean delFlag;
+    private Byte delFlag;
 
     @Override
     public String toString() {
@@ -44,11 +44,11 @@ public class GetExamListResVo {
         this.examStatus = examStatus;
     }
 
-    public Boolean getDelFlag() {
+    public Byte getDelFlag() {
         return delFlag;
     }
 
-    public void setDelFlag(Boolean delFlag) {
+    public void setDelFlag(Byte delFlag) {
         this.delFlag = delFlag;
     }
 }

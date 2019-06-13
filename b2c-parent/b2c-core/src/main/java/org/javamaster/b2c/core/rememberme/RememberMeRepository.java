@@ -1,6 +1,7 @@
 package org.javamaster.b2c.core.rememberme;
 
 import org.javamaster.b2c.core.entity.SysRememberMe;
+import org.javamaster.b2c.core.mapper.ManualSecurityMapper;
 import org.javamaster.b2c.core.mapper.SysRememberMeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
@@ -18,6 +19,8 @@ public class RememberMeRepository implements PersistentTokenRepository {
 
     @Autowired
     private SysRememberMeMapper sysRememberMeMapper;
+    @Autowired
+    private ManualSecurityMapper securityMapper;
 
     @Override
     public void createNewToken(PersistentRememberMeToken token) {
@@ -52,6 +55,6 @@ public class RememberMeRepository implements PersistentTokenRepository {
 
     @Override
     public void removeUserTokens(String username) {
-        sysRememberMeMapper.deleteByUsername(username);
+        securityMapper.deleteByUsername(username);
     }
 }
