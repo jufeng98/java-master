@@ -1,0 +1,19 @@
+server:
+  port: 9998
+spring:
+  application:
+    name: b2c-dubbo
+dubbo:
+  application:
+    name: b2c-dubbo
+  registry:
+#    修改为实际项目的zookeeper注册中心地址
+#    address: zookeeper://127.0.0.1:2181
+    address: zookeeper://192.168.240.15:2181
+  protocol:
+    name: dubbo
+    port: 21899
+  scan:
+    basePackages: org.javamaster.b2c
+info:
+  service-name: ${spring.application.name}
