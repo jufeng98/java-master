@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <description>一个简洁方便读写excel的工具包,底层使用的仍然是Apache poi类库</description>
+    <url>https://github.com/jufeng98/java-master</url>
 
     <developers>
         <developer>
