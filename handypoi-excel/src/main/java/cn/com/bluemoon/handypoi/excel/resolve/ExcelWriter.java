@@ -154,7 +154,7 @@ public class ExcelWriter<T> {
                 for (int j = 0; j < beanColumnFields.size(); j++) {
                     BeanColumnField beanColumnField = beanColumnFields.get(j);
                     Cell headerCell = headerRow.createCell(j);
-                    CellUtils.fillStrCell(headerCell, beanColumnField.getColumnName()[sheetInfo.getHeaderNum() - 1],
+                    CellUtils.fillStrCell(headerCell, beanColumnField.getColumnName()[i],
                             beanColumnField.getCellStyle());
                     sheetInfo.getSheet().setColumnWidth(j, beanColumnField.getColumnWidth());
                 }
@@ -169,10 +169,11 @@ public class ExcelWriter<T> {
          */
         private void calculateMergedRegion(SheetInfo sheetInfo) {
             Sheet sheet = sheetInfo.getSheet();
-            List<BeanColumnField> columns = sheetInfo.getBeanColumnFields();
+            List<BeanColumnField> beanColumnFields = sheetInfo.getBeanColumnFields();
+
             Map<String, List<Integer>> multiValuedMap = new HashMap<>(64);
-            for (int i = 0; i < columns.size(); i++) {
-                BeanColumnField beanColumnField = columns.get(i);
+            for (int i = 0; i < beanColumnFields.size(); i++) {
+                BeanColumnField beanColumnField = beanColumnFields.get(i);
                 beanColumnField.setColumnIndex(i);
 
                 // 处理行合并
@@ -274,7 +275,7 @@ public class ExcelWriter<T> {
             Field[] fields = sheetInfo.getDataClz().getDeclaredFields();
             AccessibleObject.setAccessible(fields, true);
 
-            List<BeanColumnField> columns = Arrays.stream(fields)
+            List<BeanColumnField> beanColumnFields = Arrays.stream(fields)
                     .map(field -> {
                         ExcelColumn excelColumn = field.getAnnotation(ExcelColumn.class);
                         if (excelColumn == null) {
@@ -325,7 +326,7 @@ public class ExcelWriter<T> {
                     .sorted(Comparator.comparingInt(BeanColumnField::getColumnOrder))
                     .collect(Collectors.toList());
             sheetInfo.setSheet(workbook.createSheet(sheetInfo.getSheetName()));
-            sheetInfo.setBeanColumnFields(columns);
+            sheetInfo.setBeanColumnFields(beanColumnFields);
         }
     }
 
