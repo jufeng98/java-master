@@ -12,8 +12,8 @@ b2c-parent/b2c-core:
 b2c-parent/b2c-dubbo:
 写有一个示例Dubbo服务UserDubboService
 
-b2c-parent/b2c-test:
-测试包:Java 8示例测试代码；Dubbo示例测试代码；Jackson示例测试代码
+b2c-parent/b2c-test
+测试包:Java 8示例测试代码；Dubbo示例测试代码；Jackson示例测试代码,JSR 303(Hibernate Validator)示例测试代码
 
 handypoi-excel
 一个简洁方便读写excel的工具包,测试包里面有两个示例Test类,可通过查看和运行Test类查看具体用法
