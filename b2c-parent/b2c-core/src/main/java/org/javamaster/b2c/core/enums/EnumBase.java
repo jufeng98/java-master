@@ -21,7 +21,10 @@ public interface EnumBase {
      * @param <E>
      * @return 若无对应的枚举对象, 返回null
      */
-    static <E extends Enum<?> & EnumBase> E codeOf(Class<E> enumClass, int code) {
+    static <E extends Enum<?> & EnumBase> E codeOf(Class<E> enumClass, Integer code) {
+        if (code == null) {
+            return null;
+        }
         E[] enumConstants = enumClass.getEnumConstants();
         for (E e : enumConstants) {
             if (e.getCode() == code) {
