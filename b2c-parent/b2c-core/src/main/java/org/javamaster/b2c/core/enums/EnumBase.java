@@ -19,7 +19,7 @@ public interface EnumBase {
      * @param enumClass
      * @param code
      * @param <E>
-     * @return 若无对应的枚举对象, 返回null
+     * @return 若code为null, 则返回null
      */
     static <E extends Enum<?> & EnumBase> E codeOf(Class<E> enumClass, Integer code) {
         if (code == null) {
