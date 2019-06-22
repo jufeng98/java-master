@@ -1,7 +1,5 @@
 package org.javamaster.b2c.core.enums;
 
-import org.javamaster.b2c.core.exception.BizException;
-
 /**
  * 枚举类的公共接口
  *
@@ -31,7 +29,7 @@ public interface EnumBase {
                 return e;
             }
         }
-        throw new BizException(BizExceptionEnum.INVALID_REQ_PARAM);
+        throw new IllegalArgumentException("the code didn't match any enum,code:" + code + ",enum class:" + enumClass.getName());
     }
 
 }
