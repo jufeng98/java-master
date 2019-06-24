@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: b2c-classloader
+server:
+  port: 9989
+info:
+  service-name: ${spring.application.name}
+  ip: ${spring.cloud.client.ip-address}
+  env: ${active.profile.name}
+  system: ${os.name}

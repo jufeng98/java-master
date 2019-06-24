@@ -21,6 +21,8 @@
         <module>b2c-dubbo</module>
         <module>b2c-dubbo-api</module>
         <module>b2c-test</module>
+        <module>../b2c-classloader</module>
+        <module>../b2c-classloader</module>
     </modules>
 
     <properties>
