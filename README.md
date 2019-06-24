@@ -15,5 +15,8 @@ b2c-parent/b2c-dubbo:
 b2c-parent/b2c-test
 测试包:Java 8示例测试代码；Dubbo示例测试代码；Jackson示例测试代码,JSR 303(Hibernate Validator)示例测试代码
 
+b2c-parent/b2c-classloader:
+devtools依赖导致的序列化和反序列化问题示例代码
+
 handypoi-excel
 一个简洁方便读写excel的工具包,测试包里面有两个示例Test类,可通过查看和运行Test类查看具体用法

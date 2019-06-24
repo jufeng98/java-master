@@ -17,7 +17,7 @@ public class DevToolsRunner implements CommandLineRunner {
         // RestartClassLoader
         System.out.println("ClassLoaderApplication classloader:"
                 + ClassLoaderApplication.class.getClassLoader().getClass().getSimpleName());
-        //AppClassLoader
+        // AppClassLoader
         System.out.println("ClassLoaderApplication classloader parent:"
                 + ClassLoaderApplication.class.getClassLoader().getParent().getClass().getSimpleName());
         // ExtClassLoader
@@ -31,7 +31,7 @@ public class DevToolsRunner implements CommandLineRunner {
         Object deserializeUserBaseDto = SerializationUtils.deserialize(bytes);
         System.out.println("deserialize userBaseDto object classloader:"
                 + deserializeUserBaseDto.getClass().getClassLoader().getClass().getSimpleName());
-//        userBaseDto = (UserBaseDto) deserializeUserBaseDto;
+        // userBaseDto = (UserBaseDto) deserializeUserBaseDto;
 
         deserializeUserBaseDto = SerializeUtils.deserialize(bytes);
         userBaseDto = (UserBaseDto) deserializeUserBaseDto;
