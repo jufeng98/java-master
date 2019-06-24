@@ -1,7 +1,5 @@
 package org.javamaster.b2c.core.enums;
 
-import org.javamaster.b2c.core.exception.BizException;
-
 /**
  * 枚举类的公共接口
  *
@@ -19,16 +17,19 @@ public interface EnumBase {
      * @param enumClass
      * @param code
      * @param <E>
-     * @return 若无对应的枚举对象, 返回null
+     * @return 若code为null, 则返回null
      */
-    static <E extends Enum<?> & EnumBase> E codeOf(Class<E> enumClass, int code) {
+    static <E extends Enum<?> & EnumBase> E codeOf(Class<E> enumClass, Integer code) {
+        if (code == null) {
+            return null;
+        }
         E[] enumConstants = enumClass.getEnumConstants();
         for (E e : enumConstants) {
             if (e.getCode() == code) {
                 return e;
             }
         }
-        throw new BizException(BizExceptionEnum.INVALID_REQ_PARAM);
+        throw new IllegalArgumentException("the code didn't match any enum,code:" + code + ",enum class:" + enumClass.getName());
     }
 
 }

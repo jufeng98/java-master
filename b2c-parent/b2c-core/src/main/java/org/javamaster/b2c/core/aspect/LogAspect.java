@@ -40,16 +40,16 @@ public class LogAspect {
         HttpServletRequest request = requestAttributes.getRequest();
         Object[] parameters = joinPoint.getArgs();
         String classMethod = joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName();
-        logger.info("ip:{}|class_method:{}|args:{}", getIpAddr(request), classMethod, Arrays.toString(parameters));
-        Object object;
+        Object resObject;
         try {
-            object = joinPoint.proceed(parameters);
+            resObject = joinPoint.proceed(parameters);
         } catch (Exception e) {
-            String reqInfo = String.format("class_method:%s|args:%s", classMethod, Arrays.toString(parameters));
-            throw new RuntimeException(reqInfo, e);
+            logger.error("aspect error req ip:{}|class_method:{}|args:{}", getIpAddr(request), classMethod, Arrays.toString(parameters));
+            throw e;
         }
-        logger.info("response:{},cost time:{}ms", object, System.currentTimeMillis() - nowMillis);
-        return object;
+        logger.info("aspect req ip:{}|class_method:{}|args:{},response:{},cost time:{}ms", getIpAddr(request), classMethod,
+                Arrays.toString(parameters), resObject, System.currentTimeMillis() - nowMillis);
+        return resObject;
     }
 
 
