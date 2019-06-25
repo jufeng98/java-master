@@ -14,7 +14,7 @@ public class ClassLoaderApplication {
 
     public static void main(String[] args) {
         // 关闭devtools重启功能
-        System.setProperty("spring.devtools.restart.enabled", "false");
+        // System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(ClassLoaderApplication.class, args);
     }
 

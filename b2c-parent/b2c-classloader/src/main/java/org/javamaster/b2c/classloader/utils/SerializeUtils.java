@@ -5,6 +5,10 @@ import org.springframework.lang.Nullable;
 
 import java.io.ByteArrayInputStream;
 
+/**
+ * @author yudong
+ * @date 2019/6/24
+ */
 public class SerializeUtils {
     public static Object deserialize(@Nullable byte[] bytes) {
         if (bytes == null) {

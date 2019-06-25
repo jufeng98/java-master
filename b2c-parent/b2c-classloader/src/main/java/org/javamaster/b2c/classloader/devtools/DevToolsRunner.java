@@ -7,6 +7,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 
+/**
+ * @author yudong
+ * @date 2019/6/24
+ */
 @Component
 public class DevToolsRunner implements CommandLineRunner {
 
