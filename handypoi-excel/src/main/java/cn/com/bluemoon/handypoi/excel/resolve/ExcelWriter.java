@@ -272,32 +272,38 @@ public class ExcelWriter<T> {
                 List<FooterColumn> footerColumnList = footerRowList.get(i).getFooterColumns();
 
                 int mergeColumns = 0;
+                int lastCreateCells = 0;
                 for (int k = 0; k < footerColumnList.size(); k++) {
-                    Cell cell = row.createCell(k);
                     FooterColumn footerColumn = footerColumnList.get(k);
+                    Cell cell;
+                    if (k == 0) {
+                        cell = row.createCell(k);
+                    } else {
+                        cell = row.createCell(k + lastCreateCells);
+                        lastCreateCells = 0;
+                    }
                     if (footerColumn.getMergeColumnNum() != 0) {
                         // 列合并信息
-                        mergeColumns += footerColumn.getMergeColumnNum();
                         sheetInfo.getSheet().addMergedRegion(new CellRangeAddress(currentRowNum, currentRowNum,
                                 k, footerColumn.getMergeColumnNum() - 1));
+                        for (int h = 0; h < footerColumn.getMergeColumnNum() - 1; h++) {
+                            Cell emptyCell = row.createCell(k + h + 1);
+                            CellUtils.fillStrCell(emptyCell, footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
+                        }
+                        mergeColumns += (footerColumn.getMergeColumnNum() - 1);
+                        lastCreateCells += (footerColumn.getMergeColumnNum() - 1);
                     }
-//                    if (footerColumn.getMergeRowNum() != 0) {
-//                         行合并信息
-//                        Row emptyRow = sheetInfo.getSheet().createRow(currentRowNum);
-//                        for (int j = 0; j < sheetInfo.getBeanColumnFields().size(); j++) {
-//                            Cell emptyCell = emptyRow.createCell(j);
-//                            CellUtils.fillStrCell(emptyCell, "", sheetInfo.getFooterStyle());
-//                        }
-//                        sheetInfo.getSheet().addMergedRegion(new CellRangeAddress(currentRowNum,
-//                                currentRowNum + footerColumn.getMergeRowNum() - 1, k, k));
-//                    }
                     if (footerColumn.isFunc()) {
-                        CellUtils.fillFuncCell(cell, (String) footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
+                        char columnAlphabet = (char) ('@' + cell.getColumnIndex() + 1);
+                        int firstDataRowNum = sheetInfo.getHeaderNum();
+                        int lastDataRowNum = firstDataRowNum + sheetInfo.getDataList().size();
+                        String funcStr = String.format("%s(%s:%s)", footerColumn.getColumnValue(),
+                                "" + columnAlphabet + firstDataRowNum, "" + columnAlphabet + lastDataRowNum);
+                        CellUtils.fillFuncCell(cell, funcStr, sheetInfo.getFooterStyle());
                     } else {
                         TripleConsumer tripleConsumer = CellUtils.getHandler(footerColumn.getColumnValue().getClass());
                         tripleConsumer.accept(cell, footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
                     }
-                    i = i + footerColumn.getMergeColumnNum();
                 }
                 for (int j = footerColumnList.size() + mergeColumns; j < sheetInfo.getBeanColumnFields().size(); j++) {
                     Cell cell = row.createCell(j);
