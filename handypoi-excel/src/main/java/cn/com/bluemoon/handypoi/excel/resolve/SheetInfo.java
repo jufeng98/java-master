@@ -1,10 +1,13 @@
 package cn.com.bluemoon.handypoi.excel.resolve;
 
 import cn.com.bluemoon.handypoi.excel.model.BeanColumnField;
+import cn.com.bluemoon.handypoi.excel.model.FooterRow;
 import cn.com.bluemoon.handypoi.excel.model.Style;
+import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,9 +39,14 @@ public class SheetInfo<T> {
      */
     private boolean multiHeader;
 
+    /**
+     * 尾部行信息
+     */
+    private List<FooterRow> footerRowList = new ArrayList<>(0);
 
     private CellStyle headerStyle;
     private CellStyle contentStyle;
+    private CellStyle footerStyle;
 
     /**
      * @param dataList  待写入的bean的list
@@ -60,6 +68,14 @@ public class SheetInfo<T> {
 
     }
 
+    public void setFooterRowList(List<FooterRow> footerRowList) {
+        this.footerRowList = footerRowList;
+    }
+
+    List<FooterRow> getFooterRowList() {
+        return footerRowList;
+    }
+
     void setSheet(Sheet sheet) {
         this.sheet = sheet;
     }
@@ -70,6 +86,10 @@ public class SheetInfo<T> {
 
     void setContentStyle(CellStyle contentStyle) {
         this.contentStyle = contentStyle;
+    }
+
+    void setFooterStyle(CellStyle footerStyle) {
+        this.footerStyle = footerStyle;
     }
 
     void setBeanColumnFields(List<BeanColumnField> beanColumnFields) {
@@ -110,5 +130,9 @@ public class SheetInfo<T> {
 
     CellStyle getContentStyle() {
         return contentStyle;
+    }
+
+    CellStyle getFooterStyle() {
+        return footerStyle;
     }
 }

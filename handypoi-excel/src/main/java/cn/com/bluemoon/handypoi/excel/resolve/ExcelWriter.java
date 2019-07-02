@@ -9,6 +9,8 @@ import cn.com.bluemoon.handypoi.excel.enums.MoneyUnit;
 import cn.com.bluemoon.handypoi.excel.function.TripleConsumer;
 import cn.com.bluemoon.handypoi.excel.listener.RowWriteListener;
 import cn.com.bluemoon.handypoi.excel.model.BeanColumnField;
+import cn.com.bluemoon.handypoi.excel.model.FooterColumn;
+import cn.com.bluemoon.handypoi.excel.model.FooterRow;
 import cn.com.bluemoon.handypoi.excel.utils.CellUtils;
 import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -58,11 +60,8 @@ public class ExcelWriter<T> {
     private RowWriteListener rowWriteListener = new RowWriteListener() {
     };
 
-
     /**
-     * excel文件类型
-     *
-     * @param excelType
+     * @param excelType excel文件类型
      */
     public ExcelWriter(ExcelType excelType) {
         if (ExcelType.XLS == excelType) {
@@ -113,6 +112,7 @@ public class ExcelWriter<T> {
             sheetInfoList.forEach(sheetInfo -> {
                 fillHeaderInfo(sheetInfo);
                 fillContentInfo(sheetInfo);
+                fillFooterInfo(sheetInfo);
             });
             return workbook;
         }
@@ -264,12 +264,57 @@ public class ExcelWriter<T> {
 
         }
 
+        private void fillFooterInfo(SheetInfo sheetInfo) {
+            List<FooterRow> footerRowList = sheetInfo.getFooterRowList();
+            for (int i = 0; i < footerRowList.size(); i++) {
+                int currentRowNum = i + sheetInfo.getHeaderNum() + sheetInfo.getDataList().size();
+                Row row = sheetInfo.getSheet().createRow(currentRowNum);
+                List<FooterColumn> footerColumnList = footerRowList.get(i).getFooterColumns();
+
+                int mergeColumns = 0;
+                for (int k = 0; k < footerColumnList.size(); k++) {
+                    Cell cell = row.createCell(k);
+                    FooterColumn footerColumn = footerColumnList.get(k);
+                    if (footerColumn.getMergeColumnNum() != 0) {
+                        // 列合并信息
+                        mergeColumns += footerColumn.getMergeColumnNum();
+                        sheetInfo.getSheet().addMergedRegion(new CellRangeAddress(currentRowNum, currentRowNum,
+                                k, footerColumn.getMergeColumnNum() - 1));
+                    }
+//                    if (footerColumn.getMergeRowNum() != 0) {
+//                         行合并信息
+//                        Row emptyRow = sheetInfo.getSheet().createRow(currentRowNum);
+//                        for (int j = 0; j < sheetInfo.getBeanColumnFields().size(); j++) {
+//                            Cell emptyCell = emptyRow.createCell(j);
+//                            CellUtils.fillStrCell(emptyCell, "", sheetInfo.getFooterStyle());
+//                        }
+//                        sheetInfo.getSheet().addMergedRegion(new CellRangeAddress(currentRowNum,
+//                                currentRowNum + footerColumn.getMergeRowNum() - 1, k, k));
+//                    }
+                    if (footerColumn.isFunc()) {
+                        CellUtils.fillFuncCell(cell, (String) footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
+                    } else {
+                        TripleConsumer tripleConsumer = CellUtils.getHandler(footerColumn.getColumnValue().getClass());
+                        tripleConsumer.accept(cell, footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
+                    }
+                    i = i + footerColumn.getMergeColumnNum();
+                }
+                for (int j = footerColumnList.size() + mergeColumns; j < sheetInfo.getBeanColumnFields().size(); j++) {
+                    Cell cell = row.createCell(j);
+                    CellUtils.fillStrCell(cell, "", sheetInfo.getFooterStyle());
+                }
+            }
+        }
+
         private void init(SheetInfo sheetInfo) {
             if (sheetInfo.getHeaderStyle() == null) {
                 sheetInfo.setHeaderStyle(StyleUtils.getCommonCellStyle(workbook));
             }
             if (sheetInfo.getContentStyle() == null) {
                 sheetInfo.setContentStyle(StyleUtils.getCommonCellStyle(workbook));
+            }
+            if (sheetInfo.getFooterStyle() == null) {
+                sheetInfo.setFooterStyle(StyleUtils.getCommonCellStyle(workbook));
             }
 
             Field[] fields = sheetInfo.getDataClz().getDeclaredFields();

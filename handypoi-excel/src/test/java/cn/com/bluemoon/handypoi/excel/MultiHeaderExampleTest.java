@@ -3,6 +3,8 @@ package cn.com.bluemoon.handypoi.excel;
 import cn.com.bluemoon.handypoi.excel.enums.ExcelType;
 import cn.com.bluemoon.handypoi.excel.example.MultiHeadExampleBean;
 import cn.com.bluemoon.handypoi.excel.listener.RowWriteListener;
+import cn.com.bluemoon.handypoi.excel.model.FooterColumn;
+import cn.com.bluemoon.handypoi.excel.model.FooterRow;
 import cn.com.bluemoon.handypoi.excel.model.Style;
 import cn.com.bluemoon.handypoi.excel.resolve.ExcelContext;
 import cn.com.bluemoon.handypoi.excel.resolve.ExcelReader;
@@ -21,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +43,12 @@ public class MultiHeaderExampleTest {
 
         ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
         SheetInfo sheetInfo = new SheetInfo(list, MultiHeadExampleBean.class, "交易信息", 2);
+        List<FooterColumn> footerColumnList = new ArrayList<>(1);
+        footerColumnList.add(new FooterColumn("合计", 2));
+        footerColumnList.add(new FooterColumn("SUM", true));
+        FooterRow footerRow = new FooterRow(footerColumnList);
+        sheetInfo.setFooterRowList(Arrays.asList(footerRow));
+
         excelWriter.addSheetInfo(sheetInfo);
         excelWriter.setRowWriteListener(new RowWriteListener() {
             @Override
