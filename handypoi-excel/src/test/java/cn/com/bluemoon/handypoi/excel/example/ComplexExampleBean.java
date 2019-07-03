@@ -14,7 +14,7 @@ public class ComplexExampleBean {
     private int index;
     @ExcelColumn(columnName = {"公司名占位符", "账单编号占位符", "品牌名称"})
     private String brandName;
-    @ExcelColumnDecimal(decimalFormat = "0.00")
+    @ExcelColumnDecimal(decimalFormat = "0.00%")
     @ExcelColumn(columnName = {"公司名占位符", "结算期数:", "服务费率"})
     private double serviceRate;
     @ExcelColumn(columnName = {"公司名占位符", "结算期数占位符", "衣物数量"})

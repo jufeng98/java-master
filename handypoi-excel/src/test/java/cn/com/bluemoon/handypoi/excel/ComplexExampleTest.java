@@ -93,11 +93,6 @@ public class ComplexExampleTest {
             @Override
             public void contentAfterWriteAction(Object data, ExcelContext context) {
                 context.getRow().setHeight((short) 400);
-                Style style = Style.builder()
-                        .decimalPattern("0.00%")
-                        .build();
-                CellStyle cellStyle = StyleUtils.getCommonCellStyle(context.getWorkbook(), style);
-                context.getRow().getCell(2).setCellStyle(cellStyle);
             }
 
             @Override
