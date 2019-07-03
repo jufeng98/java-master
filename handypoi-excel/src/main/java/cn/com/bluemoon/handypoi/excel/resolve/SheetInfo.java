@@ -3,7 +3,6 @@ package cn.com.bluemoon.handypoi.excel.resolve;
 import cn.com.bluemoon.handypoi.excel.model.BeanColumnField;
 import cn.com.bluemoon.handypoi.excel.model.FooterRow;
 import cn.com.bluemoon.handypoi.excel.model.Style;
-import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -44,9 +43,13 @@ public class SheetInfo<T> {
      */
     private List<FooterRow> footerRowList = new ArrayList<>(0);
 
-    private CellStyle headerStyle;
-    private CellStyle contentStyle;
-    private CellStyle footerStyle;
+    private Style headerStyle = Style.builder().build();
+    private Style contentStyle = Style.builder().build();
+    private Style footerStyle = Style.builder().build();
+
+    private CellStyle headerCellStyle;
+    private CellStyle contentCellStyle;
+    private CellStyle footerCellStyle;
 
     /**
      * @param dataList  待写入的bean的list
@@ -64,32 +67,36 @@ public class SheetInfo<T> {
         }
     }
 
-    public void setHeaderStyle(Style style) {
+    public void setHeaderStyle(Style headerStyle) {
+        this.headerStyle = headerStyle;
+    }
 
+    public void setContentStyle(Style contentStyle) {
+        this.contentStyle = contentStyle;
+    }
+
+    public void setFooterStyle(Style footerStyle) {
+        this.footerStyle = footerStyle;
     }
 
     public void setFooterRowList(List<FooterRow> footerRowList) {
         this.footerRowList = footerRowList;
     }
 
-    List<FooterRow> getFooterRowList() {
-        return footerRowList;
-    }
-
     void setSheet(Sheet sheet) {
         this.sheet = sheet;
     }
 
-    void setHeaderStyle(CellStyle headerStyle) {
-        this.headerStyle = headerStyle;
+    void setHeaderCellStyle(CellStyle headerStyle) {
+        this.headerCellStyle = headerStyle;
     }
 
-    void setContentStyle(CellStyle contentStyle) {
-        this.contentStyle = contentStyle;
+    void setContentCellStyle(CellStyle contentCellStyle) {
+        this.contentCellStyle = contentCellStyle;
     }
 
-    void setFooterStyle(CellStyle footerStyle) {
-        this.footerStyle = footerStyle;
+    void setFooterCellStyle(CellStyle footerCellStyle) {
+        this.footerCellStyle = footerCellStyle;
     }
 
     void setBeanColumnFields(List<BeanColumnField> beanColumnFields) {
@@ -124,15 +131,31 @@ public class SheetInfo<T> {
         return multiHeader;
     }
 
-    CellStyle getHeaderStyle() {
+    List<FooterRow> getFooterRowList() {
+        return footerRowList;
+    }
+
+    Style getHeaderStyle() {
         return headerStyle;
     }
 
-    CellStyle getContentStyle() {
+    Style getContentStyle() {
         return contentStyle;
     }
 
-    CellStyle getFooterStyle() {
+    Style getFooterStyle() {
         return footerStyle;
+    }
+
+    CellStyle getHeaderCellStyle() {
+        return headerCellStyle;
+    }
+
+    CellStyle getContentCellStyle() {
+        return contentCellStyle;
+    }
+
+    CellStyle getFooterCellStyle() {
+        return footerCellStyle;
     }
 }

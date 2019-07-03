@@ -5,6 +5,8 @@ import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnDate;
 import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnDecimal;
 import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnMoney;
 import cn.com.bluemoon.handypoi.excel.enums.MoneyUnit;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 
@@ -52,19 +54,7 @@ public class MultiHeadExampleBean {
 
     @Override
     public String toString() {
-        return "MultiHeadExampleBean{" +
-                "index=" + index +
-                ", orderCode='" + orderCode + '\'' +
-                ", orderPrice=" + orderPrice +
-                ", orderBase=" + orderBase +
-                ", payTime=" + payTime +
-                ", customerName='" + customerName + '\'' +
-                ", customerPhone='" + customerPhone + '\'' +
-                ", province='" + province + '\'' +
-                ", city='" + city + '\'' +
-                ", village='" + village + '\'' +
-                ", street='" + street + '\'' +
-                '}';
+        return ToStringBuilder.reflectionToString(ToStringStyle.JSON_STYLE);
     }
 
     public Integer getIndex() {

@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,14 +36,15 @@ public class SimpleExampleTest {
     @Test
     public void testWrite() throws Exception {
 
-        List<SimpleExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(i -> getBean(i)).collect(Collectors.toList());
+        List<SimpleExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(i -> generateBean(i)).collect(Collectors.toList());
 
         ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
         SheetInfo sheetInfo = new SheetInfo(list, SimpleExampleBean.class, "交易信息", 1);
         excelWriter.addSheetInfo(sheetInfo);
         excelWriter.setRowWriteListener(new RowWriteListener() {
             @Override
-            public void headerAfterWriteAction(int rowIndex, ExcelContext context) {
+            public void headerAfterWriteAction(ExcelContext context) {
+                int rowIndex = context.getRow().getRowNum();
                 if (rowIndex == 0) {
                     Style style = Style.builder().foregroundColor(IndexedColors.BLUE_GREY.index).build();
                     CellStyle cellStyle = StyleUtils.getCommonCellStyle(context.getWorkbook(), style);
@@ -51,8 +53,8 @@ public class SimpleExampleTest {
             }
 
             @Override
-            public void contentAfterWriteAction(Object data, int rowIndex, ExcelContext context) {
-                System.out.println(rowIndex);
+            public void contentAfterWriteAction(Object data, ExcelContext context) {
+                System.out.println(context.getRow().getRowNum());
             }
         });
         ExcelWriterService excelWriterService = excelWriter.addSheetFinish();
@@ -71,7 +73,7 @@ public class SimpleExampleTest {
 
         File file = new File("D:\\simple-excel-test.xls");
         InputStream inputStream = new FileInputStream(file);
-        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, SimpleExampleBean.class, 1);
+        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, SimpleExampleBean.class, 1, 0);
         excelReader.setRowReadListener((bean, context) -> {
             System.out.println(bean);
             return true;
@@ -82,13 +84,14 @@ public class SimpleExampleTest {
 
     }
 
-    private SimpleExampleBean getBean(int i) {
+    private SimpleExampleBean generateBean(int i) {
         SimpleExampleBean bean = new SimpleExampleBean();
         bean.setIndex(i);
         bean.setOrderCode("KC000000" + i);
         bean.setOrderPrice(i * 1000L);
         bean.setOrderBase(i * 1000.2555);
         bean.setPayTime(DateUtils.addMonths(new Date(), -i * 2));
+        bean.setConfirmTime(new Timestamp(DateUtils.addMonths(new Date(), -i * 2).getTime()));
         bean.setCustomerName("yudong" + i * 2);
         bean.setCustomerPhone("13800138000" + i);
         bean.setProvince("Guangdong" + i);

@@ -39,20 +39,24 @@ public class MultiHeaderExampleTest {
     @Test
     public void testWrite() throws Exception {
 
-        List<MultiHeadExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(i -> getBean(i)).collect(Collectors.toList());
+        List<MultiHeadExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(i -> generateBean(i)).collect(Collectors.toList());
 
         ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
         SheetInfo sheetInfo = new SheetInfo(list, MultiHeadExampleBean.class, "交易信息", 2);
+
         List<FooterColumn> footerColumnList = new ArrayList<>(1);
-        footerColumnList.add(new FooterColumn("合计", 2));
+        footerColumnList.add(new FooterColumn("合计", 1));
+        footerColumnList.add(new FooterColumn("SUM", true));
         footerColumnList.add(new FooterColumn("SUM", true));
         FooterRow footerRow = new FooterRow(footerColumnList);
+
         sheetInfo.setFooterRowList(Arrays.asList(footerRow));
 
         excelWriter.addSheetInfo(sheetInfo);
-        excelWriter.setRowWriteListener(new RowWriteListener() {
+        excelWriter.setRowWriteListener(new RowWriteListener<MultiHeadExampleBean>() {
             @Override
-            public void headerAfterWriteAction(int rowIndex, ExcelContext context) {
+            public void headerAfterWriteAction(ExcelContext context) {
+                int rowIndex = context.getRow().getRowNum();
                 if (rowIndex == 1) {
                     Style style = Style.builder().foregroundColor(IndexedColors.BLUE_GREY.index).build();
                     CellStyle cellStyle = StyleUtils.getCommonCellStyle(context.getWorkbook(), style);
@@ -61,8 +65,20 @@ public class MultiHeaderExampleTest {
             }
 
             @Override
-            public void contentAfterWriteAction(Object data, int rowIndex, ExcelContext context) {
-                System.out.println(rowIndex);
+            public void contentAfterWriteAction(MultiHeadExampleBean data, ExcelContext context) {
+                System.out.println(context.getRow().getRowNum());
+            }
+
+            @Override
+            public void footerAfterWriteAction(int reverseRowIndex, ExcelContext context) {
+                if (reverseRowIndex == 0) {
+                    Style style = Style.builder().foregroundColor(IndexedColors.RED.index).decimalPattern("0.00").build();
+                    CellStyle cellStyle = StyleUtils.getCommonCellStyle(context.getWorkbook(), style);
+                    context.getRow().getCell(2).setCellStyle(cellStyle);
+                    Style style1 = Style.builder().foregroundColor(IndexedColors.GREEN.index).decimalPattern("0.0000").build();
+                    CellStyle cellStyle1 = StyleUtils.getCommonCellStyle(context.getWorkbook(), style1);
+                    context.getRow().getCell(3).setCellStyle(cellStyle1);
+                }
             }
         });
         ExcelWriterService excelWriterService = excelWriter.addSheetFinish();
@@ -81,7 +97,7 @@ public class MultiHeaderExampleTest {
 
         File file = new File("D:\\multi-header-excel-test.xls");
         InputStream inputStream = new FileInputStream(file);
-        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, MultiHeadExampleBean.class, 2);
+        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, MultiHeadExampleBean.class, 2, 1);
         excelReader.setRowReadListener((bean, context) -> {
             System.out.println(bean);
             return true;
@@ -92,7 +108,7 @@ public class MultiHeaderExampleTest {
 
     }
 
-    private MultiHeadExampleBean getBean(int i) {
+    private MultiHeadExampleBean generateBean(int i) {
         MultiHeadExampleBean bean = new MultiHeadExampleBean();
         bean.setIndex(i);
         bean.setOrderCode("TC000000" + i);

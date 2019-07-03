@@ -57,7 +57,7 @@ public class ExcelWriter<T> {
     /**
      * 行写入监听器
      */
-    private RowWriteListener rowWriteListener = new RowWriteListener() {
+    private RowWriteListener<T> rowWriteListener = new RowWriteListener<T>() {
     };
 
     /**
@@ -149,7 +149,7 @@ public class ExcelWriter<T> {
                 Row headerRow = sheetInfo.getSheet().createRow(i);
                 context.setSheet(sheetInfo.getSheet());
                 context.setRow(headerRow);
-                rowWriteListener.headerBeforeWriteAction(i, context);
+                rowWriteListener.headerBeforeWriteAction(context);
                 List<BeanColumnField> beanColumnFields = sheetInfo.getBeanColumnFields();
                 for (int j = 0; j < beanColumnFields.size(); j++) {
                     BeanColumnField beanColumnField = beanColumnFields.get(j);
@@ -158,7 +158,7 @@ public class ExcelWriter<T> {
                             beanColumnField.getCellStyle());
                     sheetInfo.getSheet().setColumnWidth(j, beanColumnField.getColumnWidth());
                 }
-                rowWriteListener.headerAfterWriteAction(i, context);
+                rowWriteListener.headerAfterWriteAction(context);
             }
         }
 
@@ -220,9 +220,9 @@ public class ExcelWriter<T> {
                     Row row = sheetInfo.getSheet().createRow(i + sheetInfo.getHeaderNum());
                     context.setSheet(sheetInfo.getSheet());
                     context.setRow(row);
-                    rowWriteListener.contentBeforeWriteAction(writeBean, i, context);
+                    rowWriteListener.contentBeforeWriteAction(writeBean, context);
                     fillRow(sheetInfo.getBeanColumnFields(), row, writeBean);
-                    rowWriteListener.contentAfterWriteAction(writeBean, i, context);
+                    rowWriteListener.contentAfterWriteAction(writeBean, context);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("fill sheet failed:" + sheetInfo.getSheetName(), e);
@@ -264,64 +264,70 @@ public class ExcelWriter<T> {
 
         }
 
+        /**
+         * 填充尾部行信息
+         *
+         * @param sheetInfo
+         */
         private void fillFooterInfo(SheetInfo sheetInfo) {
             List<FooterRow> footerRowList = sheetInfo.getFooterRowList();
+            int sumRows = sheetInfo.getHeaderNum() + sheetInfo.getDataList().size() + sheetInfo.getFooterRowList().size();
+            int lastRowIndex = sumRows - 1;
             for (int i = 0; i < footerRowList.size(); i++) {
                 int currentRowNum = i + sheetInfo.getHeaderNum() + sheetInfo.getDataList().size();
                 Row row = sheetInfo.getSheet().createRow(currentRowNum);
+                context.setSheet(sheetInfo.getSheet());
+                context.setRow(row);
+                rowWriteListener.footerBeforeWriteAction(lastRowIndex - currentRowNum, context);
                 List<FooterColumn> footerColumnList = footerRowList.get(i).getFooterColumns();
-
                 int mergeColumns = 0;
-                int lastCreateCells = 0;
                 for (int k = 0; k < footerColumnList.size(); k++) {
                     FooterColumn footerColumn = footerColumnList.get(k);
                     Cell cell;
                     if (k == 0) {
                         cell = row.createCell(k);
                     } else {
-                        cell = row.createCell(k + lastCreateCells);
-                        lastCreateCells = 0;
+                        cell = row.createCell(k + mergeColumns);
                     }
                     if (footerColumn.getMergeColumnNum() != 0) {
                         // 列合并信息
                         sheetInfo.getSheet().addMergedRegion(new CellRangeAddress(currentRowNum, currentRowNum,
-                                k, footerColumn.getMergeColumnNum() - 1));
-                        for (int h = 0; h < footerColumn.getMergeColumnNum() - 1; h++) {
-                            Cell emptyCell = row.createCell(k + h + 1);
-                            CellUtils.fillStrCell(emptyCell, footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
+                                k, footerColumn.getMergeColumnNum()));
+                        for (int h = 0; h < footerColumn.getMergeColumnNum(); h++) {
+                            Cell emptyCell = row.createCell(k + 1 + h);
+                            CellUtils.fillStrCell(emptyCell, footerColumn.getColumnValue(), sheetInfo.getFooterCellStyle());
                         }
-                        mergeColumns += (footerColumn.getMergeColumnNum() - 1);
-                        lastCreateCells += (footerColumn.getMergeColumnNum() - 1);
+                        mergeColumns += footerColumn.getMergeColumnNum();
                     }
                     if (footerColumn.isFunc()) {
-                        char columnAlphabet = (char) ('@' + cell.getColumnIndex() + 1);
-                        int firstDataRowNum = sheetInfo.getHeaderNum();
-                        int lastDataRowNum = firstDataRowNum + sheetInfo.getDataList().size();
-                        String funcStr = String.format("%s(%s:%s)", footerColumn.getColumnValue(),
-                                "" + columnAlphabet + firstDataRowNum, "" + columnAlphabet + lastDataRowNum);
-                        CellUtils.fillFuncCell(cell, funcStr, sheetInfo.getFooterStyle());
+                        if (sheetInfo.getDataList().size() == 0) {
+                            CellUtils.fillStrCell(cell, "", sheetInfo.getFooterCellStyle());
+                        } else {
+                            char columnAlphabet = (char) ('@' + cell.getColumnIndex() + 1);
+                            int firstDataRowNum = sheetInfo.getHeaderNum() + 1;
+                            int lastDataRowNum = sheetInfo.getHeaderNum() + sheetInfo.getDataList().size();
+                            String funcStr = String.format("%s(%s:%s)", footerColumn.getColumnValue(),
+                                    "" + columnAlphabet + firstDataRowNum, "" + columnAlphabet + lastDataRowNum);
+                            CellUtils.fillFuncCell(cell, funcStr, sheetInfo.getFooterCellStyle());
+                        }
                     } else {
                         TripleConsumer tripleConsumer = CellUtils.getHandler(footerColumn.getColumnValue().getClass());
-                        tripleConsumer.accept(cell, footerColumn.getColumnValue(), sheetInfo.getFooterStyle());
+                        tripleConsumer.accept(cell, footerColumn.getColumnValue(), sheetInfo.getFooterCellStyle());
                     }
                 }
+                // 填充剩余的列
                 for (int j = footerColumnList.size() + mergeColumns; j < sheetInfo.getBeanColumnFields().size(); j++) {
                     Cell cell = row.createCell(j);
-                    CellUtils.fillStrCell(cell, "", sheetInfo.getFooterStyle());
+                    CellUtils.fillStrCell(cell, "", sheetInfo.getFooterCellStyle());
                 }
+                rowWriteListener.footerAfterWriteAction(lastRowIndex - currentRowNum, context);
             }
         }
 
         private void init(SheetInfo sheetInfo) {
-            if (sheetInfo.getHeaderStyle() == null) {
-                sheetInfo.setHeaderStyle(StyleUtils.getCommonCellStyle(workbook));
-            }
-            if (sheetInfo.getContentStyle() == null) {
-                sheetInfo.setContentStyle(StyleUtils.getCommonCellStyle(workbook));
-            }
-            if (sheetInfo.getFooterStyle() == null) {
-                sheetInfo.setFooterStyle(StyleUtils.getCommonCellStyle(workbook));
-            }
+            sheetInfo.setHeaderCellStyle(StyleUtils.getCommonCellStyle(workbook, sheetInfo.getHeaderStyle()));
+            sheetInfo.setContentCellStyle(StyleUtils.getCommonCellStyle(workbook, sheetInfo.getContentStyle()));
+            sheetInfo.setFooterCellStyle(StyleUtils.getCommonCellStyle(workbook, sheetInfo.getFooterStyle()));
 
             Field[] fields = sheetInfo.getDataClz().getDeclaredFields();
             AccessibleObject.setAccessible(fields, true);
@@ -369,7 +375,7 @@ public class ExcelWriter<T> {
                                 beanColumnField.setCellStyle(style);
                             }
                         } else {
-                            beanColumnField.setCellStyle(sheetInfo.getContentStyle());
+                            beanColumnField.setCellStyle(sheetInfo.getContentCellStyle());
                         }
                         return beanColumnField;
                     })

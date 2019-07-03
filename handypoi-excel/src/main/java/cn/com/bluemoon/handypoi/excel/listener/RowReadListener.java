@@ -7,7 +7,7 @@ import cn.com.bluemoon.handypoi.excel.resolve.ExcelContext;
  * @date 2019/6/9
  */
 @FunctionalInterface
-public interface RowReadListener {
+public interface RowReadListener<T> {
 
     /**
      * 行读取回调方法
@@ -16,6 +16,6 @@ public interface RowReadListener {
      * @param context
      * @return 返回false将会过滤掉此填充的对象
      */
-    boolean accept(Object bean, ExcelContext context);
+    boolean accept(T bean, ExcelContext context);
 
 }

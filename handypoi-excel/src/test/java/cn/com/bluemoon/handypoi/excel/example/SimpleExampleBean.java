@@ -3,7 +3,10 @@ package cn.com.bluemoon.handypoi.excel.example;
 import cn.com.bluemoon.handypoi.excel.annos.ExcelColumn;
 import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnMoney;
 import cn.com.bluemoon.handypoi.excel.enums.MoneyUnit;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -28,6 +31,9 @@ public class SimpleExampleBean {
     @ExcelColumn(columnName = "支付时间", columnWidth = 9000)
     private Date payTime;
 
+    @ExcelColumn(columnName = "确认时间", columnWidth = 9000)
+    private Timestamp confirmTime;
+
     @ExcelColumn(columnName = "消费者姓名")
     private String customerName;
 
@@ -48,19 +54,7 @@ public class SimpleExampleBean {
 
     @Override
     public String toString() {
-        return "SimpleExampleBean{" +
-                "index=" + index +
-                ", orderCode='" + orderCode + '\'' +
-                ", orderPrice=" + orderPrice +
-                ", orderBase=" + orderBase +
-                ", payTime=" + payTime +
-                ", customerName='" + customerName + '\'' +
-                ", customerPhone='" + customerPhone + '\'' +
-                ", province='" + province + '\'' +
-                ", city='" + city + '\'' +
-                ", village='" + village + '\'' +
-                ", street='" + street + '\'' +
-                '}';
+        return ToStringBuilder.reflectionToString(ToStringStyle.JSON_STYLE);
     }
 
     public Integer getIndex() {
@@ -101,6 +95,14 @@ public class SimpleExampleBean {
 
     public void setPayTime(Date payTime) {
         this.payTime = payTime;
+    }
+
+    public Timestamp getConfirmTime() {
+        return confirmTime;
+    }
+
+    public void setConfirmTime(Timestamp confirmTime) {
+        this.confirmTime = confirmTime;
     }
 
     public String getCustomerName() {

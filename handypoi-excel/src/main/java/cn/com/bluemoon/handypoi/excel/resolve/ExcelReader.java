@@ -44,6 +44,12 @@ public class ExcelReader<T> {
      * 头部标题行数
      */
     private int headerNum;
+
+    /**
+     * 尾部行数
+     */
+    private int footerNum;
+
     /**
      * 待转换的bean类型
      */
@@ -54,15 +60,16 @@ public class ExcelReader<T> {
      */
     private List<T> resultList;
 
-    private RowReadListener rowReadListener = (bean, context) -> true;
+    private RowReadListener<T> rowReadListener = (T bean, ExcelContext context) -> true;
 
     /**
      * @param excelType   excel文件类型
      * @param inputStream 文件流
      * @param beanClz     待转换的bean类型
      * @param headerNum   头部标题行数
+     * @param footerNum   尾部非数据行数
      */
-    public ExcelReader(ExcelType excelType, InputStream inputStream, Class<T> beanClz, int headerNum) {
+    public ExcelReader(ExcelType excelType, InputStream inputStream, Class<T> beanClz, int headerNum, int footerNum) {
         try {
             if (ExcelType.XLS == excelType) {
                 this.workbook = new HSSFWorkbook(inputStream);
@@ -71,6 +78,7 @@ public class ExcelReader<T> {
             }
             this.sheet = workbook.getSheetAt(0);
             this.headerNum = headerNum;
+            this.footerNum = footerNum;
             this.beanClz = beanClz;
             init();
             context = new ExcelContext();
@@ -93,7 +101,7 @@ public class ExcelReader<T> {
      *
      * @param rowReadListener 行读取监听器
      */
-    public void setRowReadListener(RowReadListener rowReadListener) {
+    public void setRowReadListener(RowReadListener<T> rowReadListener) {
         this.rowReadListener = rowReadListener;
     }
 
@@ -105,7 +113,7 @@ public class ExcelReader<T> {
             // 获取标题行
             Row headerRow = sheet.getRow(headerNum - 1);
             // 解析内容行
-            resultList = IntStream.rangeClosed(headerNum, sheet.getLastRowNum())
+            resultList = IntStream.rangeClosed(headerNum, sheet.getLastRowNum() - footerNum)
                     .mapToObj(i -> {
                         Row row = sheet.getRow(i);
                         T bean;
@@ -127,7 +135,18 @@ public class ExcelReader<T> {
                                 } else if (Number.class.isAssignableFrom(beanField.getType())) {
                                     beanValue = ConvertUtils.numberType(beanField.getType(), cell);
                                 } else if (beanField.getType().isPrimitive()) {
-                                    beanValue = ConvertUtils.primitiveType(beanField.getType(), cell);
+                                    double value = ConvertUtils.primitiveType(beanField.getType(), cell);
+                                    Class<?> fieldTypeClz = beanField.getType();
+                                    if (fieldTypeClz == long.class) {
+                                        beanField.set(bean, (long) value);
+                                    } else if (fieldTypeClz == double.class) {
+                                        beanField.set(bean, value);
+                                    } else if (fieldTypeClz == float.class) {
+                                        beanField.set(bean, (float) value);
+                                    } else {
+                                        beanField.set(bean, (int) value);
+                                    }
+                                    return;
                                 } else if (Date.class.isAssignableFrom(beanField.getType())) {
                                     beanValue = ConvertUtils.dateType(beanField.getType(), cell, beanColumnField.getDatePattern());
                                 } else {
