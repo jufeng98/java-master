@@ -54,7 +54,7 @@ public class MultiHeadExampleBean {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(ToStringStyle.JSON_STYLE);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
     }
 
     public Integer getIndex() {

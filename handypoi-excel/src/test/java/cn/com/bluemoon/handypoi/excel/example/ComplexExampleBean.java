@@ -4,13 +4,15 @@ import cn.com.bluemoon.handypoi.excel.annos.ExcelColumn;
 import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnDecimal;
 import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnMoney;
 import cn.com.bluemoon.handypoi.excel.enums.MoneyUnit;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * @author yudong
  * @date 2019/7/3
  */
 public class ComplexExampleBean {
-    @ExcelColumn(columnName = {"公司名占位符", "账单编号:", "序号"},columnWidth = 3000)
+    @ExcelColumn(columnName = {"公司名占位符", "账单编号:", "序号"}, columnWidth = 3000)
     private int index;
     @ExcelColumn(columnName = {"公司名占位符", "账单编号占位符", "品牌名称"})
     private String brandName;
@@ -20,11 +22,16 @@ public class ComplexExampleBean {
     @ExcelColumn(columnName = {"公司名占位符", "结算期数占位符", "衣物数量"})
     private int clothesCount;
     @ExcelColumnMoney(moneyFormat = "0.00", moneyUnit = MoneyUnit.CENT)
-    @ExcelColumn(columnName = {"公司名占位符", "日期:", "服务费核算基数(元)"},columnWidth = 9000)
+    @ExcelColumn(columnName = {"公司名占位符", "日期:", "服务费核算基数(元)"}, columnWidth = 9000)
     private long serviceFeeBase;
     @ExcelColumnMoney(moneyFormat = "0.00", moneyUnit = MoneyUnit.CENT)
-    @ExcelColumn(columnName = {"公司名占位符", "日期占位符", "服务费金额(元)"},columnWidth = 7000)
+    @ExcelColumn(columnName = {"公司名占位符", "日期占位符", "服务费金额(元)"}, columnWidth = 7000)
     private long serviceFee;
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
+    }
 
     public int getIndex() {
         return index;
