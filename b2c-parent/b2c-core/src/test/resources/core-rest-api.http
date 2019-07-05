@@ -1,17 +1,82 @@
-POST http://localhost:9988/core/login
+POST {{url}}/core/login
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
 username=1050106266&password=123456&submit=Login&coreRememberMe=true
 
-### 把上面/core/login接口返回的cookie信息复制到Cookie头字段
-POST http://localhost:9988/json/exam/getExamList
+> {%
+    var headers = response.headers;
+    var headerStrs = String(headers.toString());
+    var start = headerStrs.indexOf("CORE_REMEMBER_ME=")+"CORE_REMEMBER_ME=".length;
+    var end = headerStrs.indexOf("; Max-Age");
+    var cookie = headerStrs.substring(start, end);
+
+    client.global.set("CORE_REMEMBER_ME", cookie);
+    print(client.global.get("CORE_REMEMBER_ME"));
+
+    start = headerStrs.lastIndexOf("JSESSIONID=")+"JSESSIONID=".length;
+    end = headerStrs.lastIndexOf("; Path");
+    cookie = headerStrs.substring(start, end);
+
+    client.global.set("JSESSIONID", cookie);
+    print(client.global.get("JSESSIONID"));
+%}
+
+### 先调用上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/json/exam/getExamList
 Content-Type:application/json
 Accept: application/json
-Cookie: JSESSIONID=S93DCA9CE9AC5E5EF5F910EF57BFW5EA;CORE_REMEMBER_ME=OWNpbWIyUVQlMkZxRiUyRnU3NHJ2NlYyRXclM0QlM0Q6RkExQXo2R2VBM0IzSzJ4RDlnSVVnUSUzRCUzRA
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
 
 {
   "examType": 1
+}
+
+### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/admin/user/createUser
+Content-Type:application/json
+Accept: application/json
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
+
+{
+  "username": "15324564613",
+  "password": "123456"
+}
+
+### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/admin/user/changeUserStatus
+Content-Type:application/json
+Accept: application/json
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
+
+{
+  "username": "1050106158",
+  "enabled": false
+}
+
+### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/admin/user/findUsers
+Content-Type:application/json
+Accept: application/json
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
+
+{
+  "sysUser": {},
+  "page": {
+    "pageNum": 0,
+    "pageSize": 10
+  }
+}
+
+### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/admin/user/updatePassword
+Content-Type:application/json
+Accept: application/json
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
+
+{
+  "username": "1050106158",
+  "newPassword": "654321"
 }
 
 ###

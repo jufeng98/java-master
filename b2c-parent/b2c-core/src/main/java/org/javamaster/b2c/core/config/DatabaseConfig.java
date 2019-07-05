@@ -1,6 +1,8 @@
 package org.javamaster.b2c.core.config;
 
+import com.github.pagehelper.PageHelper;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
+import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandlerRegistry;
@@ -18,6 +20,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,6 +52,18 @@ public class DatabaseConfig {
         PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSource);
+
+        //分页插件
+        PageHelper pageHelper = new PageHelper();
+        Properties properties = new Properties();
+        properties.setProperty("reasonable", "true");
+        properties.setProperty("supportMethodsArguments", "true");
+        properties.setProperty("returnPageInfo", "check");
+        properties.setProperty("params", "count=countSql");
+        properties.setProperty("dialect", "MySQL");
+        pageHelper.setProperties(properties);
+        sqlSessionFactoryBean.setPlugins(new Interceptor[]{pageHelper});
+
         final String MAPPER_LOCATION = "classpath*:mapper/**/*.xml";
         sqlSessionFactoryBean.setMapperLocations(resourcePatternResolver.getResources(MAPPER_LOCATION));
         // 只指定包名,则mybatis会自动为 JavaBean 注册一个小写字母开头的非完全限定的类名形式的别名

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * 系统用户表
- * 
+ *
  * @author mybatis generator
  * @date 2019/06/13 09:37:47
  */
@@ -20,9 +20,9 @@ public class SysUser implements Serializable {
     private String password;
 
     /**
-     * 用户状态,0不可用;1:可用
+     * 用户状态
      */
-    private Byte enabled;
+    private Boolean enabled;
 
     private static final long serialVersionUID = 1821414069229130752L;
 
@@ -55,16 +55,18 @@ public class SysUser implements Serializable {
     }
 
     /**
-     * 获取用户状态,0不可用;1:可用
+     * 获取用户状态
      */
-    public Byte getEnabled() {
+    public Boolean getEnabled() {
         return enabled;
     }
 
     /**
-     * 设置用户状态,0不可用;1:可用
+     * 设置用户状态
+     *
+     * @param enabled
      */
-    public void setEnabled(Byte enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 }

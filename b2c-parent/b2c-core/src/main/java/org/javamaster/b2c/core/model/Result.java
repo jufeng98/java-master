@@ -1,5 +1,6 @@
 package org.javamaster.b2c.core.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -7,11 +8,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @author yudong
  * @date 2019/6/10
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Result<T> {
     private Boolean success;
     private Integer errorCode;
     private String errorMsg;
     private T data;
+    private Long total;
 
     @Override
     public String toString() {
@@ -19,18 +22,24 @@ public class Result<T> {
     }
 
     public Result(T data) {
-        this(true, null, null, data);
+        this(true, null, null, data, null);
     }
 
     public Result(Integer errorCode, String errorMsg) {
-        this(false, errorCode, errorMsg, null);
+        this(false, errorCode, errorMsg, null, null);
     }
 
-    public Result(Boolean success, Integer errorCode, String errorMsg, T data) {
+    public Result(T data, Long total) {
+        this.data = data;
+        this.total = total;
+    }
+
+    public Result(Boolean success, Integer errorCode, String errorMsg, T data, Long total) {
         this.success = success;
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
         this.data = data;
+        this.total = total;
     }
 
     public Boolean getSuccess() {
@@ -63,5 +72,13 @@ public class Result<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
     }
 }
