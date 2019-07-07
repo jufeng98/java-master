@@ -11,14 +11,14 @@ username=1050106266&password=123456&submit=Login&coreRememberMe=true
     var end = headerStrs.indexOf("; Max-Age");
     var cookie = headerStrs.substring(start, end);
 
-    client.global.set("CORE_REMEMBER_ME", cookie);
+    client.global.set("CORE_REMEMBER_ME", cookie); //关闭IDEA后才会失效
     print(client.global.get("CORE_REMEMBER_ME"));
 
     start = headerStrs.lastIndexOf("JSESSIONID=")+"JSESSIONID=".length;
     end = headerStrs.lastIndexOf("; Path");
     cookie = headerStrs.substring(start, end);
 
-    client.global.set("JSESSIONID", cookie);
+    client.global.set("JSESSIONID", cookie); //关闭IDEA后才会失效
     print(client.global.get("JSESSIONID"));
 %}
 
@@ -31,6 +31,14 @@ Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
 {
   "examType": 1
 }
+
+### 先调用上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/json/exam/getExamListByOpInfo
+Content-Type:application/x-www-form-urlencoded
+Accept: application/json
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
+
+examOpDate=2019-06-10
 
 ### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
 POST {{url}}/admin/user/createUser

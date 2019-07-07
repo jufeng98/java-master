@@ -6,13 +6,21 @@
         <result column="exam_name" property="examName"/>
         <result column="exam_type" property="examType"/>
         <result column="exam_status" property="examStatus"/>
+        <result column="exam_op_date" property="examOpDate"/>
+        <result column="exam_op_username" property="examOpUsername"/>
         <result column="del_flag" property="delFlag"/>
     </resultMap>
     <select id="select" resultMap="microwebsiteExamResultMap">
-        select me.exam_code, me.exam_name, me.exam_type, me.exam_status, me.del_flag
+        select me.exam_code, me.exam_name, me.exam_type, me.exam_status,me.exam_op_date, me.exam_op_username, me.del_flag
         from microwebsite_exam_user meu
                  inner join microwebsite_exam me on me.exam_code = meu.exam_code
         where me.exam_type = #{examType}
           and meu.username = #{username}
+    </select>
+    <select id="selectExamListByOpInfo" resultMap="microwebsiteExamResultMap">
+        select me.exam_code, me.exam_name, me.exam_type, me.exam_status,me.exam_op_date, me.exam_op_username, me.del_flag
+        from microwebsite_exam me
+        where me.exam_op_date = #{examOpDate}
+          and me.exam_op_username = #{examOpUsername}
     </select>
 </mapper>

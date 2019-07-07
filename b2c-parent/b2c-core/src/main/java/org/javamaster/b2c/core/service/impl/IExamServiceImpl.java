@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +35,17 @@ public class IExamServiceImpl implements IExamService {
             throw new BizException(BizExceptionEnum.EXAM_NOT_FOUND);
         }
         // 此处代码还有其它各类异常抛出......
+        List<GetExamListResVo> resVos = examEntities.stream().map(examEntity -> {
+            GetExamListResVo resVo = new GetExamListResVo();
+            BeanUtils.copyProperties(examEntity, resVo);
+            return resVo;
+        }).collect(toList());
+        return resVos;
+    }
+
+    @Override
+    public List<GetExamListResVo> getExamListByOpInfo(Date examOpDate, UserDetails userDetails) {
+        List<MicrowebsiteExam> examEntities = microwebsiteMapper.selectExamListByOpInfo(examOpDate, userDetails.getUsername());
         List<GetExamListResVo> resVos = examEntities.stream().map(examEntity -> {
             GetExamListResVo resVo = new GetExamListResVo();
             BeanUtils.copyProperties(examEntity, resVo);

@@ -5,6 +5,7 @@ import org.javamaster.b2c.core.model.vo.GetExamListResVo;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,4 +14,6 @@ import java.util.List;
  */
 public interface IExamService {
     List<GetExamListResVo> getExamList(GetExamListReqVo reqVo, UserDetails userDetails) throws IOException;
+
+    List<GetExamListResVo> getExamListByOpInfo(Date examOpDate, UserDetails userDetails);
 }

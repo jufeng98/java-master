@@ -5,9 +5,19 @@ import org.javamaster.b2c.core.exception.BizException;
 import org.javamaster.b2c.core.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import javax.validation.ConstraintViolationException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author yudong
@@ -17,8 +27,28 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalHandler {
     private final Logger logger = LoggerFactory.getLogger(GlobalHandler.class);
 
+    @ModelAttribute("loginUserInfo")
+    public UserDetails modelAttribute() {
+        return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result exceptionHandler(MethodArgumentNotValidException e) {
+        Result result = new Result(BizExceptionEnum.INVALID_REQ_PARAM.getErrorCode(),
+                BizExceptionEnum.INVALID_REQ_PARAM.getErrorMsg());
+        logger.error("req params error", e);
+        return result;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Result exceptionHandler(ConstraintViolationException e) {
         Result result = new Result(BizExceptionEnum.INVALID_REQ_PARAM.getErrorCode(),
                 BizExceptionEnum.INVALID_REQ_PARAM.getErrorMsg());
         logger.error("req params error", e);

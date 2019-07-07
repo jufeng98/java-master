@@ -61,6 +61,8 @@ CREATE TABLE microwebsite_exam (
   exam_name   varchar(20),
   exam_type   tinyint,
   exam_status tinyint,
+  exam_op_date date,
+  exam_op_username varchar(20),
   del_flag    tinyint
 );
 comment on table microwebsite_exam is '考试表';
@@ -68,6 +70,8 @@ comment on column microwebsite_exam.exam_code is '考试编码,ME开头';
 comment on column microwebsite_exam.exam_name is '考试名称';
 comment on column microwebsite_exam.exam_type is '考试类型,1:独立考试;2:关联课程';
 comment on column microwebsite_exam.exam_status is '考试状态,1:未开始;2:待考试;3:考试中;4:已完成';
+comment on column microwebsite_exam.exam_op_date is '考试最后操作日期';
+comment on column microwebsite_exam.exam_op_username is '考试最后操作人';
 comment on column microwebsite_exam.del_flag is '删除标志,true:已删除';
 drop table if exists microwebsite_exam_user;
 CREATE TABLE microwebsite_exam_user (
