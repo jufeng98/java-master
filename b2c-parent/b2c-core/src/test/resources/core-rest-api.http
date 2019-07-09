@@ -6,19 +6,31 @@ username=1050106266&password=123456&submit=Login&coreRememberMe=true
 
 > {%
     var headers = response.headers;
-    var headerStrs = String(headers.toString());
-    var start = headerStrs.indexOf("CORE_REMEMBER_ME=")+"CORE_REMEMBER_ME=".length;
-    var end = headerStrs.indexOf("; Max-Age");
-    var cookie = headerStrs.substring(start, end);
-
-    client.global.set("CORE_REMEMBER_ME", cookie); //关闭IDEA后才会失效
+    var headerStr = headers.toString();
+    var headerArr = headerStr.split(/[\r\n]/m);
+    var HEADERS = [];
+    for (var i = 0; i < headerArr.length; i++) {
+        var tmpArr = headerArr[i].split(':');
+        if (!HEADERS[tmpArr[0]]) {
+            HEADERS[tmpArr[0]] = [];
+        }
+        HEADERS[tmpArr[0]] = HEADERS[tmpArr[0]].concat(tmpArr[1]);
+    }
+    function getCookieValue(HEADERS, cookieName) {
+        var setCookies = HEADERS['Set-Cookie'];
+        for (var i = 0; i < setCookies.length; i++) {
+            var cookies = setCookies[i].split(';')[0].split('=');
+            var name = cookies[0];
+            var value = cookies[1];
+            if (cookieName === name.trim()) {
+                return value;
+            }
+        }
+    }
+    client.global.set("CORE_REMEMBER_ME", getCookieValue(HEADERS,"CORE_REMEMBER_ME")); //关闭IDEA后才会失效
     print(client.global.get("CORE_REMEMBER_ME"));
 
-    start = headerStrs.lastIndexOf("JSESSIONID=")+"JSESSIONID=".length;
-    end = headerStrs.lastIndexOf("; Path");
-    cookie = headerStrs.substring(start, end);
-
-    client.global.set("JSESSIONID", cookie); //关闭IDEA后才会失效
+    client.global.set("JSESSIONID", getCookieValue(HEADERS,"JSESSIONID")); //关闭IDEA后才会失效
     print(client.global.get("JSESSIONID"));
 %}
 
