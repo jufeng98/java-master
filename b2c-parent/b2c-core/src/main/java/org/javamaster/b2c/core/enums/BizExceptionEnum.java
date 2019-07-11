@@ -10,6 +10,8 @@ public enum BizExceptionEnum {
     INVALID_REQ_PARAM(1002, "参数错误"),
     USERNAME_NOT_EXISTS(1003, "用户不存在"),
     PASSWORD_INCORRECT(1004, "密码错误"),
+    USER_EXISTS(1005, "用户已存在"),
+    OPERATION_TOO_FREQUENT(1006, "操作过于频繁，请稍后再试"),
     EXAM_NOT_FOUND(2001, "未查到考试信息"),
     ;
 

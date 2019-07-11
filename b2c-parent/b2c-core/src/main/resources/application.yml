@@ -3,6 +3,11 @@ spring:
     name: b2c-core
 server:
   port: 9988
+redisson:
+  node:
+    # use "rediss://" for SSL connection
+    address: redis://127.0.0.1:6379
+    password: 123456
 info:
   service-name: ${spring.application.name}
   ip: ${spring.cloud.client.ip-address}

@@ -63,7 +63,7 @@ public class GlobalHandler {
         return result;
     }
 
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(Exception.class)
     public Result exceptionHandler(Exception e) {
         Result result = new Result(BizExceptionEnum.APPLICATION_ERROR.getErrorCode(),
                 BizExceptionEnum.APPLICATION_ERROR.getErrorMsg());

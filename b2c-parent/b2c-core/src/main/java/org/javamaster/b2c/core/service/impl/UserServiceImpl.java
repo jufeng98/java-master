@@ -67,6 +67,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public SysUser createUser(CreateUserReqVo reqVo) {
+        if (findUsersByUsername(reqVo.getUsername()) != null) {
+            throw new BizException(BizExceptionEnum.USER_EXISTS);
+        }
         SysUser user = new SysUser();
         BeanUtils.copyProperties(reqVo, user);
         user.setEnabled(true);

@@ -12,10 +12,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Date;
@@ -42,7 +40,7 @@ public class ExamController {
     }
 
     @PostMapping("/getExamListByOpInfo")
-    public Result<List<GetExamListResVo>> getExamListByOpInfo( @NotNull Date examOpDate,
+    public Result<List<GetExamListResVo>> getExamListByOpInfo(@NotNull Date examOpDate,
                                                               @ModelAttribute("loginUserInfo") UserDetails userDetails) {
         List<GetExamListResVo> resVos = examService.getExamListByOpInfo(examOpDate, userDetails);
         Result<List<GetExamListResVo>> result = new Result(resVos);

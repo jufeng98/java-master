@@ -1,6 +1,7 @@
 package org.javamaster.b2c.core.controller;
 
 import com.github.pagehelper.PageInfo;
+import org.javamaster.b2c.core.annos.AopLock;
 import org.javamaster.b2c.core.entity.SysUser;
 import org.javamaster.b2c.core.model.Result;
 import org.javamaster.b2c.core.model.vo.ChangeUserStatusReqVo;
@@ -42,6 +43,7 @@ public class UserController {
      */
     @Secured("ROLE_ADMIN")
     @PostMapping("/createUser")
+    @AopLock
     public Result<SysUser> createUser(@Validated @RequestBody CreateUserReqVo reqVo) {
         return new Result<>(userService.createUser(reqVo));
     }
