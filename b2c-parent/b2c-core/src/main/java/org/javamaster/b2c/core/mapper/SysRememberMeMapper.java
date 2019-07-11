@@ -2,7 +2,7 @@ package org.javamaster.b2c.core.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.javamaster.b2c.core.entity.SysRememberMe;
-import org.javamaster.b2c.core.entity.example.SysRememberMeExample;
+import org.javamaster.b2c.core.entity.SysRememberMeExample;
 
 import java.util.List;
 

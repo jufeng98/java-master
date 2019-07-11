@@ -8,7 +8,7 @@ import org.javamaster.b2c.core.model.vo.ChangeUserStatusReqVo;
 import org.javamaster.b2c.core.model.vo.CreateUserReqVo;
 import org.javamaster.b2c.core.model.vo.FindUsersReqVo;
 import org.javamaster.b2c.core.model.vo.UpdatePasswordReqVo;
-import org.javamaster.b2c.core.service.UserService;
+import org.javamaster.b2c.core.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +33,7 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private IUserService userService;
 
     /**
      * 创建用户

@@ -67,7 +67,7 @@
   <sql id="Base_Column_List">
     group_code, authority_code
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupAuthorityExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupAuthorityExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -81,7 +81,7 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupAuthorityExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupAuthorityExample">
     delete from sys_group_authority
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -110,7 +110,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupAuthorityExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupAuthorityExample" resultType="java.lang.Long">
     select count(*) from sys_group_authority
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

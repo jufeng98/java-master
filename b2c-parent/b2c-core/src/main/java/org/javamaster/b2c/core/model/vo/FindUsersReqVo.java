@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.javamaster.b2c.core.entity.SysUser;
 import org.javamaster.b2c.core.model.Page;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -14,6 +15,7 @@ import javax.validation.constraints.NotNull;
 public class FindUsersReqVo {
     @NotNull
     private SysUser sysUser;
+    @Valid
     @NotNull
     private Page page;
 

@@ -44,6 +44,9 @@ public class RememberMeRepository implements PersistentTokenRepository {
     @Override
     public PersistentRememberMeToken getTokenForSeries(String seriesId) {
         SysRememberMe sysRememberMe = sysRememberMeMapper.selectByPrimaryKey(seriesId);
+        if (sysRememberMe == null) {
+            return null;
+        }
         PersistentRememberMeToken meToken = new PersistentRememberMeToken(
                 sysRememberMe.getUsername(),
                 sysRememberMe.getSeries(),

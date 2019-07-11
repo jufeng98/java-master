@@ -67,7 +67,7 @@
   <sql id="Base_Column_List">
     group_code, group_name
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -91,7 +91,7 @@
     delete from sys_group
     where group_code = #{groupCode,jdbcType=CHAR}
   </delete>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupExample">
     delete from sys_group
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -120,7 +120,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupExample" resultType="java.lang.Long">
     select count(*) from sys_group
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

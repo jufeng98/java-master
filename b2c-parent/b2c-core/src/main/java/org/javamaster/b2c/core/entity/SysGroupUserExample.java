@@ -1,20 +1,20 @@
-package org.javamaster.b2c.core.entity.example;
+package org.javamaster.b2c.core.entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author mybatis generator
- * @date 2019/06/13 09:37:47
+ * @date 2019/06/13 08:38:38
  */
-public class SysUserExample {
+public class SysGroupUserExample {
     protected String orderByClause;
 
     protected boolean distinct;
 
     protected List<Criteria> oredCriteria;
 
-    public SysUserExample() {
+    public SysGroupUserExample() {
         oredCriteria = new ArrayList<Criteria>();
     }
 
@@ -108,6 +108,76 @@ public class SysUserExample {
             criteria.add(new Criterion(condition, value1, value2));
         }
 
+        public Criteria andGroupCodeIsNull() {
+            addCriterion("group_code is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeIsNotNull() {
+            addCriterion("group_code is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeEqualTo(String value) {
+            addCriterion("group_code =", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeNotEqualTo(String value) {
+            addCriterion("group_code <>", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeGreaterThan(String value) {
+            addCriterion("group_code >", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeGreaterThanOrEqualTo(String value) {
+            addCriterion("group_code >=", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeLessThan(String value) {
+            addCriterion("group_code <", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeLessThanOrEqualTo(String value) {
+            addCriterion("group_code <=", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeLike(String value) {
+            addCriterion("group_code like", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeNotLike(String value) {
+            addCriterion("group_code not like", value, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeIn(List<String> values) {
+            addCriterion("group_code in", values, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeNotIn(List<String> values) {
+            addCriterion("group_code not in", values, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeBetween(String value1, String value2) {
+            addCriterion("group_code between", value1, value2, "groupCode");
+            return (Criteria) this;
+        }
+
+        public Criteria andGroupCodeNotBetween(String value1, String value2) {
+            addCriterion("group_code not between", value1, value2, "groupCode");
+            return (Criteria) this;
+        }
+
         public Criteria andUsernameIsNull() {
             addCriterion("username is null");
             return (Criteria) this;
@@ -175,136 +245,6 @@ public class SysUserExample {
 
         public Criteria andUsernameNotBetween(String value1, String value2) {
             addCriterion("username not between", value1, value2, "username");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordIsNull() {
-            addCriterion("password is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordIsNotNull() {
-            addCriterion("password is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordEqualTo(String value) {
-            addCriterion("password =", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordNotEqualTo(String value) {
-            addCriterion("password <>", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordGreaterThan(String value) {
-            addCriterion("password >", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordGreaterThanOrEqualTo(String value) {
-            addCriterion("password >=", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordLessThan(String value) {
-            addCriterion("password <", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordLessThanOrEqualTo(String value) {
-            addCriterion("password <=", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordLike(String value) {
-            addCriterion("password like", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordNotLike(String value) {
-            addCriterion("password not like", value, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordIn(List<String> values) {
-            addCriterion("password in", values, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordNotIn(List<String> values) {
-            addCriterion("password not in", values, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordBetween(String value1, String value2) {
-            addCriterion("password between", value1, value2, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andPasswordNotBetween(String value1, String value2) {
-            addCriterion("password not between", value1, value2, "password");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledIsNull() {
-            addCriterion("enabled is null");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledIsNotNull() {
-            addCriterion("enabled is not null");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledEqualTo(Boolean value) {
-            addCriterion("enabled =", value, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledNotEqualTo(Boolean value) {
-            addCriterion("enabled <>", value, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledGreaterThan(Boolean value) {
-            addCriterion("enabled >", value, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledGreaterThanOrEqualTo(Boolean value) {
-            addCriterion("enabled >=", value, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledLessThan(Boolean value) {
-            addCriterion("enabled <", value, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledLessThanOrEqualTo(Boolean value) {
-            addCriterion("enabled <=", value, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledIn(List<Boolean> values) {
-            addCriterion("enabled in", values, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledNotIn(List<Boolean> values) {
-            addCriterion("enabled not in", values, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledBetween(Boolean value1, Boolean value2) {
-            addCriterion("enabled between", value1, value2, "enabled");
-            return (Criteria) this;
-        }
-
-        public Criteria andEnabledNotBetween(Boolean value1, Boolean value2) {
-            addCriterion("enabled not between", value1, value2, "enabled");
             return (Criteria) this;
         }
     }

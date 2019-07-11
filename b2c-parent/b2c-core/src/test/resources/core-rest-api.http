@@ -53,6 +53,11 @@ Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
 examOpDate=2019-06-10
 
 ### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
+POST {{url}}/json/exam/exportExam
+Cookie: JSESSIONID={{JSESSIONID}};CORE_REMEMBER_ME={{CORE_REMEMBER_ME}}
+
+> 考试信息.xlsx
+### 先调用最上面/core/login接口设置JSESSIONID和CORE_REMEMBER_ME两个cookie值
 POST {{url}}/admin/user/createUser
 Content-Type:application/json
 Accept: application/json

@@ -69,7 +69,7 @@
   <sql id="Base_Column_List">
     series, username, token, last_used
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.SysRememberMeExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.SysRememberMeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -93,7 +93,7 @@
     delete from sys_remember_me
     where series = #{series,jdbcType=VARCHAR}
   </delete>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.SysRememberMeExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.SysRememberMeExample">
     delete from sys_remember_me
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -136,7 +136,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.SysRememberMeExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.SysRememberMeExample" resultType="java.lang.Long">
     select count(*) from sys_remember_me
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

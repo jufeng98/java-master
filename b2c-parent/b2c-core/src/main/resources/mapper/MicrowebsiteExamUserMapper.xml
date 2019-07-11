@@ -67,7 +67,7 @@
   <sql id="Base_Column_List">
     exam_code, username
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.MicrowebsiteExamUserExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.MicrowebsiteExamUserExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -81,7 +81,7 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.MicrowebsiteExamUserExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.MicrowebsiteExamUserExample">
     delete from microwebsite_exam_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -110,7 +110,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.MicrowebsiteExamUserExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.MicrowebsiteExamUserExample" resultType="java.lang.Long">
     select count(*) from microwebsite_exam_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

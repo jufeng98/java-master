@@ -16,4 +16,6 @@ public interface IExamService {
     List<GetExamListResVo> getExamList(GetExamListReqVo reqVo, UserDetails userDetails) throws IOException;
 
     List<GetExamListResVo> getExamListByOpInfo(Date examOpDate, UserDetails userDetails);
+
+    byte[] exportExam();
 }

@@ -2,7 +2,7 @@ package org.javamaster.b2c.core.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.javamaster.b2c.core.entity.SysUser;
-import org.javamaster.b2c.core.entity.example.SysUserExample;
+import org.javamaster.b2c.core.entity.SysUserExample;
 
 import java.util.List;
 

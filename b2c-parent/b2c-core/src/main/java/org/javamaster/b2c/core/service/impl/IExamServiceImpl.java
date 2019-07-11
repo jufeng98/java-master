@@ -1,10 +1,18 @@
 package org.javamaster.b2c.core.service.impl;
 
+import cn.com.bluemoon.handypoi.excel.enums.ExcelType;
+import cn.com.bluemoon.handypoi.excel.resolve.ExcelWriter;
+import cn.com.bluemoon.handypoi.excel.resolve.SheetInfo;
 import static java.util.stream.Collectors.toList;
 import org.javamaster.b2c.core.entity.MicrowebsiteExam;
+import org.javamaster.b2c.core.entity.MicrowebsiteExamExample;
 import org.javamaster.b2c.core.enums.BizExceptionEnum;
+import org.javamaster.b2c.core.enums.ExamStatusEnum;
+import org.javamaster.b2c.core.enums.ExamTypeEnum;
 import org.javamaster.b2c.core.exception.BizException;
 import org.javamaster.b2c.core.mapper.ManualMicrowebsiteMapper;
+import org.javamaster.b2c.core.mapper.MicrowebsiteExamMapper;
+import org.javamaster.b2c.core.model.vo.ExportExamResVo;
 import org.javamaster.b2c.core.model.vo.GetExamListReqVo;
 import org.javamaster.b2c.core.model.vo.GetExamListResVo;
 import org.javamaster.b2c.core.service.IExamService;
@@ -25,6 +33,8 @@ import java.util.List;
 public class IExamServiceImpl implements IExamService {
     @Autowired
     private ManualMicrowebsiteMapper microwebsiteMapper;
+    @Autowired
+    private MicrowebsiteExamMapper examMapper;
 
     @Override
     public List<GetExamListResVo> getExamList(GetExamListReqVo reqVo, UserDetails userDetails) throws IOException {
@@ -52,5 +62,24 @@ public class IExamServiceImpl implements IExamService {
             return resVo;
         }).collect(toList());
         return resVos;
+    }
+
+    @Override
+    public byte[] exportExam() {
+        List<MicrowebsiteExam> exams = examMapper.selectByExample(new MicrowebsiteExamExample());
+        List<ExportExamResVo> exportExamResVos = exams.stream()
+                .map(exam -> {
+                    ExportExamResVo exportExamResVo = new ExportExamResVo();
+                    exportExamResVo.setExamCode(exam.getExamCode());
+                    exportExamResVo.setExamName(exam.getExamName());
+                    exportExamResVo.setExamTypeName(ExamTypeEnum.getEnumByCode(exam.getExamType().intValue()).getMsg());
+                    exportExamResVo.setExamStatusName(ExamStatusEnum.getEnumByCode(exam.getExamStatus().intValue()).getMsg());
+                    return exportExamResVo;
+                })
+                .collect(toList());
+        ExcelWriter<ExportExamResVo> excelWriter = new ExcelWriter<>(ExcelType.XLSX);
+        SheetInfo<ExportExamResVo> sheetInfo = new SheetInfo<>(exportExamResVos, ExportExamResVo.class, "考试信息", 1);
+        excelWriter.addSheetInfo(sheetInfo);
+        return excelWriter.addSheetFinish().getBytes();
     }
 }

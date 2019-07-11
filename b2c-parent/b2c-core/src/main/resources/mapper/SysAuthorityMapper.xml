@@ -67,7 +67,7 @@
   <sql id="Base_Column_List">
     authority_code, authority_name
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.SysAuthorityExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.SysAuthorityExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -91,7 +91,7 @@
     delete from sys_authority
     where authority_code = #{authorityCode,jdbcType=VARCHAR}
   </delete>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.SysAuthorityExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.SysAuthorityExample">
     delete from sys_authority
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -120,7 +120,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.SysAuthorityExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.SysAuthorityExample" resultType="java.lang.Long">
     select count(*) from sys_authority
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

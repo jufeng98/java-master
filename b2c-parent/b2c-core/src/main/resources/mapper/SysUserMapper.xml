@@ -68,7 +68,7 @@
   <sql id="Base_Column_List">
     username, password, enabled
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.SysUserExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.SysUserExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -92,7 +92,7 @@
     delete from sys_user
     where username = #{username,jdbcType=VARCHAR}
   </delete>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.SysUserExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.SysUserExample">
     delete from sys_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -129,7 +129,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.SysUserExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.SysUserExample" resultType="java.lang.Long">
     select count(*) from sys_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

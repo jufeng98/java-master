@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  *
  * @author yudong
  */
-public interface UserService {
+public interface IUserService {
 
     SysUser createUser(CreateUserReqVo reqVo);
 

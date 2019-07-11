@@ -67,7 +67,7 @@
   <sql id="Base_Column_List">
     group_code, username
   </sql>
-  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupUserExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupUserExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
@@ -81,7 +81,7 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupUserExample">
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupUserExample">
     delete from sys_group_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
@@ -110,7 +110,7 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.example.SysGroupUserExample" resultType="java.lang.Long">
+  <select id="countByExample" parameterType="org.javamaster.b2c.core.entity.SysGroupUserExample" resultType="java.lang.Long">
     select count(*) from sys_group_user
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

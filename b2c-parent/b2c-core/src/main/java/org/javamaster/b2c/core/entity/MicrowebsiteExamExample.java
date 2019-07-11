@@ -1,11 +1,11 @@
-package org.javamaster.b2c.core.entity.example;
+package org.javamaster.b2c.core.entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author mybatis generator
- * @date 2019/06/13 09:37:47
+ * @date 2019/07/11 14:41:40
  */
 public class MicrowebsiteExamExample {
     protected String orderByClause;

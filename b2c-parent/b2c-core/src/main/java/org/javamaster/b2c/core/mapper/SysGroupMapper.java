@@ -2,7 +2,7 @@ package org.javamaster.b2c.core.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.javamaster.b2c.core.entity.SysGroup;
-import org.javamaster.b2c.core.entity.example.SysGroupExample;
+import org.javamaster.b2c.core.entity.SysGroupExample;
 
 import java.util.List;
 

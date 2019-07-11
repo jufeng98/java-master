@@ -1,4 +1,4 @@
-package org.javamaster.b2c.core.entity.example;
+package org.javamaster.b2c.core.entity;
 
 import java.util.ArrayList;
 import java.util.List;

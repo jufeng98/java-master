@@ -2,7 +2,7 @@ package org.javamaster.b2c.core.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.javamaster.b2c.core.entity.MicrowebsiteExam;
-import org.javamaster.b2c.core.entity.example.MicrowebsiteExamExample;
+import org.javamaster.b2c.core.entity.MicrowebsiteExamExample;
 
 import java.util.List;
 

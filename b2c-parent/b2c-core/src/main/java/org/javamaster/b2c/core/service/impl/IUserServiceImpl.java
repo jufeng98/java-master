@@ -3,7 +3,7 @@ package org.javamaster.b2c.core.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.javamaster.b2c.core.entity.SysUser;
-import org.javamaster.b2c.core.entity.example.SysUserExample;
+import org.javamaster.b2c.core.entity.SysUserExample;
 import org.javamaster.b2c.core.enums.BizExceptionEnum;
 import org.javamaster.b2c.core.exception.BizException;
 import org.javamaster.b2c.core.mapper.SysUserMapper;
@@ -12,7 +12,7 @@ import org.javamaster.b2c.core.model.vo.ChangeUserStatusReqVo;
 import org.javamaster.b2c.core.model.vo.CreateUserReqVo;
 import org.javamaster.b2c.core.model.vo.FindUsersReqVo;
 import org.javamaster.b2c.core.model.vo.UpdatePasswordReqVo;
-import org.javamaster.b2c.core.service.UserService;
+import org.javamaster.b2c.core.service.IUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +28,7 @@ import java.util.List;
  * @author yudong
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class IUserServiceImpl implements IUserService {
 
     @Autowired
     private SysUserMapper userMapper;
