@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StreamUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -59,9 +56,6 @@ public class ExamController {
     @PostMapping("/exportExam")
     public ResponseEntity<byte[]> exportExam() throws Exception {
         byte[] bytes = examService.exportExam();
-        FileOutputStream fileOutputStream = new FileOutputStream(new File("F:\\h.xlsx"));
-        StreamUtils.copy(bytes, fileOutputStream);
-        fileOutputStream.close();
         HttpHeaders headers = new HttpHeaders();
         String fileName = URLEncoder.encode("考试信息", StandardCharsets.UTF_8.name());
         headers.setContentDispositionFormData("attachment", fileName + ".xlsx");
