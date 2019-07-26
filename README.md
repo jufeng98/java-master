@@ -23,3 +23,6 @@ b2c-parent/b2c-bytecode:
 
 handypoi-excel
 一个简洁方便读写excel的工具包,测试包里面有两个示例Test类,可通过查看和运行Test类查看具体用法
+
+mocklombok-javac
+一个jsr269(插入式注解处理器)的示例代码,展示了在编译时如何根据注解生成方法以及仿照findbugs等类编写规范检查
