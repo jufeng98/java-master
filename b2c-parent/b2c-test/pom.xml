@@ -87,6 +87,11 @@
             <artifactId>javax.el</artifactId>
             <version>3.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.javamaster.mocklombok</groupId>
+            <artifactId>mocklombok-javac</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <repositories>
