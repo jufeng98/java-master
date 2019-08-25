@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: b2c-scheduled
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sakila
+    username: root
+    password: root
+management:
+  security:
+    enabled: false
+server:
+  port: 8089
+info:
+  service-name: ${spring.application.name}

@@ -26,3 +26,6 @@ handypoi-excel
 
 mocklombok-javac
 一个jsr269(插入式注解处理器)的示例代码,展示了在编译时如何根据注解生成方法以及仿照findbugs等类编写规范检查
+
+b2c-scheduled
+展示如何优雅实现定时任务
