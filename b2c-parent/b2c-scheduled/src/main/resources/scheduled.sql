@@ -5,7 +5,11 @@ create table `spring_scheduled_cron` (
   `cron_expression` varchar(20)  not null,
   `task_explain`    varchar(50),
   `status`          tinyint comment '1:正常;2:停用'
-);
+)
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COMMENT = '定时任务表';
+
 insert into `spring_scheduled_cron`
 values (1, 'org.javamaster.b2c.scheduled.task.DynamicPrintTask', '*/5 * * * * ?', '定时任务描述', 1);
 insert into `spring_scheduled_cron`
