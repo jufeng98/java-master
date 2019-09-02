@@ -33,7 +33,7 @@ public class MySqlMybatisGenerator {
     }
 
     public static void generator() throws Exception {
-        List<String> warnings = new ArrayList<String>();
+        List<String> warnings = new ArrayList<>();
         File propFile = ResourceUtils.getFile("classpath:generatorConfig.properties");
         Properties properties = new Properties();
         properties.load(new FileInputStream(propFile));
