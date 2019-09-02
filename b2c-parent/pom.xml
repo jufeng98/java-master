@@ -24,6 +24,7 @@
         <module>b2c-classloader</module>
         <module>b2c-bytecode</module>
         <module>b2c-scheduled</module>
+        <module>b2c-mybatis</module>
     </modules>
 
     <properties>

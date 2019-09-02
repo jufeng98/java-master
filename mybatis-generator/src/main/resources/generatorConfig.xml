@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<!--配置信息,关于有哪些配置及各配置的作用参见官网说明http://www.mybatis.org/generator/configreference/xmlconfig.html-->
+<generatorConfiguration>
+
+    <context id="MySQL" targetRuntime="MyBatis3" defaultModelType="flat">
+        <!--自动识别数据库关键字，默认false，如果设置为true，根据SqlReservedWords中定义的关键字列表；
+            一般保留默认值，遇到数据库关键字（Java关键字），使用columnOverride覆盖 -->
+        <property name="autoDelimitKeywords" value="false"/>
+        <!-- 生成的Java文件的编码 -->
+        <property name="javaFileEncoding" value="UTF-8"/>
+        <!-- beginningDelimiter和endingDelimiter：指明数据库的用于标记数据库对象名的符号，比如ORACLE就是双引号，MYSQL默认是`反引号； -->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"></plugin>
+
+        <commentGenerator>
+            <!--去掉mybatis在字段和方法上添加的无关注释-->
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="${jdbc.driverClass}"
+                        connectionURL="${jdbc.url}"
+                        userId="${jdbc.user}"
+                        password="${jdbc.password}">
+            <!--支持oracle获取注释-->
+            <property name="remarksReporting" value="true"/>
+            <!--支持mybatis获取注释-->
+            <property name="useInformationSchema" value="true"/>
+            <!--解决多个数据库表同名导致的问题-->
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <!-- 默认情况下数据库中的 decimal，bigInt 在 Java 对应是 sql 下的 BigDecimal 类,不是 double 和 long 类型 -->
+            <!-- 使用常用的基本类型代替 sql 包下的引用类型 -->
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!--指定实体类位置-->
+        <javaModelGenerator targetPackage="${model.package}" targetProject="${project.path}/src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaModelGenerator>
+        <!--指定xml文件位置-->
+        <sqlMapGenerator targetPackage="${mapper.xml.package}" targetProject="${project.path}/src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+        <!--指定mapper类位置-->
+        <javaClientGenerator targetPackage="${mapper.package}" targetProject="${project.path}/src/main/java"
+                             type="XMLMAPPER">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!--添加要生成mybatis相关的文件的数据库表-->
+        <table tableName="exams" schema="sakila"></table>
+        <table tableName="menus" schema="sakila"></table>
+
+    </context>
+</generatorConfiguration>

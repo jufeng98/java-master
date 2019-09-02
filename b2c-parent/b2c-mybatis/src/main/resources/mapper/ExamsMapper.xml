@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.javamaster.b2c.mybatis.mapper.ExamsMapper">
+  <!-- 此文件由 mybatis generator 生成,注意: 请勿手工改动此文件, 请使用 mybatis generator -->
+  <resultMap id="BaseResultMap" type="org.javamaster.b2c.mybatis.entity.Exams">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="exams_code" jdbcType="VARCHAR" property="examsCode" />
+    <result column="exams_name" jdbcType="VARCHAR" property="examsName" />
+    <result column="exams_desc" jdbcType="VARCHAR" property="examsDesc" />
+    <result column="certs_id" jdbcType="INTEGER" property="certsId" />
+    <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, exams_code, exams_name, exams_desc, certs_id, create_username, create_time
+  </sql>
+  <select id="selectByExample" parameterType="org.javamaster.b2c.mybatis.entity.ExamsExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from exams
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from exams
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from exams
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="org.javamaster.b2c.mybatis.entity.ExamsExample">
+    delete from exams
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" keyProperty="id" parameterType="org.javamaster.b2c.mybatis.entity.Exams" useGeneratedKeys="true">
+    insert into exams (id, exams_code, exams_name, 
+      exams_desc, certs_id, create_username, 
+      create_time)
+    values (#{id,jdbcType=INTEGER}, #{examsCode,jdbcType=VARCHAR}, #{examsName,jdbcType=VARCHAR}, 
+      #{examsDesc,jdbcType=VARCHAR}, #{certsId,jdbcType=INTEGER}, #{createUsername,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="org.javamaster.b2c.mybatis.entity.Exams" useGeneratedKeys="true">
+    insert into exams
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="examsCode != null">
+        exams_code,
+      </if>
+      <if test="examsName != null">
+        exams_name,
+      </if>
+      <if test="examsDesc != null">
+        exams_desc,
+      </if>
+      <if test="certsId != null">
+        certs_id,
+      </if>
+      <if test="createUsername != null">
+        create_username,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="examsCode != null">
+        #{examsCode,jdbcType=VARCHAR},
+      </if>
+      <if test="examsName != null">
+        #{examsName,jdbcType=VARCHAR},
+      </if>
+      <if test="examsDesc != null">
+        #{examsDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="certsId != null">
+        #{certsId,jdbcType=INTEGER},
+      </if>
+      <if test="createUsername != null">
+        #{createUsername,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="org.javamaster.b2c.mybatis.entity.ExamsExample" resultType="java.lang.Long">
+    select count(*) from exams
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update exams
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.examsCode != null">
+        exams_code = #{record.examsCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.examsName != null">
+        exams_name = #{record.examsName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.examsDesc != null">
+        exams_desc = #{record.examsDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.certsId != null">
+        certs_id = #{record.certsId,jdbcType=INTEGER},
+      </if>
+      <if test="record.createUsername != null">
+        create_username = #{record.createUsername,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update exams
+    set id = #{record.id,jdbcType=INTEGER},
+      exams_code = #{record.examsCode,jdbcType=VARCHAR},
+      exams_name = #{record.examsName,jdbcType=VARCHAR},
+      exams_desc = #{record.examsDesc,jdbcType=VARCHAR},
+      certs_id = #{record.certsId,jdbcType=INTEGER},
+      create_username = #{record.createUsername,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="org.javamaster.b2c.mybatis.entity.Exams">
+    update exams
+    <set>
+      <if test="examsCode != null">
+        exams_code = #{examsCode,jdbcType=VARCHAR},
+      </if>
+      <if test="examsName != null">
+        exams_name = #{examsName,jdbcType=VARCHAR},
+      </if>
+      <if test="examsDesc != null">
+        exams_desc = #{examsDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="certsId != null">
+        certs_id = #{certsId,jdbcType=INTEGER},
+      </if>
+      <if test="createUsername != null">
+        create_username = #{createUsername,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.javamaster.b2c.mybatis.entity.Exams">
+    update exams
+    set exams_code = #{examsCode,jdbcType=VARCHAR},
+      exams_name = #{examsName,jdbcType=VARCHAR},
+      exams_desc = #{examsDesc,jdbcType=VARCHAR},
+      certs_id = #{certsId,jdbcType=INTEGER},
+      create_username = #{createUsername,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
