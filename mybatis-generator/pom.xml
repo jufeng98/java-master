@@ -46,4 +46,25 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <name>alibaba-nexus</name>
+            <id>alibaba-nexus</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <name>alibaba-nexus</name>
+            <id>alibaba-nexus</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
 </project>
