@@ -1,9 +1,8 @@
 package org.javamaster.b2c.scheduled.controller;
 
-import org.javamaster.b2c.scheduled.config.ScheduledCronTasks;
 import org.javamaster.b2c.scheduled.consts.AppConsts;
-import org.javamaster.b2c.scheduled.entity.SpringScheduledCron;
 import org.javamaster.b2c.scheduled.respsitory.SpringScheduledCronRepository;
+import org.javamaster.b2c.scheduled.task.ScheduledOfTask;
 import org.javamaster.b2c.scheduled.util.CronUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -25,8 +24,6 @@ public class TaskController {
     @Autowired
     private ApplicationContext context;
     @Autowired
-    private ScheduledCronTasks scheduledCronProperties;
-    @Autowired
     private SpringScheduledCronRepository cronRepository;
 
     /**
@@ -37,7 +34,7 @@ public class TaskController {
      */
     @RequestMapping("/taskList")
     public String taskList(Model model) {
-        model.addAttribute("cronList", scheduledCronProperties.getCronList());
+        model.addAttribute("cronList", cronRepository.findAll());
         return "task-list";
     }
 
@@ -54,9 +51,7 @@ public class TaskController {
         if (!CronUtils.isValidExpression(newCron)) {
             throw new IllegalArgumentException("失败,非法表达式:" + newCron);
         }
-        SpringScheduledCron springScheduledCron = scheduledCronProperties.findByCronKey(cronKey);
         cronRepository.updateCronExpressionByCronKey(newCron, cronKey);
-        springScheduledCron.setCronExpression(newCron);
         return AppConsts.SUCCESS;
     }
 
@@ -70,7 +65,7 @@ public class TaskController {
     @ResponseBody
     @RequestMapping("/runTaskCron")
     public Integer runTaskCron(String cronKey) throws Exception {
-        ((Runnable) context.getBean(Class.forName(cronKey))).run();
+        ((ScheduledOfTask) context.getBean(Class.forName(cronKey))).execute();
         return AppConsts.SUCCESS;
     }
 
@@ -84,9 +79,7 @@ public class TaskController {
     @ResponseBody
     @RequestMapping("/changeStatusTaskCron")
     public Integer changeStatusTaskCron(Integer status, String cronKey) {
-        SpringScheduledCron springScheduledCron = scheduledCronProperties.findByCronKey(cronKey);
         cronRepository.updateStatusByCronKey(status, cronKey);
-        springScheduledCron.setStatus(status);
         return AppConsts.SUCCESS;
 
     }

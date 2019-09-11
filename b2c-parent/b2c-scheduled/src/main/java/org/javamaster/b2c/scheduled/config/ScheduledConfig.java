@@ -1,6 +1,7 @@
 package org.javamaster.b2c.scheduled.config;
 
 import org.javamaster.b2c.scheduled.entity.SpringScheduledCron;
+import org.javamaster.b2c.scheduled.respsitory.SpringScheduledCronRepository;
 import org.javamaster.b2c.scheduled.task.ScheduledOfTask;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,12 @@ public class ScheduledConfig implements SchedulingConfigurer {
 
     @Autowired
     private ApplicationContext context;
-
     @Autowired
-    private ScheduledCronTasks scheduledCronTasks;
+    private SpringScheduledCronRepository cronRepository;
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        for (SpringScheduledCron springScheduledCron : scheduledCronTasks.getCronList()) {
+        for (SpringScheduledCron springScheduledCron : cronRepository.findAll()) {
             Class<?> clazz;
             Object task;
             try {
@@ -44,7 +44,10 @@ public class ScheduledConfig implements SchedulingConfigurer {
             Assert.isAssignable(ScheduledOfTask.class, task.getClass(), "定时任务类必须实现ScheduledOfTask接口");
             // 可以通过改变数据库数据进而实现动态改变执行周期
             taskRegistrar.addTriggerTask(((Runnable) task),
-                    triggerContext -> new CronTrigger(springScheduledCron.getCronExpression()).nextExecutionTime(triggerContext)
+                    triggerContext -> {
+                        String cronExpression = cronRepository.findByCronId(springScheduledCron.getCronId()).getCronExpression();
+                        return new CronTrigger(cronExpression).nextExecutionTime(triggerContext);
+                    }
             );
         }
 

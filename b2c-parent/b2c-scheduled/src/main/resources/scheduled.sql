@@ -9,7 +9,8 @@ create table `spring_scheduled_cron` (
   `task_explain`    varchar(50)  not null     default ''
   comment '任务描述',
   `status`          tinyint      not null     default 1
-  comment '状态,1:正常;2:停用'
+  comment '状态,1:正常;2:停用',
+  unique index cron_key_unique_idx(`cron_key`)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

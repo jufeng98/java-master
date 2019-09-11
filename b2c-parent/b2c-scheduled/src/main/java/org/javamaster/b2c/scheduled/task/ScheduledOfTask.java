@@ -1,8 +1,8 @@
 package org.javamaster.b2c.scheduled.task;
 
-import org.javamaster.b2c.scheduled.config.ScheduledCronTasks;
 import org.javamaster.b2c.scheduled.entity.SpringScheduledCron;
 import org.javamaster.b2c.scheduled.enums.StatusEnum;
+import org.javamaster.b2c.scheduled.respsitory.SpringScheduledCronRepository;
 import org.javamaster.b2c.scheduled.util.SpringUtils;
 
 /**
@@ -21,9 +21,9 @@ public interface ScheduledOfTask extends Runnable {
      */
     @Override
     default void run() {
-        ScheduledCronTasks properties = SpringUtils.getBean(ScheduledCronTasks.class);
-        SpringScheduledCron scheduledCron = properties.findByCronKey(this.getClass().getName());
-        if (scheduledCron.getStatus().equals(StatusEnum.DISABLED.getCode())) {
+        SpringScheduledCronRepository repository = SpringUtils.getBean(SpringScheduledCronRepository.class);
+        SpringScheduledCron scheduledCron = repository.findByCronKey(this.getClass().getName());
+        if (StatusEnum.DISABLED.getCode().equals(scheduledCron.getStatus())) {
             return;
         }
         execute();
