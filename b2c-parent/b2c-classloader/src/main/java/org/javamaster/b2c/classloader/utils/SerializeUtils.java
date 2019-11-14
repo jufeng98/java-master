@@ -18,8 +18,7 @@ public class SerializeUtils {
             ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
             ConfigurableObjectInputStream inputStream =
                     new ConfigurableObjectInputStream(stream, Thread.currentThread().getContextClassLoader());
-            Object object = inputStream.readObject();
-            return object;
+            return inputStream.readObject();
         } catch (Exception e) {
             throw new RuntimeException("deserialize failed", e);
         }

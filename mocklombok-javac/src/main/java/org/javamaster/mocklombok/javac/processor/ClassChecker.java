@@ -14,7 +14,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementScanner8;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -45,7 +45,7 @@ public class ClassChecker extends AbstractProcessor {
 class ClassScanner extends ElementScanner8<Set<? extends Element>, Element> {
 
     private Logger logger = Logger.getLogger(this.getClass().getCanonicalName());
-    private static final List<String> EXCLUDES = Arrays.asList("serialVersionUID");
+    private static final List<String> EXCLUDES = Collections.singletonList("serialVersionUID");
     private Pattern pattern1 = Pattern.compile("^([A-Z]+_*)+[A-Z]+$");
     private Pattern pattern2 = Pattern.compile("^[a-z]+[a-zA-Z0-9]*$");
 
@@ -75,9 +75,9 @@ class ClassScanner extends ElementScanner8<Set<? extends Element>, Element> {
 
     @Override
     public Set<? extends Element> visitType(TypeElement e, Element element) {
-        final char A = 'A';
-        final char Z = 'Z';
-        if (!(e.getSimpleName().charAt(0) >= A && e.getSimpleName().charAt(0) <= Z)) {
+        final char a = 'A';
+        final char z = 'Z';
+        if (!(e.getSimpleName().charAt(0) >= a && e.getSimpleName().charAt(0) <= z)) {
             logger.warning(e.getQualifiedName() + "类名不符合规范,需以大写字母开头");
         }
         return super.visitType(e, element);

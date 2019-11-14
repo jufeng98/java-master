@@ -94,11 +94,11 @@ public class ClassFileReader {
      */
     private AttributeInfo[] attributeInfos;
 
-    public ClassFileReader(InputStream classFileStream) {
+    ClassFileReader(InputStream classFileStream) {
         initClassFileInfo(classFileStream);
     }
 
-    public void initClassFileInfo(InputStream classFileStream) {
+    private void initClassFileInfo(InputStream classFileStream) {
         try {
             DataInputStream dataInputStream = new DataInputStream(classFileStream);
             magic = dataInputStream.readInt();
@@ -128,7 +128,7 @@ public class ClassFileReader {
         } finally {
             try {
                 classFileStream.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
     }

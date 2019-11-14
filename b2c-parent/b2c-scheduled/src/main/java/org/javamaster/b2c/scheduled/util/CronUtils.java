@@ -11,7 +11,7 @@ import java.util.Date;
  * @date 2019/5/10
  */
 public class CronUtils {
-    static Logger logger = LoggerFactory.getLogger(CronUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(CronUtils.class);
 
     public static boolean isValidExpression(final String cronExpression) {
         CronTriggerImpl trigger = new CronTriggerImpl();

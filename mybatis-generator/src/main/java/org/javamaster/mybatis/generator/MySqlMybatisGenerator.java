@@ -22,7 +22,7 @@ import java.util.Properties;
  */
 public class MySqlMybatisGenerator {
 
-    static Logger logger = LoggerFactory.getLogger(MySqlMybatisGenerator.class);
+    private static Logger logger = LoggerFactory.getLogger(MySqlMybatisGenerator.class);
 
     public static void main(String[] args) {
         try {
@@ -32,7 +32,7 @@ public class MySqlMybatisGenerator {
         }
     }
 
-    public static void generator() throws Exception {
+    private static void generator() throws Exception {
         List<String> warnings = new ArrayList<>();
         File propFile = ResourceUtils.getFile("classpath:generatorConfig.properties");
         Properties properties = new Properties();

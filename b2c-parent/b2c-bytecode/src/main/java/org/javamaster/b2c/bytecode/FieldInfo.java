@@ -52,7 +52,7 @@ public class FieldInfo {
     @JsonIgnore
     private ConstantPool constantPool;
 
-    public void initFieldInfo(DataInputStream dataInputStream, ConstantPool constantPool) throws Exception {
+    void initFieldInfo(DataInputStream dataInputStream, ConstantPool constantPool) throws Exception {
         this.constantPool = constantPool;
         accessFlags = dataInputStream.readShort();
         nameIndex = dataInputStream.readShort();

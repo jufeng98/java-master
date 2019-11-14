@@ -44,7 +44,7 @@ public class MethodInfo {
     @JsonIgnore
     private ConstantPool constantPool;
 
-    public void initMethodInfo(DataInputStream dataInputStream, ConstantPool constantPool) throws Exception {
+    void initMethodInfo(DataInputStream dataInputStream, ConstantPool constantPool) throws Exception {
         accessFlags = dataInputStream.readShort();
         nameIndex = dataInputStream.readShort();
         descriptorIndex = dataInputStream.readShort();

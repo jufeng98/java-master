@@ -16,7 +16,7 @@ import org.javamaster.b2c.bytecode.tablestructure.ConstantInfo;
 public class ConstantPool {
     private final ConstantInfo[] constantInfos;
 
-    public ConstantPool(int count) {
+    ConstantPool(int count) {
         constantInfos = new ConstantInfo[count];
     }
 

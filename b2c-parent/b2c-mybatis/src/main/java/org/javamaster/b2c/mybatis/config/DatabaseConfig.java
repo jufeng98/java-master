@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan(basePackages = "org.javamaster.b2c.mybatis.mapper")
 public class DatabaseConfig {
-    PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+    private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
     @Bean
     public DataSourceTransactionManager transactionManager(DataSource dataSource) {
@@ -33,12 +33,11 @@ public class DatabaseConfig {
             throws Exception {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSource);
-        final String MAPPER_LOCATION = "classpath:mapper/**/*.xml";
-        sqlSessionFactoryBean.setMapperLocations(resolver.getResources(MAPPER_LOCATION));
+        final String mapperLocation = "classpath:mapper/**/*.xml";
+        sqlSessionFactoryBean.setMapperLocations(resolver.getResources(mapperLocation));
         String configLocation = "classpath:mybatis-config.xml";
         sqlSessionFactoryBean.setConfigLocation(resolver.getResources(configLocation)[0]);
-        SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBean.getObject();
-        return sqlSessionFactory;
+        return sqlSessionFactoryBean.getObject();
     }
 
 }

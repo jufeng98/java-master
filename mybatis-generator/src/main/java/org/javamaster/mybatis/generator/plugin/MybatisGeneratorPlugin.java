@@ -33,6 +33,7 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
         super.setContext(context);
     }
 
+    @Override
     public boolean validate(List<String> warnings) {
         return true;
     }
@@ -53,7 +54,7 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
         topLevelClass.addImportedType("org.apache.commons.lang3.builder.ToStringBuilder");
         topLevelClass.addImportedType("org.apache.commons.lang3.builder.ToStringStyle");
 
-        List<Method> newMethods = new ArrayList<Method>();
+        List<Method> newMethods = new ArrayList<>();
         Method toStringMethod = new Method();
         toStringMethod.addAnnotation("@Override");
         toStringMethod.setVisibility(JavaVisibility.PUBLIC);
@@ -168,22 +169,12 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapInsertElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
-        List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
-        if (columns.size() == 1) {
-            element.addAttribute(new Attribute("useGeneratedKeys", "true"));
-            element.addAttribute(new Attribute("keyProperty", columns.get(0).getJavaProperty()));
-        }
-        return super.sqlMapInsertElementGenerated(element, introspectedTable);
+        return addGenerateKey(element, introspectedTable);
     }
 
     @Override
     public boolean sqlMapInsertSelectiveElementGenerated(XmlElement element, IntrospectedTable introspectedTable) {
-        List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
-        if (columns.size() == 1) {
-            element.addAttribute(new Attribute("useGeneratedKeys", "true"));
-            element.addAttribute(new Attribute("keyProperty", columns.get(0).getJavaProperty()));
-        }
-        return super.sqlMapInsertElementGenerated(element, introspectedTable);
+        return addGenerateKey(element, introspectedTable);
     }
 
     @Override
@@ -192,4 +183,15 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
         sqlMap.setMergeable(false);
         return true;
     }
+
+
+    private boolean addGenerateKey(XmlElement element, IntrospectedTable introspectedTable) {
+        List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
+        if (columns.size() == 1) {
+            element.addAttribute(new Attribute("useGeneratedKeys", "true"));
+            element.addAttribute(new Attribute("keyProperty", columns.get(0).getJavaProperty()));
+        }
+        return super.sqlMapInsertElementGenerated(element, introspectedTable);
+    }
+
 }
