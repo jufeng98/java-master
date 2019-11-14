@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -103,8 +104,8 @@ public class ExcelWriter<T> {
 
     private class ExcelWriterImpl implements ExcelWriterService {
 
-        public ExcelWriterImpl() {
-            sheetInfoList.forEach(sheetInfo -> init(sheetInfo));
+        ExcelWriterImpl() {
+            sheetInfoList.forEach(this::init);
         }
 
         @Override
@@ -130,7 +131,7 @@ public class ExcelWriter<T> {
             } finally {
                 try {
                     workbook.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
             return bytes;
@@ -379,7 +380,7 @@ public class ExcelWriter<T> {
                         }
                         return beanColumnField;
                     })
-                    .filter(beanColumnField -> beanColumnField != null)
+                    .filter(Objects::nonNull)
                     .sorted(Comparator.comparingInt(BeanColumnField::getColumnOrder))
                     .collect(Collectors.toList());
             sheetInfo.setSheet(workbook.createSheet(sheetInfo.getSheetName()));

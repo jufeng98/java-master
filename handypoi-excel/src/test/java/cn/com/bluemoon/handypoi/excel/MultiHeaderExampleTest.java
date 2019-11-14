@@ -24,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,10 +39,10 @@ public class MultiHeaderExampleTest {
     @Test
     public void testWrite() throws Exception {
 
-        List<MultiHeadExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(i -> generateBean(i)).collect(Collectors.toList());
+        List<MultiHeadExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(this::generateBean).collect(Collectors.toList());
 
         ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
-        SheetInfo sheetInfo = new SheetInfo(list, MultiHeadExampleBean.class, "交易信息", 2);
+        SheetInfo<MultiHeadExampleBean> sheetInfo = new SheetInfo<>(list, MultiHeadExampleBean.class, "交易信息", 2);
 
         List<FooterColumn> footerColumnList = new ArrayList<>(1);
         footerColumnList.add(new FooterColumn("合计", 1));
@@ -50,7 +50,7 @@ public class MultiHeaderExampleTest {
         footerColumnList.add(new FooterColumn("SUM", true));
         FooterRow footerRow = new FooterRow(footerColumnList);
 
-        sheetInfo.setFooterRowList(Arrays.asList(footerRow));
+        sheetInfo.setFooterRowList(Collections.singletonList(footerRow));
 
         excelWriter.addSheetInfo(sheetInfo);
         excelWriter.setRowWriteListener(new RowWriteListener<MultiHeadExampleBean>() {
@@ -97,7 +97,7 @@ public class MultiHeaderExampleTest {
 
         File file = new File("D:\\multi-header-excel-test.xls");
         InputStream inputStream = new FileInputStream(file);
-        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, MultiHeadExampleBean.class, 2, 1);
+        ExcelReader<MultiHeadExampleBean> excelReader = new ExcelReader<>(ExcelType.XLS, inputStream, MultiHeadExampleBean.class, 2, 1);
         excelReader.setRowReadListener((bean, context) -> {
             System.out.println(bean);
             return true;

@@ -38,10 +38,10 @@ public class ComplexExampleTest {
     @Test
     public void testWrite() throws Exception {
 
-        List<ComplexExampleBean> list = IntStream.rangeClosed(1, 6).mapToObj(i -> generateBean(i)).collect(Collectors.toList());
+        List<ComplexExampleBean> list = IntStream.rangeClosed(1, 6).mapToObj(this::generateBean).collect(Collectors.toList());
 
         ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
-        SheetInfo sheetInfo = new SheetInfo(list, ComplexExampleBean.class, "结算信息", 3);
+        SheetInfo<ComplexExampleBean> sheetInfo = new SheetInfo<>(list, ComplexExampleBean.class, "结算信息", 3);
 
         sheetInfo.setFooterRowList(getFooterInfos());
 
@@ -153,7 +153,7 @@ public class ComplexExampleTest {
 
         File file = new File("D:\\complex-excel-test.xls");
         InputStream inputStream = new FileInputStream(file);
-        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, ComplexExampleBean.class, 3, 6);
+        ExcelReader<ComplexExampleBean> excelReader = new ExcelReader<>(ExcelType.XLS, inputStream, ComplexExampleBean.class, 3, 6);
         excelReader.setRowReadListener((bean, context) -> {
             System.out.println(bean);
             return true;

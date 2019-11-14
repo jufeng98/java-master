@@ -36,10 +36,10 @@ public class SimpleExampleTest {
     @Test
     public void testWrite() throws Exception {
 
-        List<SimpleExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(i -> generateBean(i)).collect(Collectors.toList());
+        List<SimpleExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(this::generateBean).collect(Collectors.toList());
 
         ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
-        SheetInfo sheetInfo = new SheetInfo(list, SimpleExampleBean.class, "交易信息", 1);
+        SheetInfo<SimpleExampleBean> sheetInfo = new SheetInfo<>(list, SimpleExampleBean.class, "交易信息", 1);
         excelWriter.addSheetInfo(sheetInfo);
         excelWriter.setRowWriteListener(new RowWriteListener() {
             @Override
@@ -73,7 +73,7 @@ public class SimpleExampleTest {
 
         File file = new File("D:\\simple-excel-test.xls");
         InputStream inputStream = new FileInputStream(file);
-        ExcelReader excelReader = new ExcelReader(ExcelType.XLS, inputStream, SimpleExampleBean.class, 1, 0);
+        ExcelReader<SimpleExampleBean> excelReader = new ExcelReader<>(ExcelType.XLS, inputStream, SimpleExampleBean.class, 1, 0);
         excelReader.setRowReadListener((bean, context) -> {
             System.out.println(bean);
             return true;

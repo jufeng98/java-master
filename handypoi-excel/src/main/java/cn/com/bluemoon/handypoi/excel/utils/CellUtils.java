@@ -62,7 +62,7 @@ public class CellUtils {
         cell.setCellStyle(style);
     }
 
-    public static void fillNumberCell(Cell cell, Number number, CellStyle style) {
+    private static void fillNumberCell(Cell cell, Number number, CellStyle style) {
         cell.setCellType(CellType.NUMERIC);
         cell.setCellStyle(style);
         if (number == null) {
@@ -71,7 +71,7 @@ public class CellUtils {
         cell.setCellValue(number.doubleValue());
     }
 
-    public static void fillDecimalCell(Cell cell, Number number, CellStyle style) {
+    private static void fillDecimalCell(Cell cell, Number number, CellStyle style) {
         cell.setCellType(CellType.NUMERIC);
         cell.setCellStyle(style);
         if (number == null) {
@@ -96,7 +96,7 @@ public class CellUtils {
         cell.setCellValue(str);
     }
 
-    public static void fillDateCell(Cell cell, Date date, CellStyle style) {
+    private static void fillDateCell(Cell cell, Date date, CellStyle style) {
         cell.setCellStyle(style);
         cell.setCellType(CellType.NUMERIC);
         if (date == null) {
@@ -110,15 +110,15 @@ public class CellUtils {
         fillStrCell(cell, (String) o, style);
     }
 
-    public static void fillDecimalCell(Cell cell, Object o, CellStyle style) {
+    private static void fillDecimalCell(Cell cell, Object o, CellStyle style) {
         fillDecimalCell(cell, (Double) o, style);
     }
 
-    public static void fillNumberCell(Cell cell, Object o, CellStyle style) {
+    private static void fillNumberCell(Cell cell, Object o, CellStyle style) {
         fillNumberCell(cell, (Number) o, style);
     }
 
-    public static void fillDateCell(Cell cell, Object o, CellStyle style) {
+    private static void fillDateCell(Cell cell, Object o, CellStyle style) {
         fillDateCell(cell, (Date) o, style);
     }
 

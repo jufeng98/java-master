@@ -14,7 +14,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class StyleUtils {
 
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    public static final String DEFAULT_DECIMAL_PATTERN = "0.00";
+    private static final String DEFAULT_DECIMAL_PATTERN = "0.00";
 
     public static CellStyle getDecimalCellStyle(Workbook workbook) {
         return getDecimalCellStyle(workbook, DEFAULT_DECIMAL_PATTERN);

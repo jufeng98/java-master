@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -90,7 +91,7 @@ public class ExcelReader<T> {
             if (this.workbook != null) {
                 try {
                     this.workbook.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -165,7 +166,7 @@ public class ExcelReader<T> {
                         }
 
                     })
-                    .filter(bean -> bean != null)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("resolved excel failed", e);
@@ -173,7 +174,7 @@ public class ExcelReader<T> {
             if (this.workbook != null) {
                 try {
                     this.workbook.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -220,7 +221,7 @@ public class ExcelReader<T> {
                     }
                     return beanColumnField;
                 })
-                .filter(beanColumnField -> beanColumnField != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         columnNameBeanFieldMap = new HashMap<>(beanColumnFields.size(), 1);
         for (BeanColumnField columnField : beanColumnFields) {

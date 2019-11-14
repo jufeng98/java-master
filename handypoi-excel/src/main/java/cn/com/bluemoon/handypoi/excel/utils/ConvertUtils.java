@@ -70,6 +70,9 @@ public class ConvertUtils {
         if (StringUtils.isBlank(numberStr)) {
             return null;
         }
+        if (!StringUtils.isNumeric(numberStr)) {
+            return null;
+        }
         if (fieldTypeClz == BigDecimal.class) {
             return new BigDecimal(numberStr);
         } else if (fieldTypeClz == BigInteger.class) {
