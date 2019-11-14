@@ -24,7 +24,7 @@ public class ConvertUtils {
         } catch (Exception e) {
             // 非Number列
         }
-        if (value != Double.NaN) {
+        if (!Double.isNaN(value)) {
             return value;
         }
         // 取值失败,则把cell值当成String类型来取
@@ -56,13 +56,13 @@ public class ConvertUtils {
             } else if (fieldTypeClz == BigInteger.class) {
                 return BigInteger.valueOf(value.longValue());
             } else if (fieldTypeClz == Long.class) {
-                return Long.valueOf(value.longValue());
+                return value.longValue();
             } else if (fieldTypeClz == Double.class) {
-                return Double.valueOf(value.doubleValue());
+                return value.doubleValue();
             } else if (fieldTypeClz == Float.class) {
-                return Float.valueOf(value.floatValue());
+                return value.floatValue();
             } else {
-                return Integer.valueOf(value.intValue());
+                return value.intValue();
             }
         }
         // 取值失败,则把cell值当成String类型来取
