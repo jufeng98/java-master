@@ -14,6 +14,7 @@ test/java目录内有:
 * Dubbo示例测试代码；
 * Jackson示例测试代码;
 * JSR 303(数据校验)示例测试代码
+* 多线程示例代码
 ## b2c-parent/b2c-classloader
 springboot devtools(开发者工具)依赖导致的序列化和反序列化问题示例代码
 ## b2c-parent/b2c-bytecode(普通jar模块,可被引用,非微服务)
