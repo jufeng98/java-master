@@ -11,15 +11,13 @@ import java.util.concurrent.Callable;
  */
 public class Task4 implements Callable<String> {
 
-    private static ThreadLocal<SimpleDateFormat> threadLocal = new ThreadLocal<>();
+    private static ThreadLocal<SimpleDateFormat> threadLocal = ThreadLocal
+            .withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     @Override
     public String call() throws ParseException {
+        // 某个线程首次调用get方法时,会先调用initialValue方法
         SimpleDateFormat simpleDateFormat = threadLocal.get();
-        if (simpleDateFormat == null) {
-            simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            threadLocal.set(simpleDateFormat);
-        }
         for (int i = 0; i < 10000; i++) {
             Date date = simpleDateFormat.parse("2019-12-12 12:12:12");
             if (date.getTime() != 1576123932000L) {

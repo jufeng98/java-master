@@ -4,13 +4,23 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Exchanger;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.LongStream;
 
 /**
@@ -95,7 +105,132 @@ public class MultiThreadTest {
     }
 
     @Test
-    public void test6() {
+    public void test6() throws Exception {
+        Queue<String> cachePoolQueue = new LinkedList<>();
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(() -> {
+            Producer producer = new Producer(cachePoolQueue);
+            while (true) {
+                producer.produce();
+            }
+        });
+        for (int i = 0; i < 5; i++) {
+            executorService.submit(() -> {
+                Consumer consumer = new Consumer(cachePoolQueue);
+                while (true) {
+                    consumer.consume();
+                }
+            });
+        }
+        executorService.shutdown();
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    @Test
+    public void test7() throws Exception {
+        Queue<String> cachePoolQueue = new LinkedList<>();
+        ReentrantLock reentrantLock = new ReentrantLock();
+        Condition condition = reentrantLock.newCondition();
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(() -> {
+            Producer2 producer = new Producer2(cachePoolQueue, reentrantLock, condition);
+            while (true) {
+                producer.produce();
+            }
+        });
+        for (int i = 0; i < 5; i++) {
+            executorService.submit(() -> {
+                Consumer2 consumer = new Consumer2(cachePoolQueue, reentrantLock, condition);
+                while (true) {
+                    consumer.consume();
+                }
+            });
+        }
+        executorService.shutdown();
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+
+    @Test
+    public void test8() throws Exception {
+        BlockingQueue<String> cachePoolQueue = new ArrayBlockingQueue<>(1);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(() -> {
+            Producer3 producer = new Producer3(cachePoolQueue);
+            while (true) {
+                producer.produce();
+            }
+        });
+        for (int i = 0; i < 5; i++) {
+            executorService.submit(() -> {
+                Consumer3 consumer = new Consumer3(cachePoolQueue);
+                while (true) {
+                    consumer.consume();
+                }
+            });
+        }
+        executorService.shutdown();
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    @Test
+    public void test9() throws Exception {
+        // 裁判的发令枪只响一次
+        CountDownLatch startCountDownLatch = new CountDownLatch(1);
+        int runnerSize = 10;
+        // 运动员有多个
+        CountDownLatch endCountDownLatch = new CountDownLatch(runnerSize);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+
+        Judge judge = new Judge(startCountDownLatch, endCountDownLatch);
+        Future<Integer> averageFuture = executorService.submit(judge);
+
+        for (int i = 0; i < runnerSize; i++) {
+            Future<Integer> scoreFuture = executorService.submit(new Runner(startCountDownLatch, endCountDownLatch));
+            judge.collectScore(scoreFuture);
+        }
+        executorService.shutdown();
+        System.out.println("运动员平均耗时:" + averageFuture.get() + "秒");
+    }
+
+    @Test
+    public void test10() throws Exception {
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(2, () -> {
+            // 这里是栅栏动作,当栅栏被撤销(即两个队伍的挖掘任务都已完成),这里就会被执行
+            System.out.println("恭喜,隧道已经打通!");
+        });
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(new LeftDigging(cyclicBarrier));
+        executorService.submit(new RightDigging(cyclicBarrier));
+        executorService.shutdown();
+
+        TimeUnit.SECONDS.sleep(10);
+    }
+
+    @Test
+    public void test11() throws Exception {
+        Exchanger<List<String>> exchanger = new Exchanger<>();
+        List<String> producerList = new CopyOnWriteArrayList<>();
+        List<String> consumerList = new CopyOnWriteArrayList<>();
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(() -> {
+            ProducerExchanger producerExchanger = new ProducerExchanger(exchanger, producerList);
+            while (true) {
+                producerExchanger.produce();
+            }
+        });
+        executorService.submit(() -> {
+            ConsumerExchanger consumerExchanger = new ConsumerExchanger(exchanger, consumerList);
+            while (true) {
+                consumerExchanger.consumer();
+            }
+        });
+        executorService.shutdown();
+        TimeUnit.SECONDS.sleep(1000);
+    }
+
+    @Test
+    public void test111() {
         long start = System.nanoTime();
         System.out.println(findPricesSingleThread("肥皂", "80552588", shops));
         long invocationTime = ((System.nanoTime() - start) / 1_000_000);
