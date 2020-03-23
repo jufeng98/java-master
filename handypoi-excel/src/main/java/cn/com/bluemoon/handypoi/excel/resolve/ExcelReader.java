@@ -128,6 +128,9 @@ public class ExcelReader<T> {
                             try {
                                 Cell headerCell = headerRow.getCell(j);
                                 BeanColumnField beanColumnField = columnNameBeanFieldMap.get(headerCell.getStringCellValue());
+                                if (beanColumnField == null) {
+                                    return;
+                                }
                                 Cell cell = row.getCell(j);
                                 Field beanField = beanColumnField.getField();
                                 Object beanValue;
