@@ -1,5 +1,6 @@
 package org.javamaster.b2c.test.multithread;
 
+import static java.util.stream.Collectors.toList;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -9,10 +10,12 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Exchanger;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -230,11 +233,63 @@ public class MultiThreadTest {
     }
 
     @Test
-    public void test111() {
+    public void test12() {
         long start = System.nanoTime();
-        System.out.println(findPricesSingleThread("肥皂", "80552588", shops));
+        List<Double> prices = findPrices("肥皂", shops);
         long invocationTime = ((System.nanoTime() - start) / 1_000_000);
-        System.out.println("Invocation sequence after all shop " + invocationTime + " ms");
+        System.out.println("同步状态下查询价格耗时" + invocationTime + " ms," + "价格列表:" + prices);
+    }
+
+    public static List<Double> findPrices(String product, List<Shop> shops) {
+        return shops.stream().map(shop -> shop.getPrice(product)).collect(toList());
+    }
+
+    @Test
+    public void test13() {
+        long start = System.nanoTime();
+        List<Future<Double>> pricesFuture = findPricesAsync("肥皂", shops);
+        // 这里可以做其他事情
+        doSomethingElse();
+        List<Double> prices = pricesFuture.stream()
+                .map(doubleFuture -> {
+                    try {
+                        return doubleFuture.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(toList());
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("异步状态下查询价格耗时" + invocationTime + " ms," + "价格列表:" + prices);
+    }
+
+    public static List<Future<Double>> findPricesAsync(String product, List<Shop> shops) {
+        return shops.stream().map(shop -> shop.getPriceAsync(product)).collect(toList());
+    }
+
+    private static void doSomethingElse() {
+        // 其他任务...
+    }
+
+    @Test
+    public void test14() {
+        long start = System.nanoTime();
+        List<Double> prices = shops.parallelStream().map(shop -> shop.getPrice("肥皂")).collect(toList());
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("并行流方式查询价格耗时" + invocationTime + " ms," + "价格列表:" + prices);
+    }
+
+    @Test
+    public void test15() {
+        long start = System.nanoTime();
+        List<CompletableFuture<Double>> priceFutures = shops.stream()
+                // 使用CompletableFuture以异步方式计算每种商品的价格
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPrice("肥皂")))
+                .collect(toList());
+        // 等待所有异步操作结束
+        List<Double> prices = priceFutures.stream().map(CompletableFuture::join).collect(toList());
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("CompletableFuture异步方式查询价格耗时" + invocationTime + " ms," + "价格列表:" + prices);
     }
 
     public static List<String> findPricesSingleThread(String product, String memberNo, List<Shop> shops) {

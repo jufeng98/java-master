@@ -1,6 +1,7 @@
 package org.javamaster.b2c.test.multithread;
 
-import java.util.Random;
+import org.apache.commons.lang3.RandomUtils;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -11,41 +12,64 @@ import java.util.concurrent.TimeUnit;
  */
 public class Shop {
 
+    /**
+     * 商店名称
+     */
     private String name;
-    static Random random = new Random();
 
-    public Shop(String name) {
+    Shop(String name) {
         this.name = name;
     }
 
     /**
-     * 获取商品价格
-     *
-     * @param product
-     * @return
+     * 获取商品价格(同步)
      */
     public double getPrice(String product) {
-        return calculatePrice(product);
+        // 会查询商店的数据库，但也有可能执行一些其他耗时的任务，比如联系其
+        // 他外部服务（比如，商店的供应商，或者跟制造商相关的推广折扣）
+        // 模拟这些工作的耗时
+        try {
+            TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
     }
 
-
+    /**
+     * 获取商品价格(异步)
+     */
     public Future<Double> getPriceAsync(String product) {
+        // 创建CompletableFuture对象，它会包含计算的结果
         CompletableFuture<Double> futurePrice = new CompletableFuture<>();
         new Thread(() -> {
             try {
-                double price = calculatePrice(product);
+                TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
+                double price = RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
+                // 需长时间计算的任务结束并得出结果时，设置Future的返回值
                 futurePrice.complete(price);
             } catch (Exception ex) {
+                // 抛出导致失败的异常，完成这次Future操作
                 futurePrice.completeExceptionally(ex);
             }
         }).start();
+        // 无需等待还没结束的计算，直接返回Future对象
         return futurePrice;
     }
 
 
     public Future<Double> getPriceAsync1(String product) {
-        return CompletableFuture.supplyAsync(() -> calculatePrice(product));
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            double price = RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
+            return price;
+        });
     }
+
     /**
      * 获取会员等级和此等级对应的商品价格
      *
@@ -61,7 +85,7 @@ public class Shop {
         delay();
         double price = calculatePrice(product);
         // 模拟会员的等级
-        Discount.Code code = Discount.Code.values()[random.nextInt(Discount.Code.values().length)];
+        Discount.Code code = Discount.Code.values()[RandomUtils.nextInt(0, Discount.Code.values().length)];
         return String.format("%s:%.2f:%s", name, price, code);
     }
 
@@ -73,7 +97,7 @@ public class Shop {
      */
     private double calculatePrice(String product) {
         delay();
-        return random.nextDouble() * product.charAt(0) + product.charAt(1);
+        return RandomUtils.nextDouble() * product.charAt(0) + product.charAt(1);
     }
 
     /**
@@ -81,7 +105,7 @@ public class Shop {
      */
     public static void delay() {
         try {
-            TimeUnit.MILLISECONDS.sleep(500 + random.nextInt(1000));
+            TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
