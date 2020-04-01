@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/applicationContext.xml</param-value>
+    </context-param>
+
+    <context-param>
+        <!--  使用globalInitializerClasses或者contextInitializerClasses其实效果是一样的  -->
+        <param-name>globalInitializerClasses</param-name>
+        <param-value>org.javamaster.spring.lifecycle.initializers.LifecycleApplicationContextInitializer</param-value>
+    </context-param>
+
+    <!--
+        ContextLoaderListener首先执行, 建立第一个应用上下文ApplicationContext,
+        搜索bean的范围为applicationContext.xml, applicationContext.xml定义的
+        bean均会被纳入到此应用上下文ApplicationContext中管理
+    -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!--
+        当ContextLoaderListener执行完, DispatcherServlet开始执行, 建立第二个应用上下文ApplicationContext,
+        搜索bean的范围为dispatcher-servlet.xml, dispatcher-servlet.xml定义的bean均会被纳入到此应用上下文
+        ApplicationContext中管理, 注意也包括component-scan能扫描到的所有bean
+
+        另外, 此应用上下文ApplicationContext的parent会被设置为ContextLoaderListener建立的第一个应用上下文ApplicationContext
+    -->
+    <servlet>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>applicationName</param-name>
+            <param-value>spring-lifecycle</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+</web-app>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:application.properties"/>
+
+    <context:component-scan base-package="org.javamaster.spring"/>
+
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler />
+
+    <!-- 如果放在applicationContext.xml中，这里的aop设置将不会生效 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="mediaTypes">
+            <map>
+                <entry key="xml" value="application/xml"/>
+                <entry key="json" value="application/json"/>
+            </map>
+        </property>
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="favorPathExtension" value="true"/>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="${web.view.prefix}"/>
+        <property name="suffix" value="${web.view.suffix}"/>
+    </bean>
+
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="prettyPrint" value="false"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+</beans>

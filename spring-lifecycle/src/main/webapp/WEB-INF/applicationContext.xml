@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean name="appConfig" class="org.javamaster.spring.lifecycle.AppConfig"/>
+
+    <bean name="lifecycleBeanDefinitionRegistryPostProcessor"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleBeanDefinitionRegistryPostProcessor"/>
+
+    <bean name="lifecycleBeanFactoryPostProcessor"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleBeanFactoryPostProcessor"/>
+
+
+    <bean name="lifecycleBeanPostProcessor"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleBeanPostProcessor"/>
+
+    <bean name="lifecycleApplicationListener"
+          class="org.javamaster.spring.lifecycle.listeners.LifecycleApplicationListener"/>
+
+    <bean name="lifecycleInstantiationAwareBeanPostProcessor"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleInstantiationAwareBeanPostProcessor"/>
+
+    <bean name="lifecycleEmbeddedValueResolverAware"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleEmbeddedValueResolverAware"/>
+
+    <bean name="lifecycleEnvironmentAware"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleEnvironmentAware"/>
+
+    <bean name="contextBean" class="org.javamaster.spring.lifecycle.ContextLoaderListenerBeans.ContextBean" init-method="initMethod"
+          destroy-method="destroyMethod"/>
+
+</beans>
