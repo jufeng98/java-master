@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 /**
  * @author yudong
@@ -292,16 +294,123 @@ public class MultiThreadTest {
         System.out.println("CompletableFuture异步方式查询价格耗时" + invocationTime + " ms," + "价格列表:" + prices);
     }
 
-    public static List<String> findPricesSingleThread(String product, String memberNo, List<Shop> shops) {
-        List<String> list = new ArrayList<>(shops.size());
-        for (Shop shop : shops) {
-            String quoteStr = shop.getPriceQuote(product, memberNo);
-            Quote quote = Quote.parse(quoteStr);
-            double rate = RateService.getRate("CN", "USA");
-            Quote euQuote = new Quote(quote.getShopName(), rate * quote.getPrice(), quote.getDiscountCode());
-            String res = Discount.applyDiscount(euQuote);
-            list.add(res);
-        }
-        return list;
+    @Test
+    public void test16() {
+        long start = System.nanoTime();
+        List<Double> discountPrices = findDiscountPrices("肥皂", "100001", shops);
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("折扣服务同步方式查询价格耗时" + invocationTime + " ms," + "价格列表:" + discountPrices);
     }
+
+    public static List<Double> findDiscountPrices(String product, String memberNo, List<Shop> shops) {
+        return shops.stream()
+                .map(shop -> shop.getPriceQuote(product, memberNo))
+                .map(Quote::parse)
+                .map(Discount::applyDiscount)
+                .collect(toList());
+    }
+
+    @Test
+    public void test17() {
+        long start = System.nanoTime();
+        List<Double> discountPrices = findDiscountPricesAsync("肥皂", "100001", shops);
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("折扣服务异步方式查询价格耗时" + invocationTime + " ms," + "价格列表:" + discountPrices);
+    }
+
+    public List<Double> findDiscountPricesAsync(String product, String memberNo, List<Shop> shops) {
+
+        List<CompletableFuture<Double>> priceFutures = shops.stream()
+                // 以异步方式取得每个shop中指定产品的原始价格
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPriceQuote(product, memberNo)))
+                // Quote对象存在时，对其返回的值进行转换
+                .map(future -> future.thenApply(Quote::parse))
+                // 使用另一个异步任务构造期望的Future，申请折扣
+                .map(future -> future.thenCompose(quote -> CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote))))
+                .collect(toList());
+
+        // 等待流中的所有Future执行完毕，并提取各自的返回值
+        return priceFutures.stream()
+                .map(CompletableFuture::join)
+                .collect(toList());
+    }
+
+
+    @Test
+    public void test18() {
+        long start = System.nanoTime();
+        List<CompletableFuture<Double>> futures = shops.stream()
+                .map(shop ->
+                        CompletableFuture
+                                // 查商品价格操作和查兑换汇率操作同时进行,当两者都完成时将结果进行整合
+                                .supplyAsync(() -> shop.getPrice("肥皂"))
+                                .thenCombine(CompletableFuture.supplyAsync(() -> RateService.getRate("RMB", "USD")), (price, rate) -> price * rate)
+                )
+                .collect(toList());
+        List<Double> usdPrices = futures.stream()
+                .map(CompletableFuture::join)
+                .collect(toList());
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("兑换汇率服务异步方式查询价格耗时" + invocationTime + " ms," + "美元价格列表:" + usdPrices);
+    }
+
+    ExecutorService executor = Executors.newCachedThreadPool();
+
+    @Test
+    public void test19() throws ExecutionException, InterruptedException {
+        long start = System.nanoTime();
+        List<Future<Double>> usdFuturePrices = new ArrayList<>(shops.size());
+        for (Shop shop : shops) {
+            // 创建一个查询人民币到美元转换汇率的Future
+            final Future<Double> usdFutureRate = executor.submit(new Callable<Double>() {
+                public Double call() {
+                    return RateService.getRate("RMB", "USD");
+                }
+            });
+            // 在第二个Future中查询指定商店中特定商品的价格
+            Future<Double> usdFuturePrice = executor.submit(new Callable<Double>() {
+                public Double call() throws ExecutionException, InterruptedException {
+                    double rmbPrice = shop.getPrice("肥皂");
+                    // 在查找价格操作的同一个Future中， 将价格和汇率做乘法计算出汇后价格
+                    return rmbPrice * usdFutureRate.get();
+                }
+            });
+            usdFuturePrices.add(usdFuturePrice);
+        }
+        List<Double> usdPrices = new ArrayList<>(usdFuturePrices.size());
+        for (Future<Double> usdFuturePrice : usdFuturePrices) {
+            usdPrices.add(usdFuturePrice.get());
+        }
+        long invocationTime = ((System.nanoTime() - start) / 1_000_000);
+        System.out.println("Java7方式兑换汇率服务异步方式查询价格耗时" + invocationTime + " ms," + "美元价格列表:" + usdPrices);
+    }
+
+    @Test
+    public void test20() throws InterruptedException {
+        findPricesStream("肥皂", "100001", shops)
+                .map(f -> f.thenAccept(System.out::println));
+
+        // 防止主线程结束导致应用退出
+        TimeUnit.SECONDS.sleep(10);
+    }
+
+    @Test
+    public void test21() throws InterruptedException {
+        CompletableFuture[] futures = findPricesStream("肥皂", "100001", shops)
+                .map(f -> f.thenAccept(System.out::println))
+                .toArray(CompletableFuture[]::new);
+
+        CompletableFuture.allOf(futures).join();
+
+        // 防止主线程结束导致应用退出
+        TimeUnit.SECONDS.sleep(10);
+    }
+
+    public static Stream<CompletableFuture<Double>> findPricesStream(String product, String memberNo, List<Shop> shops) {
+        return shops.stream()
+                .map(shop -> CompletableFuture.supplyAsync(() -> shop.getPriceQuote(product, memberNo)))
+                .map(future -> future.thenApply(Quote::parse))
+                .map(future -> future.thenCompose(quote -> CompletableFuture.supplyAsync(() -> Discount.applyDiscount(quote))));
+    }
+
 }

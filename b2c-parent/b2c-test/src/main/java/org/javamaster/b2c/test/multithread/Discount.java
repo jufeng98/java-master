@@ -1,49 +1,46 @@
 package org.javamaster.b2c.test.multithread;
 
-import java.text.DecimalFormat;
+import org.apache.commons.lang3.RandomUtils;
+
+import java.util.concurrent.TimeUnit;
 
 /**
- * Created on 2019/1/8.<br/>
+ * 折扣服务
  *
  * @author yudong
+ * @date 2019/1/8
  */
 public class Discount {
-    /**
-     * 应用折扣
-     *
-     * @param quote
-     * @return
-     */
-    public static String applyDiscount(Quote quote) {
-        return quote.getShopName() + " price is " + apply(quote.getPrice(), quote.getDiscountCode());
-    }
 
     /**
      * 获取折扣价格
-     *
-     * @param price 原始价格
-     * @param code  折扣比例
-     * @return 折扣价格
      */
-    private static double apply(double price, Discount.Code code) {
-        DecimalFormat dFormat = new DecimalFormat("#.00");
-        String string = dFormat.format(price * (100 - code.getPercentage()) / 100);
-        double temp = Double.parseDouble(string);
-        return temp;
+    public static double applyDiscount(Quote quote) {
+        try {
+            // 模拟Discount服务响应的延迟
+            TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
+        } catch (InterruptedException ignored) {
+        }
+        // 模拟折扣价格
+        return quote.getPrice() * (100 - quote.getMemberLevelEnum().percentage) / 100;
 
     }
 
-    public enum Code {
-        NONE(0), SILVER(5), GOLD(10), PLATINUM(15), DIAMOND(20);
+    /**
+     * 会员等级
+     */
+    public enum MemberLevelEnum {
+        NONE(0),
+        SILVER(5),
+        GOLD(10),
+        PLATINUM(15),
+        DIAMOND(20);
 
-        private final int percentage;
+        public final int percentage;
 
-        Code(int percentage) {
+        MemberLevelEnum(int percentage) {
             this.percentage = percentage;
         }
 
-        public int getPercentage() {
-            return percentage;
-        }
     }
 }

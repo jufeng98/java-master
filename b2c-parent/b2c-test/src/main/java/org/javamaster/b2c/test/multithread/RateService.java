@@ -1,6 +1,8 @@
 package org.javamaster.b2c.test.multithread;
 
-import static org.javamaster.b2c.test.multithread.Shop.delay;
+import org.apache.commons.lang3.RandomUtils;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yudong
@@ -16,7 +18,13 @@ public class RateService {
      * @return
      */
     public static double getRate(String country1, String country2) {
-        delay();
-        return Math.random() + 0.01;
+        try {
+            // 模拟查询兑换汇率耗时
+            TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
+        } catch (InterruptedException ignored) {
+        }
+        // 模拟兑换汇率
+        double rate = (country1.length() + country2.length()) / 100.0;
+        return Math.random() + rate;
     }
 }

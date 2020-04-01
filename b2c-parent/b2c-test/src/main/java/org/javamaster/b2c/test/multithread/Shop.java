@@ -30,9 +30,9 @@ public class Shop {
         // 模拟这些工作的耗时
         try {
             TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (InterruptedException ignored) {
         }
+        // 模拟价格
         return RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
     }
 
@@ -45,6 +45,7 @@ public class Shop {
         new Thread(() -> {
             try {
                 TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
+                // 模拟价格
                 double price = RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
                 // 需长时间计算的任务结束并得出结果时，设置Future的返回值
                 futurePrice.complete(price);
@@ -62,54 +63,29 @@ public class Shop {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException ignored) {
             }
-            double price = RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
-            return price;
+            // 模拟价格
+            return RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
         });
     }
 
     /**
-     * 获取会员等级和此等级对应的商品价格
-     *
-     * @param product
-     * @param memberNo
-     * @return
+     * 获取商店名,此等级对应的商品价格和会员等级字符串
      */
     public String getPriceQuote(String product, String memberNo) {
-        return calculatePriceQuote(product, memberNo);
-    }
-
-    private String calculatePriceQuote(String product, String memberNo) {
-        delay();
-        double price = calculatePrice(product);
-        // 模拟会员的等级
-        Discount.Code code = Discount.Code.values()[RandomUtils.nextInt(0, Discount.Code.values().length)];
-        return String.format("%s:%.2f:%s", name, price, code);
-    }
-
-    /**
-     * 模拟商品价格
-     *
-     * @param product
-     * @return
-     */
-    private double calculatePrice(String product) {
-        delay();
-        return RandomUtils.nextDouble() * product.charAt(0) + product.charAt(1);
-    }
-
-    /**
-     * 模拟业务处理过程的耗时
-     */
-    public static void delay() {
         try {
             TimeUnit.MILLISECONDS.sleep(500 + RandomUtils.nextInt(10, 1000));
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (InterruptedException ignored) {
         }
+        // 模拟价格
+        double price = RandomUtils.nextDouble(1, 10) * product.charAt(0) + product.charAt(1);
+        // 模拟会员的等级
+        int length = Math.min(memberNo.length(), Discount.MemberLevelEnum.values().length);
+        Discount.MemberLevelEnum memberLevelEnum = Discount.MemberLevelEnum.values()[RandomUtils.nextInt(0, length)];
+        return String.format("%s:%.2f:%s", name, price, memberLevelEnum);
     }
+
 
     public String getName() {
         return name;
