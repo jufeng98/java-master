@@ -23,6 +23,8 @@ import javax.annotation.PostConstruct;
 public class ContextBean implements BeanNameAware, BeanClassLoaderAware, BeanFactoryAware,
         InitializingBean, DisposableBean, ApplicationContextAware {
 
+    private ContextBean1 contextBean1;
+
     @Override
     public void setBeanName(String name) {
         log.info("setBeanName invoke:{}", name);
@@ -71,5 +73,11 @@ public class ContextBean implements BeanNameAware, BeanClassLoaderAware, BeanFac
         log.info("destroyMethod invoke");
     }
 
+    public ContextBean1 getContextBean1() {
+        return contextBean1;
+    }
 
+    public void setContextBean1(ContextBean1 contextBean1) {
+        this.contextBean1 = contextBean1;
+    }
 }
