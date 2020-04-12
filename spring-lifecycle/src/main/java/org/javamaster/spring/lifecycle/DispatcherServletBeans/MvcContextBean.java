@@ -1,6 +1,7 @@
 package org.javamaster.spring.lifecycle.DispatcherServletBeans;
 
 import lombok.extern.slf4j.Slf4j;
+import org.javamaster.spring.lifecycle.ContextLoaderListenerBeans.ContextBean1;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -22,6 +24,9 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class MvcContextBean implements BeanNameAware, BeanClassLoaderAware, BeanFactoryAware,
         InitializingBean, DisposableBean, ApplicationContextAware {
+
+    @Autowired
+    private ContextBean1 contextBean1;
 
     @Override
     public void setBeanName(String name) {

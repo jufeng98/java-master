@@ -27,6 +27,9 @@
     <bean name="lifecycleEnvironmentAware"
           class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleEnvironmentAware"/>
 
+    <bean name="lifecycleMergedBeanDefinitionPostProcessor"
+          class="org.javamaster.spring.lifecycle.ContextLoaderBeans.LifecycleMergedBeanDefinitionPostProcessor"/>
+
     <bean name="contextBean" class="org.javamaster.spring.lifecycle.ContextLoaderListenerBeans.ContextBean" init-method="initMethod"
           destroy-method="destroyMethod">
         <property name="contextBean1" ref="contextBean1"/>
