@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * 各个接口方法的执行顺序从上到下
@@ -48,6 +49,9 @@ public class ContextBean implements BeanNameAware, BeanClassLoaderAware, BeanFac
     /**
      * PostConstruct注解不被ContextLoaderListener的ApplicationContext支持
      * 而此类是定义在ContextLoaderListener的applicationContext.xml下,所以此方法不会被调用
+     *
+     * 不过,如果我们手工在applicationContext.xml注册CommonAnnotationBeanPostProcessor这个
+     * bean,则PostConstruct注解就可以起作用了
      */
     @PostConstruct
     public void postConstruct() {
@@ -62,6 +66,11 @@ public class ContextBean implements BeanNameAware, BeanClassLoaderAware, BeanFac
 
     public void initMethod() {
         log.info("initMethod invoke");
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        log.info("preDestroy invoke");
     }
 
     @Override

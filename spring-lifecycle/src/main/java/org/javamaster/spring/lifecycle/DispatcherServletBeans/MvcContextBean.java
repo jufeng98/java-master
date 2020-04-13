@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * bean的生命周期, 各个接口方法的执行顺序从上到下
@@ -60,6 +61,12 @@ public class MvcContextBean implements BeanNameAware, BeanClassLoaderAware, Bean
 
     public void initMethod() {
         log.info("initMethod invoke");
+    }
+
+
+    @PreDestroy
+    public void preDestroy() {
+        log.info("preDestroy invoke");
     }
 
     @Override

@@ -31,3 +31,5 @@ springboot devtools(开发者工具)依赖导致的序列化和反序列化问�
 的行为,使得生成的文件符合我们自己的需求
 ## b2c-parent/b2c-mybatis
 展示mybatis-generator生成的相关mybatis实体类,mapper等文件,其中表结构文件schema.sql放在main/resources/sql-script目录内
+## spring-lifecycle
+用于研究spring的生命周期以及bean的生命周期

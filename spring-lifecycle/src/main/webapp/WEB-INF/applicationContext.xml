@@ -35,6 +35,8 @@
         <property name="contextBean1" ref="contextBean1"/>
     </bean>
 
+    <bean name="commonAnnotationBeanPostProcessor" class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+
     <bean name="contextBean1" class="org.javamaster.spring.lifecycle.ContextLoaderListenerBeans.ContextBean1"/>
 
 </beans>
