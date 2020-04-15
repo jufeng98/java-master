@@ -23,6 +23,7 @@ public class LifecycleApplicationListener implements ApplicationListener<Context
     public void onApplicationEvent(ContextRefreshedEvent event) {
         ApplicationContext applicationContext = (ApplicationContext) event.getSource();
         log.info("onApplicationEvent invoke:{},{}", event.getClass().getName(), applicationContext.getId());
+        System.out.println("http://localhost:8082/lifecycle/portal/index");
     }
 
 }

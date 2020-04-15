@@ -1,0 +1,11 @@
+# Initializers
+org.springframework.context.ApplicationContextInitializer=\
+org.javamaster.springboot.lifecycle.extensions.LifecycleApplicationContextInitializer
+
+# Application Listeners
+org.springframework.context.ApplicationListener=\
+org.javamaster.springboot.lifecycle.extensions.LifecycleApplicationListener
+
+# Application Run Listeners
+org.springframework.boot.SpringApplicationRunListener=\
+org.javamaster.springboot.lifecycle.extensions.LifecycleSpringApplicationRunListener
