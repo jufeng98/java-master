@@ -15,7 +15,8 @@
         <property name="beginningDelimiter" value="`"/>
         <property name="endingDelimiter" value="`"/>
 
-        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"></plugin>
+        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"/>
+        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisEnumsPlugin"/>
 
         <commentGenerator>
             <!--去掉mybatis在字段和方法上添加的无关注释-->
@@ -56,8 +57,7 @@
         </javaClientGenerator>
 
         <!--添加要生成mybatis相关的文件的数据库表-->
-        <table tableName="exams" schema="sakila"></table>
-        <table tableName="menus" schema="sakila"></table>
+        <table tableName="exampleTable" schema="exampleSchema"></table>
 
     </context>
 </generatorConfiguration>
