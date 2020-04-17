@@ -10,7 +10,6 @@ import cn.com.bluemoon.handypoi.excel.resolve.*;
 import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
