@@ -52,6 +52,10 @@ public class MySqlMybatisGenerator {
         Properties properties = new Properties();
         properties.load(new FileInputStream(propFile));
 
+        String projectPath = new File("").getAbsolutePath();
+        properties.put("project.path", projectPath);
+
+
         InputStream inputStream = addTableToXml(properties.getProperty("tables"));
 
         ConfigurationParser cp = new ConfigurationParser(properties, warnings);
