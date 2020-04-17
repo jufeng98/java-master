@@ -1,0 +1,51 @@
+package {{enumPath}};
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * 请勿手工改动此文件,请使用 mybatis generator
+ *
+ * @author mybatis generator
+ */
+public enum {{enumClassName}} {
+    /**
+     * 未知枚举值
+     */
+    UNKNOWN(-1, ""),
+{{#enumFields}}
+    /**
+     * {{msg}}
+     */
+    {{label}}({{code}}, "{{msg}}"),
+{{/enumFields}}
+    ;
+    private final int code;
+    private final String msg;
+    private static final Map<Integer, {{enumClassName}}> MAP;
+
+    static {
+        MAP = new HashMap<>(8, 1);
+        for ({{enumClassName}} value : {{enumClassName}}.values()) {
+            MAP.put(value.getCode(), value);
+        }
+    }
+
+    {{enumClassName}}(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public static {{enumClassName}} getByCode(Integer code) {
+        return MAP.getOrDefault(code, UNKNOWN);
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+}
