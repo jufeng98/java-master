@@ -41,7 +41,7 @@ public class MultiHeaderExampleTest {
 
         List<MultiHeadExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(this::generateBean).collect(Collectors.toList());
 
-        ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
+        ExcelWriter<MultiHeadExampleBean> excelWriter = new ExcelWriter<>(ExcelType.XLS);
         SheetInfo<MultiHeadExampleBean> sheetInfo = new SheetInfo<>(list, MultiHeadExampleBean.class, "交易信息", 2);
 
         List<FooterColumn> footerColumnList = new ArrayList<>(1);

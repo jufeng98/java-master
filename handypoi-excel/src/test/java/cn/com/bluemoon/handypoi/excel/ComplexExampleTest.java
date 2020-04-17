@@ -6,25 +6,20 @@ import cn.com.bluemoon.handypoi.excel.listener.RowWriteListener;
 import cn.com.bluemoon.handypoi.excel.model.FooterColumn;
 import cn.com.bluemoon.handypoi.excel.model.FooterRow;
 import cn.com.bluemoon.handypoi.excel.model.Style;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelContext;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelReader;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelWriter;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelWriterService;
-import cn.com.bluemoon.handypoi.excel.resolve.SheetInfo;
+import cn.com.bluemoon.handypoi.excel.resolve.*;
 import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,13 +35,13 @@ public class ComplexExampleTest {
 
         List<ComplexExampleBean> list = IntStream.rangeClosed(1, 6).mapToObj(this::generateBean).collect(Collectors.toList());
 
-        ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
+        ExcelWriter<ComplexExampleBean> excelWriter = new ExcelWriter<>(ExcelType.XLS);
         SheetInfo<ComplexExampleBean> sheetInfo = new SheetInfo<>(list, ComplexExampleBean.class, "结算信息", 3);
 
         sheetInfo.setFooterRowList(getFooterInfos());
 
         excelWriter.addSheetInfo(sheetInfo);
-        excelWriter.setRowWriteListener(new RowWriteListener() {
+        excelWriter.setRowWriteListener(new RowWriteListener<ComplexExampleBean>() {
             @Override
             public void headerAfterWriteAction(ExcelContext context) {
                 int rowIndex = context.getRow().getRowNum();
@@ -65,6 +60,7 @@ public class ComplexExampleTest {
                     CellStyle cellStyle = StyleUtils.getCommonCellStyle(context.getWorkbook(), style);
                     for (int i = 0; i < context.getRow().getLastCellNum(); i++) {
                         context.getRow().getCell(i).setCellStyle(cellStyle);
+                        context.getRow().getCell(i).setCellValue("XXXXX公司");
                     }
                 } else if (rowIndex == 1) {
                     context.getRow().setHeight((short) 800);
@@ -85,13 +81,16 @@ public class ComplexExampleTest {
                         CellStyle cellStyle = StyleUtils.getCommonCellStyle(context.getWorkbook(), styleBuilder.build());
                         context.getRow().getCell(i).setCellStyle(cellStyle);
                     }
+                    context.getRow().getCell(1).setCellValue("T0000000123");
+                    context.getRow().getCell(3).setCellValue("10期");
+                    context.getRow().getCell(5).setCellValue(DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
                 } else {
                     context.getRow().setHeight((short) 400);
                 }
             }
 
             @Override
-            public void contentAfterWriteAction(Object data, ExcelContext context) {
+            public void contentAfterWriteAction(ComplexExampleBean data, ExcelContext context) {
                 context.getRow().setHeight((short) 400);
             }
 
@@ -197,17 +196,17 @@ public class ComplexExampleTest {
         footerRowList.add(footerRow3);
 
         List<FooterColumn> footerColumnList4 = new ArrayList<>(6);
-        footerColumnList4.add(new FooterColumn("银行账户名称：", 5));
+        footerColumnList4.add(new FooterColumn("银行账户名称：XXX", 5));
         FooterRow footerRow4 = new FooterRow(footerColumnList4);
         footerRowList.add(footerRow4);
 
         List<FooterColumn> footerColumnList5 = new ArrayList<>(6);
-        footerColumnList5.add(new FooterColumn("开户行：", 5));
+        footerColumnList5.add(new FooterColumn("开户行：中国XX银行", 5));
         FooterRow footerRow5 = new FooterRow(footerColumnList5);
         footerRowList.add(footerRow5);
 
         List<FooterColumn> footerColumnList6 = new ArrayList<>(6);
-        footerColumnList6.add(new FooterColumn("账号：", 5));
+        footerColumnList6.add(new FooterColumn("账号：62222 02360 02485 XXXXX", 5));
         FooterRow footerRow6 = new FooterRow(footerColumnList6);
         footerRowList.add(footerRow6);
         return footerRowList;

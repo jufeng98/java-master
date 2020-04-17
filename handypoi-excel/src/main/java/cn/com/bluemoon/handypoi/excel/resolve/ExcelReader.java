@@ -1,33 +1,24 @@
 package cn.com.bluemoon.handypoi.excel.resolve;
 
-import cn.com.bluemoon.handypoi.excel.annos.ExcelColumn;
-import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnDate;
-import cn.com.bluemoon.handypoi.excel.annos.ExcelColumnMoney;
 import cn.com.bluemoon.handypoi.excel.enums.ExcelType;
 import cn.com.bluemoon.handypoi.excel.listener.RowReadListener;
 import cn.com.bluemoon.handypoi.excel.model.BeanColumnField;
+import cn.com.bluemoon.handypoi.excel.model.Style;
 import cn.com.bluemoon.handypoi.excel.utils.ConvertUtils;
 import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static cn.com.bluemoon.handypoi.excel.resolve.ExcelWriter.initBeanColumnField;
 
 /**
  * 读取excel
@@ -185,45 +176,17 @@ public class ExcelReader<T> {
 
     /**
      * 获取解析结果list
-     *
-     * @return
      */
     public List<T> getResultList() {
         return resultList;
     }
 
     private void init() {
+        CellStyle contentCellStyle = StyleUtils.getCommonCellStyle(workbook, Style.builder().build());
         Field[] fields = beanClz.getDeclaredFields();
         AccessibleObject.setAccessible(fields, true);
         List<BeanColumnField> beanColumnFields = Arrays.stream(fields)
-                .map(field -> {
-                    ExcelColumn excelColumn = field.getAnnotation(ExcelColumn.class);
-                    if (excelColumn == null) {
-                        return null;
-                    }
-                    Class<?> fieldType = field.getType();
-                    BeanColumnField beanColumnField = new BeanColumnField();
-                    beanColumnField.setField(field);
-                    beanColumnField.setColumnName(excelColumn.columnName());
-
-                    ExcelColumnMoney excelColumnMoney = field.getAnnotation(ExcelColumnMoney.class);
-                    if (excelColumnMoney != null) {
-                        beanColumnField.setMoneyField(true);
-                        beanColumnField.setMoneyUnit(excelColumnMoney.moneyUnit());
-                        return beanColumnField;
-                    }
-
-                    if (fieldType == Date.class || fieldType == Timestamp.class) {
-                        beanColumnField.setDateField(true);
-                        ExcelColumnDate excelColumnDate = field.getAnnotation(ExcelColumnDate.class);
-                        if (excelColumnDate != null) {
-                            beanColumnField.setDatePattern(excelColumnDate.datePattern());
-                        } else {
-                            beanColumnField.setDatePattern(StyleUtils.DEFAULT_DATE_PATTERN);
-                        }
-                    }
-                    return beanColumnField;
-                })
+                .map(field -> initBeanColumnField(field, workbook, contentCellStyle))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         columnNameBeanFieldMap = new HashMap<>(beanColumnFields.size(), 1);

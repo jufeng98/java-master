@@ -49,7 +49,7 @@ public class CellUtils {
     }
 
 
-    public static TripleConsumer getHandler(Class<?> clz) {
+    public static TripleConsumer<Cell, Object, CellStyle> getHandler(Class<?> clz) {
         return map.get(clz);
     }
 

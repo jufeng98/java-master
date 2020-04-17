@@ -4,11 +4,7 @@ import cn.com.bluemoon.handypoi.excel.enums.ExcelType;
 import cn.com.bluemoon.handypoi.excel.example.SimpleExampleBean;
 import cn.com.bluemoon.handypoi.excel.listener.RowWriteListener;
 import cn.com.bluemoon.handypoi.excel.model.Style;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelContext;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelReader;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelWriter;
-import cn.com.bluemoon.handypoi.excel.resolve.ExcelWriterService;
-import cn.com.bluemoon.handypoi.excel.resolve.SheetInfo;
+import cn.com.bluemoon.handypoi.excel.resolve.*;
 import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -16,11 +12,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -38,10 +30,10 @@ public class SimpleExampleTest {
 
         List<SimpleExampleBean> list = IntStream.rangeClosed(1, 3).mapToObj(this::generateBean).collect(Collectors.toList());
 
-        ExcelWriter excelWriter = new ExcelWriter(ExcelType.XLS);
+        ExcelWriter<SimpleExampleBean> excelWriter = new ExcelWriter<>(ExcelType.XLS);
         SheetInfo<SimpleExampleBean> sheetInfo = new SheetInfo<>(list, SimpleExampleBean.class, "交易信息", 1);
         excelWriter.addSheetInfo(sheetInfo);
-        excelWriter.setRowWriteListener(new RowWriteListener() {
+        excelWriter.setRowWriteListener(new RowWriteListener<SimpleExampleBean>() {
             @Override
             public void headerAfterWriteAction(ExcelContext context) {
                 int rowIndex = context.getRow().getRowNum();
@@ -53,7 +45,7 @@ public class SimpleExampleTest {
             }
 
             @Override
-            public void contentAfterWriteAction(Object data, ExcelContext context) {
+            public void contentAfterWriteAction(SimpleExampleBean data, ExcelContext context) {
                 System.out.println(context.getRow().getRowNum());
             }
         });
