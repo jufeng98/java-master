@@ -24,6 +24,24 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+    <servlet>
+        <servlet-name>helloServlet</servlet-name>
+        <servlet-class>org.javamaster.spring.lifecycle.servlet.HelloServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>helloServlet</servlet-name>
+        <url-pattern>/welcome</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>helloJspServlet</servlet-name>
+        <servlet-class>org.javamaster.spring.lifecycle.servlet.HelloJspServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>helloJspServlet</servlet-name>
+        <url-pattern>/welcomeJsp</url-pattern>
+    </servlet-mapping>
+
     <!--
         当ContextLoaderListener执行完, DispatcherServlet开始执行, 建立第二个应用上下文ApplicationContext,
         搜索bean的范围为dispatcher-servlet.xml, dispatcher-servlet.xml定义的bean均会被纳入到此应用上下文
