@@ -35,3 +35,5 @@ springboot devtools(开发者工具)依赖导致的序列化和反序列化问�
 用于研究spring的生命周期以及bean的生命周期
 ## springboot-lifecycle
 用于研究springboot的生命周期以及bean的生命周期
+## spring-transactional
+spring @Transactional注解实现原理解析

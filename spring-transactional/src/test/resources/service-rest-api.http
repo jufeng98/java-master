@@ -1,0 +1,13 @@
+###
+GET http://localhost:8899/trans/transactionOriginalResearch
+Accept: application/json
+
+###
+GET http://localhost:8899/trans/transactionResearch
+Accept: application/json
+
+###
+GET http://localhost:8899/trans/transactionResearch1
+Accept: application/json
+
+###
