@@ -34,20 +34,18 @@ public class DatabaseConfig {
 
     /**
      * 使用内嵌数据库
-     *
-     * @return
      */
     @Bean
     public DataSource h2DataSource() {
-        DataSource dataSource = new EmbeddedDatabaseBuilder()
+        return new EmbeddedDatabaseBuilder()
                 .setType(EmbeddedDatabaseType.H2)
                 .addScript("sql-script/schema.sql")
                 .addScript("sql-script/data.sql")
                 .build();
-        return dataSource;
     }
 
     @Bean
+    @SuppressWarnings("ALL")
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         PathMatchingResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
@@ -64,8 +62,8 @@ public class DatabaseConfig {
         pageHelper.setProperties(properties);
         sqlSessionFactoryBean.setPlugins(new Interceptor[]{pageHelper});
 
-        final String MAPPER_LOCATION = "classpath*:mapper/**/*.xml";
-        sqlSessionFactoryBean.setMapperLocations(resourcePatternResolver.getResources(MAPPER_LOCATION));
+        final String mapperLocation = "classpath*:mapper/**/*.xml";
+        sqlSessionFactoryBean.setMapperLocations(resourcePatternResolver.getResources(mapperLocation));
         // 只指定包名,则mybatis会自动为 JavaBean 注册一个小写字母开头的非完全限定的类名形式的别名
         sqlSessionFactoryBean.setTypeAliasesPackage("org.javamaster.b2c.core.entity");
         org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
@@ -85,8 +83,7 @@ public class DatabaseConfig {
             typeHandlerRegistry.register(enumClass, null, handler);
         });
 
-        SqlSessionFactory sqlSessionFactory = sqlSessionFactoryBean.getObject();
-        return sqlSessionFactory;
+        return sqlSessionFactoryBean.getObject();
     }
 
     @Bean

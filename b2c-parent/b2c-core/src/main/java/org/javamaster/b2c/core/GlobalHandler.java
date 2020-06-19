@@ -2,6 +2,7 @@ package org.javamaster.b2c.core;
 
 import org.javamaster.b2c.core.enums.BizExceptionEnum;
 import org.javamaster.b2c.core.exception.BizException;
+import org.javamaster.b2c.core.exception.BusinessException;
 import org.javamaster.b2c.core.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,32 +41,39 @@ public class GlobalHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Result exceptionHandler(MethodArgumentNotValidException e) {
-        Result result = new Result(BizExceptionEnum.INVALID_REQ_PARAM.getErrorCode(),
+    public Result<Void> exceptionHandler(MethodArgumentNotValidException e) {
+        Result<Void> result = new Result<>(BizExceptionEnum.INVALID_REQ_PARAM.getErrorCode(),
                 BizExceptionEnum.INVALID_REQ_PARAM.getErrorMsg());
         logger.error("req params error", e);
         return result;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public Result exceptionHandler(ConstraintViolationException e) {
-        Result result = new Result(BizExceptionEnum.INVALID_REQ_PARAM.getErrorCode(),
+    public Result<Void> exceptionHandler(ConstraintViolationException e) {
+        Result<Void> result = new Result<>(BizExceptionEnum.INVALID_REQ_PARAM.getErrorCode(),
                 BizExceptionEnum.INVALID_REQ_PARAM.getErrorMsg());
         logger.error("req params error", e);
         return result;
     }
 
     @ExceptionHandler(BizException.class)
-    public Result exceptionHandler(BizException e) {
+    public Result<Void> exceptionHandler(BizException e) {
         BizExceptionEnum exceptionEnum = e.getBizExceptionEnum();
-        Result result = new Result(exceptionEnum.getErrorCode(), exceptionEnum.getErrorMsg());
+        Result<Void> result = new Result<>(exceptionEnum.getErrorCode(), exceptionEnum.getErrorMsg());
+        logger.error("biz error", e);
+        return result;
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public Result<Void> exceptionHandler(BusinessException e) {
+        Result<Void> result = new Result<>(e.getErrorCode(), e.getMessage());
         logger.error("business error", e);
         return result;
     }
 
     @ExceptionHandler(Exception.class)
-    public Result exceptionHandler(Exception e) {
-        Result result = new Result(BizExceptionEnum.APPLICATION_ERROR.getErrorCode(),
+    public Result<Void> exceptionHandler(Exception e) {
+        Result<Void> result = new Result<>(BizExceptionEnum.APPLICATION_ERROR.getErrorCode(),
                 BizExceptionEnum.APPLICATION_ERROR.getErrorMsg());
         logger.error("application error", e);
         return result;

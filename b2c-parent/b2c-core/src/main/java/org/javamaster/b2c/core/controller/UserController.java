@@ -37,22 +37,16 @@ public class UserController {
 
     /**
      * 创建用户
-     *
-     * @param reqVo
-     * @return
      */
     @Secured("ROLE_ADMIN")
     @PostMapping("/createUser")
-    @AopLock
+    @AopLock(lockKeySpEL = "#reqVo.username", errorMsg = "用户名已被占用，请重新输入")
     public Result<SysUser> createUser(@Validated @RequestBody CreateUserReqVo reqVo) {
         return new Result<>(userService.createUser(reqVo));
     }
 
     /**
      * 启用或者禁用用户
-     *
-     * @param reqVo
-     * @return
      */
     @Secured("ROLE_ADMIN")
     @PostMapping("/changeUserStatus")
@@ -62,11 +56,8 @@ public class UserController {
 
     /**
      * 拥有管理员权限可查看任何用户信息,否则只能查看自己的信息
-     *
-     * @param reqVo
-     * @return
      */
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or #reqVo.sysUser.username == #userDetails.username")
+    @PreAuthorize("hasAuthority('ROLE_DMIN') or #reqVo.sysUser.username == #userDetails.username")
     @PostMapping("/findUsers")
     public Result<List<SysUser>> findUsers(@RequestBody FindUsersReqVo reqVo, @AuthenticationPrincipal UserDetails userDetails) {
         PageInfo<SysUser> pageInfo = userService.findUsers(reqVo);
@@ -75,10 +66,6 @@ public class UserController {
 
     /**
      * 拥有管理员权限可修改任何用户的密码,否则只能修改自己的密码
-     *
-     * @param reqVo
-     * @param userDetails
-     * @return
      */
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or (#reqVo.username == #userDetails.username and !T(org.springframework.util.StringUtils).isEmpty(#reqVo.password))")
     @PostMapping("/updatePassword")

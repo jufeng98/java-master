@@ -41,16 +41,14 @@ public class ExamController {
                                                       @AuthenticationPrincipal UserDetails userDetails)
             throws IOException {
         List<GetExamListResVo> resVos = examService.getExamList(reqVo, userDetails);
-        Result<List<GetExamListResVo>> result = new Result(resVos);
-        return result;
+        return new Result<>(resVos);
     }
 
     @PostMapping("/getExamListByOpInfo")
     public Result<List<GetExamListResVo>> getExamListByOpInfo(@NotNull Date examOpDate,
                                                               @ModelAttribute("loginUserInfo") UserDetails userDetails) {
         List<GetExamListResVo> resVos = examService.getExamListByOpInfo(examOpDate, userDetails);
-        Result<List<GetExamListResVo>> result = new Result(resVos);
-        return result;
+        return new Result<>(resVos);
     }
 
     @PostMapping("/exportExam")

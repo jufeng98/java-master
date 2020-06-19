@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @author yudong
  * @date 2019/6/10
  */
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
