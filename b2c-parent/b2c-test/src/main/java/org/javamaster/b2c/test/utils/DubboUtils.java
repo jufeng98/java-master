@@ -43,8 +43,8 @@ public class DubboUtils {
             ReferenceConfig<GenericService> reference = getReferenceConfig(dubboServiceClass, group, version, host);
             GenericService genericService = reference.get();
             Object result = genericService.$invoke(method.getName(), getMethodParamType(method), args);
-            String resJsonStr = OMUtils.getInstance().writeValueAsString(result);
-            return OMUtils.getInstance().readValue(resJsonStr, method.getReturnType());
+            String resJsonStr = OMUtils.objectMapper().writeValueAsString(result);
+            return OMUtils.objectMapper().readValue(resJsonStr, method.getReturnType());
         });
         Object service = enhancer.create();
         return (T) service;

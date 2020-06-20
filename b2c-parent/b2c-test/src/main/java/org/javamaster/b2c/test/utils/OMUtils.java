@@ -20,7 +20,7 @@ public class OMUtils {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
-    public static ObjectMapper getInstance() {
+    public static ObjectMapper objectMapper() {
         return objectMapper;
     }
 
