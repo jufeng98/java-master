@@ -13,7 +13,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @SpringBootApplication
 @EnableAspectJAutoProxy
 @ComponentScan(basePackages = "org.javamaster.b2c")
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class CoreApplication {
 
     public static void main(String[] args) {

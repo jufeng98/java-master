@@ -52,11 +52,20 @@ public class LockAspect {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
 
-        EvaluationContext context = new StandardEvaluationContext();
+//        这种方式拿不到方法参数真正的名称,只会拿到arg0,arg1之类的无意义名称
+//        for (Parameter parameter : method.getParameters()) {
+//            String paramName = parameter.getName();
+//        }
+
+        EvaluationContext evaluationContext = new StandardEvaluationContext();
+        // 这里Spring最终使用的是LocalVariableTableParameterNameDiscoverer类,它对ASM进行了封装,读取了Class文件的LocalVariableTable
+        // 来得到方法参数的真正名称,当然这里需要编译器开启输出调试符号信息的参数的-g,生成的Class文件才会带有LocalVariableTable
+        // 一般默认都会开启
         String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
         for (int i = 0; i < parameterNames.length; i++) {
             String paramName = parameterNames[i];
-            context.setVariable(paramName, args[i]);
+            // 参数名称和参数对象9设置到表达式上下文对象里,这样才能通过 #reqVo 这样的写法来引用方法参数
+            evaluationContext.setVariable(paramName, args[i]);
         }
 
         AopLock aopLock = method.getAnnotation(AopLock.class);
@@ -66,7 +75,8 @@ public class LockAspect {
         if (StringUtils.isBlank(spEl)) {
             key += userDetails.getUsername();
         } else {
-            key += (String) expressionParser.parseExpression(spEl).getValue(context);
+            // 通过ExpressionParser类对象来解析SpEL表达式
+            key += (String) expressionParser.parseExpression(spEl).getValue(evaluationContext);
         }
         RLock lock = redisson.getLock(key);
         try {
@@ -79,6 +89,5 @@ public class LockAspect {
             lock.unlock();
         }
     }
-
 
 }
