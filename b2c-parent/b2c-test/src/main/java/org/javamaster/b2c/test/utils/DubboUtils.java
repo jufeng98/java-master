@@ -4,7 +4,7 @@ import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
 import com.alibaba.dubbo.rpc.service.GenericService;
-import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 
@@ -24,50 +24,59 @@ public class DubboUtils {
     /**
      * dubbo服务的zookeeper注册中心地址
      */
-    // private static final String address = "zookeeper://127.0.0.1:2181";
-    private static final String address = "zookeeper://192.168.240.15:2181";
+    // private static final String ZOOKEEPER_ADDRESS = "zookeeper://127.0.0.1:2181";
+    private static final String ZOOKEEPER_ADDRESS = "zookeeper://192.168.240.15:2181";
 
-    public static <T> T getService(Class<T> clazz, String version, String hostPort) {
+    public static <T> T getService(Class<T> dubboServiceClass, String version) {
+        return getService(dubboServiceClass, null, version, null);
+    }
+
+    public static <T> T getService(Class<T> dubboServiceClass, String version, String host) {
+        return getService(dubboServiceClass, null, version, host);
+    }
+
+    @SuppressWarnings("ALL")
+    public static <T> T getService(Class<T> dubboServiceClass, String group, String version, String host) {
         Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(clazz);
+        enhancer.setSuperclass(dubboServiceClass);
         enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
-            ReferenceConfig<GenericService> reference = getReferenceConfig(clazz, null, version, hostPort);
+            ReferenceConfig<GenericService> reference = getReferenceConfig(dubboServiceClass, group, version, host);
             GenericService genericService = reference.get();
             Object result = genericService.$invoke(method.getName(), getMethodParamType(method), args);
-            String resJsonStr = JSONObject.toJSONString(result);
-            return JSONObject.parseObject(resJsonStr, method.getReturnType());
+            String resJsonStr = OMUtils.objectMapper().writeValueAsString(result);
+            return OMUtils.objectMapper().readValue(resJsonStr, method.getReturnType());
         });
         Object service = enhancer.create();
         return (T) service;
     }
 
-    private static ReferenceConfig getReferenceConfig(Class<?> interfaceClass, String group, String version,
-                                                      String hostPort) {
+    private static <T> ReferenceConfig<T> getReferenceConfig(Class<?> interfaceClass, String group, String version,
+                                                             String host) {
         String referenceKey = interfaceClass.getName();
-        ReferenceConfig referenceConfig = new ReferenceConfig<>();
+        ReferenceConfig<T> referenceConfig = new ReferenceConfig<>();
         referenceConfig.setApplication(application);
-        referenceConfig.setRegistry(getRegistryConfig(address, group, version));
+        referenceConfig.setRegistry(getRegistryConfig(group, version));
         referenceConfig.setInterface(interfaceClass);
         referenceConfig.setVersion(version);
         referenceConfig.setTimeout(30000);
         referenceConfig.setGeneric(true);
-        if (hostPort != null) {
-            String url = String.format("dubbo://%s/%s", hostPort, referenceKey);
+        if (StringUtils.isNotBlank(host)) {
+            String url = String.format("dubbo://%s/%s", host, referenceKey);
             referenceConfig.setUrl(url);
         }
         return referenceConfig;
     }
 
-    private static RegistryConfig getRegistryConfig(String address, String group, String version) {
+    private static RegistryConfig getRegistryConfig(String group, String version) {
         RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setAddress(address);
+        registryConfig.setAddress(DubboUtils.ZOOKEEPER_ADDRESS);
         registryConfig.setVersion(version);
         registryConfig.setGroup(group);
         registryConfig.setTimeout(30000);
         return registryConfig;
     }
 
-    public static String[] getMethodParamType(Method method) {
+    private static String[] getMethodParamType(Method method) {
         Class[] paramClassList = method.getParameterTypes();
         String[] paramTypeList = new String[paramClassList.length];
         for (int i = 0; i < paramClassList.length; i++) {

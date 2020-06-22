@@ -14,6 +14,15 @@ public class UserBaseDto implements Serializable {
     private String mobile;
     private Date registerTime;
 
+    @Override
+    public String toString() {
+        return "UserBaseDto{" +
+                "username='" + username + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", registerTime=" + registerTime +
+                '}';
+    }
+
     public String getUsername() {
         return username;
     }
