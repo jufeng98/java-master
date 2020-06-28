@@ -7,35 +7,42 @@
             <pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
         </layout>
     </appender>
-    <appender name="b2c-core"
+    <appender name="app"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>/home/logs/b2c-core/b2c-core.log</File>
+        <File>logs/@project.artifactId@.log</File>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/home/logs/b2c-core/b2c-core.%d{yyyy-MM-dd-HH}.log.zip</FileNamePattern>
+            <FileNamePattern>logs/@project.artifactId@.%d{yyyy-MM-dd-HH}.%i.log</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>128MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
         </layout>
     </appender>
-    <appender name="b2c-core-mybatis"
+    <appender name="mybatis"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>/home/logs/b2c-core/b2c-core-mybatis.log</File>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/home/logs/b2c-core/b2c-core-mybatis.%d{yyyy-MM-dd-HH}.log.zip</FileNamePattern>
+        <File>logs/@project.artifactId@-mybatis.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <FileNamePattern>logs/@project.artifactId@-mybatis.%d{yyyy-MM-dd-HH}.%i.log</FileNamePattern>
+            <maxFileSize>128MB</maxFileSize>
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
         <layout class="ch.qos.logback.classic.PatternLayout">
             <pattern>%date [%thread] %-5level %logger{80} - %msg%n</pattern>
         </layout>
     </appender>
-    <root>
-        <level value="info"/>
+    <root level="INFO">
         <appender-ref ref="stdout"/>
+        <appender-ref ref="app"/>
     </root>
-    <logger name="org.javamaster.b2c.core" level="info">
-        <appender-ref ref="b2c-core"/>
-    </logger>
-    <logger name="org.javamaster.b2c.core.mapper" level="debug" additivity="false">
-        <appender-ref ref="b2c-core-mybatis"/>
+    <logger name="org.javamaster.b2c.core" level="INFO" additivity="false">
         <appender-ref ref="stdout"/>
+        <appender-ref ref="app"/>
+    </logger>
+    <logger name="org.javamaster.b2c.core.mapper" level="DEBUG" additivity="false">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="mybatis"/>
     </logger>
 </configuration>

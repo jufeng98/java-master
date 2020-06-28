@@ -1,6 +1,7 @@
 package org.javamaster.b2c.core.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 考试表
@@ -28,6 +29,16 @@ public class MicrowebsiteExam implements Serializable {
      * 考试状态,1:未开始;2:待考试;3:考试中;4:已完成
      */
     private Byte examStatus;
+
+    /**
+     * 考试最后操作日期
+     */
+    private Date examOpDate;
+
+    /**
+     * 考试最后操作人
+     */
+    private String examOpUsername;
 
     /**
      * 删除标志,0:已删除;1:正常
@@ -90,6 +101,34 @@ public class MicrowebsiteExam implements Serializable {
      */
     public void setExamStatus(Byte examStatus) {
         this.examStatus = examStatus;
+    }
+
+    /**
+     * 获取考试最后操作日期
+     */
+    public Date getExamOpDate() {
+        return examOpDate;
+    }
+
+    /**
+     * 设置考试最后操作日期
+     */
+    public void setExamOpDate(Date examOpDate) {
+        this.examOpDate = examOpDate;
+    }
+
+    /**
+     * 获取考试最后操作人
+     */
+    public String getExamOpUsername() {
+        return examOpUsername;
+    }
+
+    /**
+     * 设置考试最后操作人
+     */
+    public void setExamOpUsername(String examOpUsername) {
+        this.examOpUsername = examOpUsername;
     }
 
     /**

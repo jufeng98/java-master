@@ -64,7 +64,7 @@ public class LockAspect {
         String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
         for (int i = 0; i < parameterNames.length; i++) {
             String paramName = parameterNames[i];
-            // 参数名称和参数对象9设置到表达式上下文对象里,这样才能通过 #reqVo 这样的写法来引用方法参数
+            // 参数名称和参数对象设置到表达式上下文对象里,这样才能通过 #reqVo 这样的写法来引用方法参数
             evaluationContext.setVariable(paramName, args[i]);
         }
 

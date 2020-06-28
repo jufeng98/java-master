@@ -3,6 +3,7 @@ package org.javamaster.b2c.core.model;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -10,6 +11,16 @@ import java.util.Collection;
  * @date 2019/6/10
  */
 public class AuthUser implements UserDetails {
+    public static final AuthUser ANONYMOUS_USER;
+
+    static {
+        ANONYMOUS_USER = new AuthUser();
+        ANONYMOUS_USER.setUsername("anonymousUser");
+        ANONYMOUS_USER.setEnabled(true);
+        ANONYMOUS_USER.setPassword("");
+        ANONYMOUS_USER.setAuthorities(new ArrayList<>());
+    }
+
     private String username;
     private String password;
     private boolean enabled;

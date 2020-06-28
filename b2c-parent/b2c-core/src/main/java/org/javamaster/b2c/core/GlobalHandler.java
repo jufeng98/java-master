@@ -3,6 +3,7 @@ package org.javamaster.b2c.core;
 import org.javamaster.b2c.core.enums.BizExceptionEnum;
 import org.javamaster.b2c.core.exception.BizException;
 import org.javamaster.b2c.core.exception.BusinessException;
+import org.javamaster.b2c.core.model.AuthUser;
 import org.javamaster.b2c.core.model.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,11 @@ public class GlobalHandler {
 
     @ModelAttribute("loginUserInfo")
     public UserDetails modelAttribute() {
-        return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof String) {
+            return AuthUser.ANONYMOUS_USER;
+        }
+        return (UserDetails) principal;
     }
 
     @InitBinder
