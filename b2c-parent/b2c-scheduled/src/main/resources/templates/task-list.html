@@ -88,10 +88,10 @@
     function changeStatusTaskCron(aObj) {
         let cronKey = aObj.getAttribute("data-cron-key");
         let status = aObj.getAttribute("data-cron-status");
-        if (status == AppConsts .ENABLED) {
+        if (status == AppConsts.ENABLED) {
             status = AppConsts.DISABLED;
         } else {
-            status = AppConsts .ENABLED;
+            status = AppConsts.ENABLED;
         }
         let formData = new FormData();
         formData.append("cronKey", cronKey);
@@ -102,14 +102,18 @@
     function post(reqUrl, successUrl, formData) {
         let xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
-                    console.log(xhr.responseText);
-                    alert(xhr.responseText == 0 ? "操作成功" : "系统错误");
-                    location.href = successUrl;
-                } else {
-                    console.log("Request was unsuccessful: " + xhr.status);
+            if (xhr.readyState !== 4) {
+                return;
+            }
+            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                var resJson = JSON.parse(xhr.responseText);
+                alert(resJson.msg);
+                if (resJson.code !== 0) {
+                    return;
                 }
+                location.href = successUrl;
+            } else {
+                console.log("Request was unsuccessful: " + xhr.status);
             }
         };
         xhr.open("post", reqUrl, false);

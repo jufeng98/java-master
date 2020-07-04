@@ -1,6 +1,7 @@
 package org.javamaster.b2c.scheduled.controller;
 
 import org.javamaster.b2c.scheduled.consts.AppConsts;
+import org.javamaster.b2c.scheduled.model.Result;
 import org.javamaster.b2c.scheduled.respsitory.SpringScheduledCronRepository;
 import org.javamaster.b2c.scheduled.task.ScheduledOfTask;
 import org.javamaster.b2c.scheduled.util.CronUtils;
@@ -28,9 +29,6 @@ public class TaskController {
 
     /**
      * 查看任务列表
-     *
-     * @param model
-     * @return
      */
     @RequestMapping("/taskList")
     public String taskList(Model model) {
@@ -40,47 +38,35 @@ public class TaskController {
 
     /**
      * 编辑任务cron表达式
-     *
-     * @param cronKey
-     * @param newCron
-     * @return
      */
     @ResponseBody
     @RequestMapping("/editTaskCron")
-    public Integer editTaskCron(String cronKey, String newCron) {
+    public Result<Void> editTaskCron(String cronKey, String newCron) {
         if (!CronUtils.isValidExpression(newCron)) {
             throw new IllegalArgumentException("失败,非法表达式:" + newCron);
         }
         cronRepository.updateCronExpressionByCronKey(newCron, cronKey);
-        return AppConsts.SUCCESS;
+        return new Result<>(AppConsts.SUCCESS, "更新成功");
     }
 
     /**
      * 执行定时任务
-     *
-     * @param cronKey
-     * @return
-     * @throws Exception
      */
     @ResponseBody
     @RequestMapping("/runTaskCron")
-    public Integer runTaskCron(String cronKey) throws Exception {
+    public Result<Void> runTaskCron(String cronKey) throws Exception {
         ((ScheduledOfTask) context.getBean(Class.forName(cronKey))).execute();
-        return AppConsts.SUCCESS;
+        return new Result<>(AppConsts.SUCCESS, "执行成功");
     }
 
     /**
      * 启用或禁用定时任务
-     *
-     * @param status
-     * @param cronKey
-     * @return
      */
     @ResponseBody
     @RequestMapping("/changeStatusTaskCron")
-    public Integer changeStatusTaskCron(Integer status, String cronKey) {
+    public Result<Void> changeStatusTaskCron(Integer status, String cronKey) {
         cronRepository.updateStatusByCronKey(status, cronKey);
-        return AppConsts.SUCCESS;
+        return new Result<>(AppConsts.SUCCESS, "操作成功");
 
     }
 
