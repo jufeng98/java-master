@@ -12,6 +12,8 @@ import org.javamaster.b2c.core.enums.BizExceptionEnum;
 import org.javamaster.b2c.core.exception.BusinessException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.Order;
@@ -35,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class LockAspect {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private RedissonClient redisson;
     @Autowired
@@ -86,7 +89,11 @@ public class LockAspect {
             }
             return joinPoint.proceed(args);
         } finally {
-            lock.unlock();
+            try {
+                lock.unlock();
+            } catch (Exception e) {
+                logger.error("unlock error:{},{}", e.getMessage(), e.getClass().getName());
+            }
         }
     }
 
