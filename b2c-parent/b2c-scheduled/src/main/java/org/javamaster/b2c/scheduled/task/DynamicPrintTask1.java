@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class DynamicPrintTask1 implements ScheduledOfTask {
 
-    Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private int i;
 
     @Override
     public void execute() {
-        logger.info("DynamicPrintTask1 execute times:{}", ++i);
+        logger.info("thread id:{},DynamicPrintTask1 execute times:{}", Thread.currentThread().getId(), ++i);
     }
 
 }

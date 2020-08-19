@@ -24,6 +24,7 @@ public interface ScheduledOfTask extends Runnable {
         SpringScheduledCronRepository repository = SpringUtils.getBean(SpringScheduledCronRepository.class);
         SpringScheduledCron scheduledCron = repository.findByCronKey(this.getClass().getName());
         if (StatusEnum.DISABLED.getCode().equals(scheduledCron.getStatus())) {
+            // 任务是禁用状态
             return;
         }
         execute();

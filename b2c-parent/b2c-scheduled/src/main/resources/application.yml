@@ -6,10 +6,7 @@ spring:
     url: jdbc:mysql://localhost:3306/sakila
     username: root
     password: root
-management:
-  security:
-    enabled: false
+    jpa:
+      show-sql: true
 server:
   port: 8089
-info:
-  service-name: ${spring.application.name}

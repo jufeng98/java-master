@@ -17,7 +17,7 @@ public class DynamicPrintTask2 implements ScheduledOfTask {
 
     @Override
     public void execute() {
-        logger.info("DynamicPrintTask2 execute times:{}", ++i);
+        logger.info("thread id:{},DynamicPrintTask2 execute times:{}", Thread.currentThread().getId(), ++i);
     }
 
 }

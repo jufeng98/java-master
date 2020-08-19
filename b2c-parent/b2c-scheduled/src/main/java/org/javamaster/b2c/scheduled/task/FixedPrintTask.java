@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class FixedPrintTask {
-    Logger logger = LoggerFactory.getLogger(getClass());
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     private int i;
 
     @Scheduled(cron = "*/15 * * * * ?")
     public void execute() {
-        logger.info("FixedPrintTask execute times:{}", ++i);
+        logger.info("thread id:{},FixedPrintTask execute times:{}", Thread.currentThread().getId(), ++i);
     }
 
 }

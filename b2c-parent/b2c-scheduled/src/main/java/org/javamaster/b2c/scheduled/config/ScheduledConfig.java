@@ -45,7 +45,7 @@ public class ScheduledConfig implements SchedulingConfigurer {
             // 可以通过改变数据库数据进而实现动态改变执行周期
             taskRegistrar.addTriggerTask(((Runnable) task),
                     triggerContext -> {
-                        String cronExpression = cronRepository.findByCronId(springScheduledCron.getCronId()).getCronExpression();
+                        String cronExpression = cronRepository.findByCronKey(springScheduledCron.getCronKey()).getCronExpression();
                         return new CronTrigger(cronExpression).nextExecutionTime(triggerContext);
                     }
             );
