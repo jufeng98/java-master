@@ -13,7 +13,7 @@ public class SpringScheduledCron {
     @Id
     @Column(name = "cron_id")
     private Integer cronId;
-    @Column(name = "cron_key")
+    @Column(name = "cron_key", unique = true)
     private String cronKey;
     @Column(name = "cron_expression")
     private String cronExpression;
