@@ -66,7 +66,7 @@ def print_last_lines_log(log_path, num):
     try:
         with open(log_path, "r") as out:
             lines = out.read().splitlines()
-            end = len(lines) - 1
+            end = len(lines)
             start = end - num
             if start < 0:
                 start = 0
