@@ -19,7 +19,7 @@ java_opts = "-Duser.timezone=GMT+8 -Xms512m -Xmx512m"
 if not os.path.exists("logs"):
     os.mkdir("logs")
 os.system("""
-    nohup /usr/java/jdk1.8.0_92/bin/java -jar {}.jar {} 1> logs/{}.out 2>&1  &
+    nohup /usr/java/jdk1.8.0_92/bin/java -jar {}.jar {} 1>/dev/null 2>&1  &
     """.format(application_name, java_opts, application_name))
 
 port = None
@@ -34,13 +34,17 @@ except IOError as e:
     print("error" + str(e))
 print("Application port is:" + port)
 
-ip_address = None
+ip_address = "localhost"
+s = None
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(('8.8.8.8', 80))
     ip_address = s.getsockname()[0]
+except IOError as e:
+    print("error" + str(e))
 finally:
-    s.close()
+    if s is not None:
+        s.close()
 print("Machine ip is:" + ip_address)
 
 detect_url = "http://{}:{}/actuator/info".format(ip_address, port)
@@ -58,6 +62,21 @@ def check_url(url):
         return False
 
 
+def print_last_lines_log(log_path, num):
+    try:
+        with open(log_path, "r") as out:
+            lines = out.read().splitlines()
+            end = len(lines) - 1
+            start = end - num
+            if start < 0:
+                start = 0
+            lines = lines[start:end]
+            for line in lines:
+                print(line)
+    except IOError as e:
+        print("error" + str(e))
+
+
 try_times = 10
 cur_time = 1
 success = check_url(detect_url)
@@ -69,11 +88,7 @@ while not success:
     cur_time = cur_time + 1
 if success:
     print("Application {} start success.".format(application_name))
+    print_last_lines_log("logs/{}.log".format(application_name), 300)
 else:
     print("Application {} start failed.".format(application_name))
-    
-try:
-    with open("logs/{}.out".format(application_name), "r") as out:
-        print(out.read())
-except IOError as e:
-    print("error" + str(e))
+    print_last_lines_log("logs/{}.log".format(application_name), 1500)
