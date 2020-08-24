@@ -65,12 +65,7 @@ def check_url(url):
 def print_last_lines_log(log_path, num):
     try:
         with open(log_path, "r") as out:
-            lines = out.read().splitlines()
-            end = len(lines)
-            start = end - num
-            if start < 0:
-                start = 0
-            lines = lines[start:end]
+            lines = out.read().splitlines()[-num:]
             for line in lines:
                 print(line)
     except IOError as e:
