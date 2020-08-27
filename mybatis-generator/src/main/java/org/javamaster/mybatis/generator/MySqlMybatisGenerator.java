@@ -107,6 +107,9 @@ public class MySqlMybatisGenerator {
             Node node = (Node) xPath
                     .evaluate("/generatorConfiguration/context/plugin[@type='tk.mybatis.mapper.generator.MapperPlugin']", rootEle, XPathConstants.NODE);
             parentNode.removeChild(node);
+        } else {
+            Node node = parentNode.getAttributes().getNamedItem("targetRuntime");
+            node.setNodeValue("MyBatis3Simple");
         }
 
         String[] tables = tablesStr.split(",");
