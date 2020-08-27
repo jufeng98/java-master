@@ -1,4 +1,4 @@
-package org.javamaster.mybatis.generator;
+package org.javamaster.mybatis.generator.model;
 
 /**
  * @author yudong

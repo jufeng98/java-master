@@ -1,5 +1,6 @@
 package org.javamaster.mybatis.generator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
 import org.mybatis.generator.config.xml.ConfigurationParser;
@@ -20,6 +21,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.net.URL;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -56,7 +58,7 @@ public class MySqlMybatisGenerator {
         properties.put("project.path", projectPath);
 
 
-        InputStream inputStream = addTableToXml(properties.getProperty("tables"));
+        InputStream inputStream = addTableToXml(properties.getProperty("tables"), properties);
 
         ConfigurationParser cp = new ConfigurationParser(properties, warnings);
         Configuration config = cp.parseConfiguration(inputStream);
@@ -67,11 +69,12 @@ public class MySqlMybatisGenerator {
         logger.info("generated warnings:" + warnings);
     }
 
-    private static InputStream addTableToXml(String tablesStr) throws Exception {
+    private static InputStream addTableToXml(String tablesStr, Properties properties) throws Exception {
         URL url = MySqlMybatisGenerator.class.getClassLoader().getResource("generatorConfig.xml");
         assert url != null;
         UrlResource urlResource = new UrlResource(url);
 
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         Document doc = documentBuilder.parse(urlResource.getInputStream());
         Element rootEle = doc.getDocumentElement();
@@ -92,16 +95,59 @@ public class MySqlMybatisGenerator {
             element.setAttribute("schema", tmp[0]);
             parentNode.appendChild(element);
         }
+
+        changeDatabaseTinyintToInteger(xPath, doc, properties);
+
         DOMImplementation domImplementation = doc.getImplementation();
-        DOMImplementationLS domImplementationLS = (DOMImplementationLS) domImplementation.getFeature("LS", "3.0");
-        LSOutput lsOutput = domImplementationLS.createLSOutput();
+        DOMImplementationLS domImplementationLs = (DOMImplementationLS) domImplementation.getFeature("LS", "3.0");
+        LSOutput lsOutput = domImplementationLs.createLSOutput();
         lsOutput.setEncoding("UTF-8");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         lsOutput.setByteStream(byteArrayOutputStream);
-        LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
+        LSSerializer lsSerializer = domImplementationLs.createLSSerializer();
         lsSerializer.write(doc, lsOutput);
         byteArrayOutputStream.close();
         return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+    }
+
+    /**
+     * 修改所有db列类型为TINYINT的,生成到Java里用Integer表示,通过修改generatorConfig.xml的table元素来完成这个任务
+     */
+    private static void changeDatabaseTinyintToInteger(XPath xPath, Document doc, Properties properties) throws Exception {
+        Element rootEle = doc.getDocumentElement();
+        String s = properties.getProperty("disable.tinyint.to.integer");
+        if (StringUtils.isBlank(s)) {
+            s = "true";
+        }
+        boolean disable = Boolean.parseBoolean(s);
+        if (disable) {
+            return;
+        }
+        try (Connection connection = DriverManager.getConnection(properties.getProperty("jdbc.url"),
+                properties.getProperty("jdbc.user"), properties.getProperty("jdbc.password"))) {
+            NodeList nodeList = (NodeList) xPath.evaluate("//table", rootEle, XPathConstants.NODESET);
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element tableEle = ((Element) nodeList.item(i));
+                if (tableEle.getElementsByTagName("columnOverride").getLength() != 0) {
+                    continue;
+                }
+                String tableName = tableEle.getAttribute("tableName");
+                DatabaseMetaData databaseMetaData = connection.getMetaData();
+                ResultSet rs = databaseMetaData.getColumns(null, null, tableName, null);
+                while (rs.next()) {
+                    int dataType = rs.getInt("DATA_TYPE");
+                    if (Types.TINYINT != dataType && Types.BIT != dataType) {
+                        continue;
+                    }
+                    String columnName = rs.getString("COLUMN_NAME");
+                    Element columnOverrideEle = doc.createElement("columnOverride");
+                    columnOverrideEle.setAttribute("column", columnName);
+                    columnOverrideEle.setAttribute("javaType", "Integer");
+                    columnOverrideEle.setAttribute("jdbcType", "INTEGER");
+                    tableEle.appendChild(columnOverrideEle);
+                }
+            }
+        }
     }
 
 }

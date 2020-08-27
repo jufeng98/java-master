@@ -16,6 +16,7 @@
         <property name="endingDelimiter" value="`"/>
 
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"/>
+        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorOverridePlugin"/>
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisEnumsPlugin"/>
 
         <commentGenerator>
