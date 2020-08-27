@@ -1,6 +1,5 @@
 package org.javamaster.mybatis.generator.plugin;
 
-import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
@@ -12,13 +11,9 @@ import org.mybatis.generator.api.dom.xml.Element;
 import org.mybatis.generator.api.dom.xml.XmlElement;
 import org.mybatis.generator.config.Context;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author yudong
@@ -26,22 +21,8 @@ import java.util.Properties;
  */
 public class MybatisGeneratorPlugin extends PluginAdapter {
 
-    private boolean disableComment;
-
     @Override
     public void setContext(Context context) {
-        try {
-            File propFile = ResourceUtils.getFile("classpath:generatorConfig.properties");
-            Properties properties = new Properties();
-            properties.load(new FileInputStream(propFile));
-            String s = properties.getProperty("disable.comment");
-            if (StringUtils.isBlank(s)) {
-                s = "false";
-            }
-            disableComment = Boolean.parseBoolean(s);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
         super.setContext(context);
     }
 
@@ -52,9 +33,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        if (disableComment) {
-            return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
-        }
         // 添加entity类注释
         String docLine = "/**\n" +
                 " * %s,请勿手工改动此文件,请使用 mybatis generator\n" +
@@ -111,9 +89,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
     @Override
     public boolean modelFieldGenerated(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn
             , IntrospectedTable introspectedTable, ModelClassType modelClassType) {
-        if (disableComment) {
-            return super.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable, modelClassType);
-        }
         // 添加entity字段注释
         String docLine = "/**\n" +
                 "     * %s\n" +
@@ -125,9 +100,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
     @Override
     public boolean modelGetterMethodGenerated(Method method, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn,
                                               IntrospectedTable introspectedTable, ModelClassType modelClassType) {
-        if (disableComment) {
-            return super.modelGetterMethodGenerated(method, topLevelClass, introspectedColumn, introspectedTable, modelClassType);
-        }
         // 添加entity get方法注释
         String docLine = "/**\n" +
                 "     * 获取%s\n" +
@@ -139,9 +111,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
     @Override
     public boolean modelSetterMethodGenerated(Method method, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn,
                                               IntrospectedTable introspectedTable, ModelClassType modelClassType) {
-        if (disableComment) {
-            return super.modelGetterMethodGenerated(method, topLevelClass, introspectedColumn, introspectedTable, modelClassType);
-        }
         // 添加entity set方法注释
         String docLine = "/**\n" +
                 "     * 设置%s\n" +
@@ -152,9 +121,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean modelExampleClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        if (disableComment) {
-            return super.modelExampleClassGenerated(topLevelClass, introspectedTable);
-        }
         // 添加example类注释
         String docLine = "/**\n" +
                 " * 请勿手工改动此文件,请使用 mybatis generator\n" +
@@ -167,9 +133,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean clientGenerated(Interface interfaze, TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        if (disableComment) {
-            return super.clientGenerated(interfaze, topLevelClass, introspectedTable);
-        }
         // 添加mapper类注释
         String docLine = "/**\n" +
                 " * 操纵%s,请勿手工改动此文件,请使用 mybatis generator\n" +
@@ -184,9 +147,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
-        if (disableComment) {
-            return super.sqlMapDocumentGenerated(document, introspectedTable);
-        }
         Element element = new Element() {
             @Override
             public String getFormattedContent(int indentLevel) {

@@ -87,6 +87,28 @@ public class MySqlMybatisGenerator {
             parentNode.removeChild(nodeList.item(i));
         }
 
+
+        String tkMybatisStr = properties.getProperty("is.tk.mybatis");
+        if (StringUtils.isBlank(tkMybatisStr)) {
+            tkMybatisStr = "false";
+        }
+        String disableCommentStr = properties.getProperty("disable.comment");
+        if (StringUtils.isBlank(disableCommentStr)) {
+            disableCommentStr = "false";
+        }
+        boolean disableComment = Boolean.parseBoolean(disableCommentStr);
+        boolean tkMybatis = Boolean.parseBoolean(tkMybatisStr);
+        if (tkMybatis || disableComment) {
+            Node node = (Node) xPath
+                    .evaluate("/generatorConfiguration/context/plugin[@type='org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin']", rootEle, XPathConstants.NODE);
+            parentNode.removeChild(node);
+        }
+        if (!tkMybatis) {
+            Node node = (Node) xPath
+                    .evaluate("/generatorConfiguration/context/plugin[@type='tk.mybatis.mapper.generator.MapperPlugin']", rootEle, XPathConstants.NODE);
+            parentNode.removeChild(node);
+        }
+
         String[] tables = tablesStr.split(",");
         for (String string : tables) {
             String[] tmp = string.split("\\.");
@@ -115,12 +137,12 @@ public class MySqlMybatisGenerator {
      */
     private static void changeDatabaseTinyintToInteger(XPath xPath, Document doc, Properties properties) throws Exception {
         Element rootEle = doc.getDocumentElement();
-        String s = properties.getProperty("disable.tinyint.to.integer");
-        if (StringUtils.isBlank(s)) {
-            s = "true";
+        String closeTinyintToInteger = properties.getProperty("disable.tinyint.to.integer");
+        if (StringUtils.isBlank(closeTinyintToInteger)) {
+            closeTinyintToInteger = "true";
         }
-        boolean disable = Boolean.parseBoolean(s);
-        if (disable) {
+        boolean close = Boolean.parseBoolean(closeTinyintToInteger);
+        if (close) {
             return;
         }
         try (Connection connection = DriverManager.getConnection(properties.getProperty("jdbc.url"),

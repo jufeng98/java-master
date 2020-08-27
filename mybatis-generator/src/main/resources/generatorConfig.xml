@@ -15,9 +15,12 @@
         <property name="beginningDelimiter" value="`"/>
         <property name="endingDelimiter" value="`"/>
 
-        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"/>
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorOverridePlugin"/>
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisEnumsPlugin"/>
+        <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"/>
+        <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+            <property name="mappers" value="${package.Mapper}"/>
+        </plugin>
 
         <commentGenerator>
             <!--去掉mybatis在字段和方法上添加的无关注释-->
