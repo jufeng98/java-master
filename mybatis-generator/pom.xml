@@ -55,6 +55,11 @@
             <artifactId>compiler</artifactId>
             <version>0.9.6</version>
         </dependency>
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper</artifactId>
+            <version>3.3.9</version>
+        </dependency>
     </dependencies>
 
     <repositories>
