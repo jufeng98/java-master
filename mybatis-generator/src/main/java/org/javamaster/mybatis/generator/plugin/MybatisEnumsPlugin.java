@@ -5,6 +5,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import org.javamaster.mybatis.generator.model.EnumMustacheBean;
 import org.javamaster.mybatis.generator.model.EnumMustacheField;
+import org.javamaster.mybatis.generator.utils.PropertiesUtils;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
@@ -12,14 +13,11 @@ import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.config.Context;
 import org.mybatis.generator.internal.DefaultShellCallback;
-import org.springframework.util.ResourceUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -39,15 +37,8 @@ public class MybatisEnumsPlugin extends PluginAdapter {
 
     @Override
     public void setContext(Context context) {
-        try {
-            File propFile = ResourceUtils.getFile("classpath:generatorConfig.properties");
-            Properties properties = new Properties();
-            properties.load(new FileInputStream(propFile));
-            enumPath = properties.getProperty("enums.package");
-            targetProject = context.getJavaModelGeneratorConfiguration().getTargetProject();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        enumPath = PropertiesUtils.getProp("enums.package");
+        targetProject = context.getJavaModelGeneratorConfiguration().getTargetProject();
     }
 
     @Override
@@ -93,8 +84,6 @@ public class MybatisEnumsPlugin extends PluginAdapter {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
         return super.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable, modelClassType);
     }
 

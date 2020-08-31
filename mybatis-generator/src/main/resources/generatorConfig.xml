@@ -2,9 +2,8 @@
 <!DOCTYPE generatorConfiguration
         PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
         "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
-<!--配置信息,关于有哪些配置及各配置的作用参见官网说明http://www.mybatis.org/generator/configreference/xmlconfig.html-->
 <generatorConfiguration>
-
+    <!--配置信息,关于有哪些配置及各配置的作用参见官网说明http://www.mybatis.org/generator/configreference/xmlconfig.html-->
     <context id="MySQL" targetRuntime="MyBatis3" defaultModelType="flat">
         <!--自动识别数据库关键字，默认false，如果设置为true，根据SqlReservedWords中定义的关键字列表；
             一般保留默认值，遇到数据库关键字（Java关键字），使用columnOverride覆盖 -->
