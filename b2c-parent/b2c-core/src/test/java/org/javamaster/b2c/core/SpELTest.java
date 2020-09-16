@@ -58,7 +58,7 @@ public class SpELTest {
 
         logger.info(parser.parseExpression("'abc'.substring(2, 3)").getValue(String.class));
 
-        logger.info(parser.parseExpression("6.0221415E+23").getValue().toString());
+        logger.info((String) parser.parseExpression("6.0221415E+23").getValue());
     }
 
     @Test
@@ -76,25 +76,25 @@ public class SpELTest {
         logger.info((String) exp.getValue(context));
 
         // 模板写法,同@Value注解的写法
-        logger.info(parser.parseExpression("#{username}", ParserContext.TEMPLATE_EXPRESSION).getValue(context).toString());
+        logger.info((String) parser.parseExpression("#{username}", ParserContext.TEMPLATE_EXPRESSION).getValue(context));
     }
 
     @Test
     public void test3() {
         // 调用Java类的静态方法
-        logger.info(parser.parseExpression("#{T(java.lang.Math).random() * 100.0}", ParserContext.TEMPLATE_EXPRESSION).getValue(Double.class).toString());
+        logger.info(String.valueOf(parser.parseExpression("#{T(java.lang.Math).random() * 100.0}", ParserContext.TEMPLATE_EXPRESSION).getValue(Double.class)));
 
         // java.lang包内的不需要使用全限定名
-        logger.info(parser.parseExpression("T(String)").getValue(Class.class).toString());
+        logger.info(String.valueOf(parser.parseExpression("T(String)").getValue(Class.class)));
 
         // 条件判断
-        logger.info(parser.parseExpression("2==2").getValue(Boolean.class).toString());
+        logger.info(String.valueOf(parser.parseExpression("2==2").getValue(Boolean.class)));
 
-        logger.info(parser.parseExpression("'xyz' instanceof T(Integer)").getValue(Boolean.class).toString());
+        logger.info(String.valueOf(parser.parseExpression("'xyz' instanceof T(Integer)").getValue(Boolean.class)));
 
-        logger.info(parser.parseExpression("'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class).toString());
+        logger.info(String.valueOf(parser.parseExpression("'5.00' matches '^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class)));
 
-        logger.info(parser.parseExpression("1 + 1").getValue(Integer.class).toString());
+        logger.info(String.valueOf(parser.parseExpression("1 + 1").getValue(Integer.class)));
 
     }
 
@@ -106,6 +106,12 @@ public class SpELTest {
         StandardEvaluationContext context = new StandardEvaluationContext();
         // 注册一个对象变量,以便能在spEL中引用
         context.setVariable("primes", primes);
+        Integer age = null;
+        context.setVariable("num", 12);
+        context.setVariable("age", age);
+        context.setVariable("timestamp", System.currentTimeMillis());
+        context.setVariable("hasPayed", false);
+        context.setVariable("name", null);
 
         // 过滤List并做投影运算
         List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression("#primes.?[#this>10]").getValue(context);
@@ -114,6 +120,8 @@ public class SpELTest {
         // 注册一个方法,以便能在spEL中调用
         context.registerFunction("reverseString", SpELTest.class.getDeclaredMethod("reverseString", String.class));
         logger.info(parser.parseExpression("#reverseString('hello')").getValue(context, String.class));
+
+        logger.info((String) parser.parseExpression("#num+'_'+#timestamp+'_'+#hasPayed+'_'+#name+'_'+#age").getValue(context));
     }
 
     public static String reverseString(String input) {
@@ -131,7 +139,7 @@ public class SpELTest {
 
         // null时取默认值及null时安全调用
         logger.info(parser.parseExpression("name?:'Unknown'").getValue(context, String.class));
-        logger.info(parser.parseExpression("name?.length()").getValue(context, Integer.class).toString());
+        logger.info(Objects.requireNonNull(parser.parseExpression("name?.length()").getValue(context, Integer.class)).toString());
 
         tesla.setName(null);
         logger.info(parser.parseExpression("name?:'Unknown'").getValue(context, String.class));
@@ -172,7 +180,7 @@ public class SpELTest {
         params.put("backOrderCode", "H12345764564");
         context.setVariable("params", params);
         Object object = parser.parseExpression("#params[backOrderCode]").getValue(context);
-        logger.info(object.toString());
+        logger.info((String) object);
     }
 
 }
