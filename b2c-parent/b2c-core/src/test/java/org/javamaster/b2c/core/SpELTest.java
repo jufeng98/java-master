@@ -17,6 +17,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -107,11 +108,13 @@ public class SpELTest {
         // 注册一个对象变量,以便能在spEL中引用
         context.setVariable("primes", primes);
         Integer age = null;
+        BigInteger bigInteger = null;
         context.setVariable("num", 12);
         context.setVariable("age", age);
         context.setVariable("timestamp", System.currentTimeMillis());
         context.setVariable("hasPayed", false);
         context.setVariable("name", null);
+        context.setVariable("money", bigInteger);
 
         // 过滤List并做投影运算
         List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression("#primes.?[#this>10]").getValue(context);
@@ -121,6 +124,7 @@ public class SpELTest {
         context.registerFunction("reverseString", SpELTest.class.getDeclaredMethod("reverseString", String.class));
         logger.info(parser.parseExpression("#reverseString('hello')").getValue(context, String.class));
 
+        logger.info((String) parser.parseExpression("#money").getValue(context,String.class));
         logger.info((String) parser.parseExpression("#num+'_'+#timestamp+'_'+#hasPayed+'_'+#name+'_'+#age").getValue(context));
     }
 

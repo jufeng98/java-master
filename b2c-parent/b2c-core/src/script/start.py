@@ -3,10 +3,7 @@
 
 import os
 
-import socket
 import time
-import zipfile
-from urllib import urlopen
 
 application_name = None
 for file_name in os.listdir("./"):
@@ -22,45 +19,6 @@ os.system("""
     nohup /usr/java/jdk1.8.0_92/bin/java -jar {}.jar {} 1>/dev/null 2>&1  &
     """.format(application_name, java_opts, application_name))
 
-port = None
-try:
-    with zipfile.ZipFile(application_name + ".jar") as zipFile:
-        file_content = zipFile.read("BOOT-INF/classes/application.yml").decode('utf-8')
-        for line in file_content.splitlines():
-            if line.startswith("  port:"):
-                port = line.split(":")[1].strip()
-                break
-except IOError as e:
-    print("error" + str(e))
-print("Application port is:" + port)
-
-ip_address = "localhost"
-s = None
-try:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 80))
-    ip_address = s.getsockname()[0]
-except IOError as e:
-    print("error" + str(e))
-finally:
-    if s is not None:
-        s.close()
-print("Machine ip is:" + ip_address)
-
-detect_url = "http://{}:{}/actuator/info".format(ip_address, port)
-print("detect_url is:" + detect_url)
-time.sleep(10)
-
-
-def check_url(url):
-    try:
-        page = urlopen(url)
-        print(page.read().decode("utf-8"))
-        return True
-    except Exception as e:
-        print('timeout', str(e))
-        return False
-
 
 def print_last_lines_log(log_path, num):
     try:
@@ -72,18 +30,20 @@ def print_last_lines_log(log_path, num):
         print("error" + str(e))
 
 
-try_times = 10
-cur_time = 1
-success = check_url(detect_url)
-while not success:
-    if cur_time > try_times:
+port_file = "tmp/port.properties"
+exception_file = "tmp/exception.log"
+success_flag = True
+while True:
+    if os.path.exists(port_file):
+        success_flag = True
         break
-    print("try connect {} times...".format(cur_time))
-    success = check_url(detect_url)
-    cur_time = cur_time + 1
-if success:
+    if os.path.exists(exception_file):
+        success_flag = False
+        break
+    time.sleep(3)
+if success_flag:
     print("Application {} start success.".format(application_name))
-    print_last_lines_log("logs/{}.log".format(application_name), 300)
+    print_last_lines_log("logs/{}.log".format(application_name), 100)
 else:
     print("Application {} start failed.".format(application_name))
-    print_last_lines_log("logs/{}.log".format(application_name), 1500)
+    print_last_lines_log(exception_file, 1000)
