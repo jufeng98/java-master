@@ -1,5 +1,7 @@
 package org.javamaster.b2c.core.model;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -25,6 +27,11 @@ public class AuthUser implements UserDetails {
     private String password;
     private boolean enabled;
     private Collection<? extends GrantedAuthority> authorities;
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

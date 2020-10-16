@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>watch</title>
+</head>
+<body>
+<h1>模拟arthas watch命令</h1>
+<ul id="content"></ul>
+</body>
+<script>
+    var count = 1;
+    var socket = new WebSocket("ws://localhost:7000/websocket/watchConsumer");
+    socket.onmessage = function (event) {
+        var jsonStr = event.data;
+        console.log(jsonStr);
+        var json = JSON.parse(jsonStr);
+        var ul = document.getElementById("content");
+        ul.innerHTML = "";
+
+        var li = document.createElement("li");
+        li.innerHTML = new Date().toLocaleString() + ":第" + count++ + "次调用";
+        ul.appendChild(li);
+
+        var keys = Object.keys(json);
+        for (var i = 0; i < keys.length; i++) {
+            li = document.createElement("li");
+            li.innerHTML = keys[i] + ":" + json[keys[i]];
+            ul.appendChild(li);
+        }
+    };
+</script>
+</html>
