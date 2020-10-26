@@ -39,14 +39,14 @@ import java.util.Properties;
  */
 public class MySqlMybatisGenerator {
 
-    private static Logger logger = LoggerFactory.getLogger(MySqlMybatisGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(MySqlMybatisGenerator.class);
 
-    private static DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    private static XPathFactory xPathFactory = XPathFactory.newInstance();
+    private static final DocumentBuilderFactory FACTORY = DocumentBuilderFactory.newInstance();
+    private static final XPathFactory X_PATH_FACTORY = XPathFactory.newInstance();
 
     static {
         try {
-            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            FACTORY.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -76,7 +76,7 @@ public class MySqlMybatisGenerator {
             MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
             myBatisGenerator.generate(null);
             logger.info("generated warnings:" + warnings);
-        }finally {
+        } finally {
             if (inputStream != null) {
                 inputStream.close();
             }
@@ -90,11 +90,11 @@ public class MySqlMybatisGenerator {
             URL url = MySqlMybatisGenerator.class.getClassLoader().getResource("generatorConfig.xml");
             assert url != null;
             UrlResource urlResource = new UrlResource(url);
-            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+            DocumentBuilder documentBuilder = FACTORY.newDocumentBuilder();
             xmlInputStream = urlResource.getInputStream();
             Document doc = documentBuilder.parse(xmlInputStream);
             Element rootEle = doc.getDocumentElement();
-            XPath xPath = xPathFactory.newXPath();
+            XPath xPath = X_PATH_FACTORY.newXPath();
 
             Node parentNode = (Node) xPath.evaluate("/generatorConfiguration/context", rootEle, XPathConstants.NODE);
 
@@ -112,7 +112,7 @@ public class MySqlMybatisGenerator {
             }
             if (!tkMybatis) {
                 Node node = (Node) xPath
-                        .evaluate("/generatorConfiguration/context/plugin[@type='tk.mybatis.mapper.generator.MapperPlugin']", rootEle, XPathConstants.NODE);
+                        .evaluate("/generatorConfiguration/context/plugin[@type='org.javamaster.mybatis.generator.plugin.TkMapperPlugin']", rootEle, XPathConstants.NODE);
                 parentNode.removeChild(node);
             } else {
                 Node node = parentNode.getAttributes().getNamedItem("targetRuntime");
@@ -129,6 +129,8 @@ public class MySqlMybatisGenerator {
                 element.setAttribute("schema", database);
                 parentNode.appendChild(element);
             }
+
+            handlerAutoIncrement(xPath, doc);
 
             changeDatabaseTinyintToInteger(xPath, doc);
 
@@ -182,6 +184,45 @@ public class MySqlMybatisGenerator {
                     columnOverrideEle.setAttribute("javaType", "Integer");
                     columnOverrideEle.setAttribute("jdbcType", "INTEGER");
                     tableEle.appendChild(columnOverrideEle);
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理自动递增主键
+     */
+    private static void handlerAutoIncrement(XPath xPath, Document doc) throws Exception {
+        Element rootEle = doc.getDocumentElement();
+        try (Connection connection = DriverManager.getConnection(PropertiesUtils.getProp("jdbc.url"),
+                PropertiesUtils.getProp("jdbc.user"), PropertiesUtils.getProp("jdbc.password"))) {
+            NodeList tableNodeList = (NodeList) xPath.evaluate("//table", rootEle, XPathConstants.NODESET);
+            for (int i = 0; i < tableNodeList.getLength(); i++) {
+                Element tableEle = ((Element) tableNodeList.item(i));
+                String tableName = tableEle.getAttribute("tableName");
+                DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+                boolean supportsIsAutoIncrement = false;
+                ResultSet resultSet = databaseMetaData.getColumns(null, null, tableName, "%");
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                for (int j = 1; j <= metaData.getColumnCount(); j++) {
+                    if ("IS_AUTOINCREMENT".equals(metaData.getColumnName(j))) {
+                        supportsIsAutoIncrement = true;
+                        break;
+                    }
+                }
+                if (!supportsIsAutoIncrement) {
+                    return;
+                }
+
+                ResultSet tableResultSet = databaseMetaData.getPrimaryKeys(null, null, tableName);
+                while (tableResultSet.next()) {
+                    String columnName = tableResultSet.getString("COLUMN_NAME");
+                    Element generatedKeyEle = doc.createElement("generatedKey");
+                    generatedKeyEle.setAttribute("column", columnName);
+                    generatedKeyEle.setAttribute("sqlStatement", "MySql");
+                    generatedKeyEle.setAttribute("identity", "true");
+                    tableEle.appendChild(generatedKeyEle);
                 }
             }
         }

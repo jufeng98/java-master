@@ -172,7 +172,7 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     private boolean addGenerateKey(XmlElement element, IntrospectedTable introspectedTable) {
         List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
-        if (columns.size() == 1) {
+        if (columns.size() == 1 && columns.get(0).isAutoIncrement()) {
             element.addAttribute(new Attribute("useGeneratedKeys", "true"));
             element.addAttribute(new Attribute("keyProperty", columns.get(0).getJavaProperty()));
         }
