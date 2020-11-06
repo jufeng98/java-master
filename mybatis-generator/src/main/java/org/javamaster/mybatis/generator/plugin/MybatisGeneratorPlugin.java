@@ -33,6 +33,11 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        appendMethod(topLevelClass, introspectedTable);
+        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    public static void appendMethod(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         // 添加entity类注释
         String docLine = "/**\n" +
                 " * %s,请勿手工改动此文件,请使用 mybatis generator\n" +
@@ -77,13 +82,12 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
         try {
             java.lang.reflect.Field field = ReflectionUtils.findField(topLevelClass.getClass(), "methods");
+            assert field != null;
             field.setAccessible(true);
             field.set(topLevelClass, newMethods);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
     }
 
     @Override
@@ -147,6 +151,11 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 
     @Override
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
+        appendComment(document);
+        return super.sqlMapDocumentGenerated(document, introspectedTable);
+    }
+
+    public static void appendComment(Document document) {
         Element element = new Element() {
             @Override
             public String getFormattedContent(int indentLevel) {
@@ -157,7 +166,6 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
             }
         };
         document.getRootElement().addElement(0, element);
-        return super.sqlMapDocumentGenerated(document, introspectedTable);
     }
 
     @Override

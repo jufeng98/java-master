@@ -75,7 +75,8 @@ public class MySqlMybatisGenerator {
             DefaultShellCallback callback = new DefaultShellCallback(true);
             MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
             myBatisGenerator.generate(null);
-            logger.info("generated warnings:" + warnings);
+            logger.info("generated warnings:");
+            warnings.forEach(System.out::println);
         } finally {
             if (inputStream != null) {
                 inputStream.close();
