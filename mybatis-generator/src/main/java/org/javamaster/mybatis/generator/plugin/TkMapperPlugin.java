@@ -1,6 +1,7 @@
 package org.javamaster.mybatis.generator.plugin;
 
 import org.mybatis.generator.api.IntrospectedTable;
+import org.mybatis.generator.api.dom.java.Interface;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.api.dom.xml.Document;
 import tk.mybatis.mapper.generator.MapperPlugin;
@@ -18,6 +19,19 @@ public class TkMapperPlugin extends MapperPlugin {
     public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
         appendMethod(topLevelClass, introspectedTable);
         return super.modelBaseRecordClassGenerated(topLevelClass, introspectedTable);
+    }
+
+    @Override
+    public boolean clientGenerated(Interface interfaze, TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
+        // 添加mapper类注释
+        String docLine = "/**\n" +
+                " * 操纵%s,请勿手工改动此文件,请使用 mybatis generator\n" +
+                " * \n" +
+                " * @author mybatis generator\n" +
+                " */";
+        docLine = String.format(docLine, introspectedTable.getRemarks());
+        interfaze.addJavaDocLine(docLine);
+        return super.clientGenerated(interfaze, topLevelClass, introspectedTable);
     }
 
     @Override
