@@ -85,7 +85,7 @@ redefine /tmp/IExamServiceImpl.class
 monitor -c 5 org.javamaster.b2c.core.service.impl.IExamServiceImpl getExamList
 
 # 方法执行堆栈耗时
-trace -E org.javamaster.b2c.core.controller.ExamController | org.javamaster.b2c.core.service.impl.IExamServiceImpl getExamList
+trace -E org.javamaster.b2c.core.controller.ExamController|org.javamaster.b2c.core.service.impl.IExamServiceImpl getExamList
 
 # 观察方法调用前入参
 watch org.javamaster.b2c.core.service.impl.IExamServiceImpl getExamList "{params}" -x 3 -b
