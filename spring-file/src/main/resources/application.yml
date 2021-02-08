@@ -1,0 +1,7 @@
+server.port: 8896
+spring:
+  application:
+    name: b2c-upload
+  servlet:
+    multipart:
+      max-file-size: 200MB

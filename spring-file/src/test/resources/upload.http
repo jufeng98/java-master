@@ -1,0 +1,13 @@
+###
+POST http://localhost:8896/upload/uploadFile
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="loading.gif"
+Content-Type: multipart/form-data
+
+< ./loading.gif
+--WebAppBoundary--
+
+###
+
