@@ -49,6 +49,7 @@ public class UploadServiceImpl implements UploadService {
     @PostMapping("/checkBigFile")
     public Object checkBigFile(String fileName, String fileMd5, Integer fileSize, Integer chunkSize,
                                UriComponentsBuilder builder) {
+        // 简单起见,直接保存到webapp的file目录下
         File filePath = new File(servletContext.getRealPath("/") + "/file", fileMd5);
         if (!filePath.exists()) {
             Files.createDirectories(filePath.toPath());
@@ -74,12 +75,14 @@ public class UploadServiceImpl implements UploadService {
     @Override
     @SneakyThrows
     public String uploadBigFile(Integer chunk, String fileMd5, String chunkMd5, byte[] chunkBytes) {
+        // 校验分片md5
         String md5 = DigestUtils.md5DigestAsHex(chunkBytes);
         Assert.isTrue(chunkMd5.equals(md5), "分片已损坏,请重新上传");
         File filePath = new File(servletContext.getRealPath("/") + "/file/" + fileMd5, String.valueOf(chunk));
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             StreamUtils.copy(chunkBytes, fileOutputStream);
         } catch (Exception e) {
+            // 分片传输过程中出现问题,删除当前分片文件
             Files.delete(filePath.toPath());
             throw e;
         }

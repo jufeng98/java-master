@@ -158,7 +158,6 @@
                                     this.fileObject[file.id].url = resJsonObj.data;
                                 }
                                 this.wulObj[file.id] = {};
-                                setTimeout(() => clearInterval(this.interval), 1000);
                             }
                         });
                     }
@@ -223,16 +222,45 @@
                 }
             );
             webUploader.on(
+                "uploadAccept",
+                (file, res) => {
+                    this.$progress.append(`<li>uploadAccept:file,res<br/>${Object.entries(file)} ${Object.entries(res)}</li>`);
+                    if (res.code !== 0) {
+                        return false;
+                    }
+                    this.fileObject[file.id].status = "uploading";
+                    return true;
+                }
+            );
+            webUploader.on(
+                "uploadSuccess",
+                (file, res) => {
+                    this.$progress.append(`<li>uploadSuccess:file<br/>${Object.entries(file)} ${Object.entries(res)}</li>`);
+                    this.fileObject[file.id].status = "success";
+                    setTimeout(() => clearInterval(this.interval), 1000);
+                }
+            );
+            webUploader.on(
+                "uploadError",
+                (file, res) => {
+                    this.$progress.append(`<li>uploadError:file<br/>${Object.entries(file)} res:${Object.entries(res)}</li>`);
+                    this.fileObject[file.id].status = "error";
+                }
+            );
+            webUploader.on(
                 "uploadComplete",
                 file => {
                     this.$progress.append(`<li>uploadComplete:file<br/>${Object.entries(file)}</li>`);
-                    this.fileObject[file.id].status = "complete";
+                    if (this.fileObject[file.id].status !== "success") {
+                        $("#percent").text("上传出错,请重试");
+                    }
+                    setTimeout(() => clearInterval(this.interval), 1000);
                 }
             );
             webUploader.on(
                 "error",
                 type => {
-                    this.$progress.append(`<li>error:file ${type}</li>`);
+                    this.$progress.append(`<li>error:type ${type}</li>`);
                     console.error("error:", type);
                 }
             );
