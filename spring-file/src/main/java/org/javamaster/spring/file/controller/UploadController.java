@@ -52,5 +52,4 @@ public class UploadController {
         return new Result<>(uploadService.mergeBigFile(fileMd5, fileName, builder));
     }
 
-
 }
