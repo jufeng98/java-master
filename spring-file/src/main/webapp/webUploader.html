@@ -48,12 +48,16 @@
     }
 
     class FileUploader {
+        static ALREADY_UPLOADED = 0;
+
         /**
          * @param chunkSize 分片大小
          */
         constructor(chunkSize) {
             this.chunkSize = chunkSize;
-            this.fileObject = {};
+            this.fileObject = {
+                hasError: false
+            };
             this.wulObj = {};
             this.$progress = $("#progress");
             this._initGlobalWebUploader();
@@ -82,7 +86,7 @@
                         this.webUploader
                             .md5File(file)
                             .progress(percent => {
-                                this.$progress.append(`<li>文件md5计算进度: ${Math.ceil(percent * 100) + "%"}</li>`);
+                                this.$progress.children(":last-child").html(`<li>文件md5计算进度: ${Math.ceil(percent * 100) + "%"}</li>`);
                             })
                             .then(fileMd5 => {
                                     this.wulObj[file.id] = {};
@@ -101,7 +105,7 @@
                                             if (typeof resJsonObj.data === "string") {
                                                 this.$progress.append(`<li>文件检查完成,状态:已完成上传,访问链接:${resJsonObj.data}</li>`);
                                                 this.fileObject[file.id].url = resJsonObj.data;
-                                                deferred.reject();
+                                                deferred.reject(FileUploader.ALREADY_UPLOADED);
                                             } else {
                                                 this.$progress.append(`<li>文件检查完成,状态:缺失分片${resJsonObj.data}</li>`);
                                                 this.fileObject[file.id].missingChunks = resJsonObj.data;
@@ -109,8 +113,7 @@
                                             }
                                         },
                                         error: e => {
-                                            this.$progress.append(`<li>检查失败,请联系管理员${e}</li>`);
-                                            deferred.reject();
+                                            deferred.reject(e);
                                         },
                                     });
                                 }
@@ -122,7 +125,7 @@
                         let deferred = WebUploader.Deferred();
                         if (this.fileObject[block.file.id].missingChunks.indexOf(block.chunk) === -1) {
                             this.$progress.append(`<li>服务器已存在该分片${block.chunk},跳过上传</li>`);
-                            return deferred.reject();
+                            deferred.reject();
                         }
                         this.webUploader
                             .md5File(block.blob)
@@ -152,11 +155,7 @@
                             },
                             success: resJsonObj => {
                                 this.$progress.append(`<li>服务器合并文件分片完成,文件链接:${resJsonObj.data}</li>`);
-                                if (this.fileObject[file.id]) {
-                                    this.fileObject[file.id].status = "success";
-                                    this.fileObject[file.id].percentage = 100;
-                                    this.fileObject[file.id].url = resJsonObj.data;
-                                }
+                                this.fileObject[file.id].url = resJsonObj.data;
                                 this.wulObj[file.id] = {};
                             }
                         });
@@ -201,7 +200,6 @@
                     this.$progress.append(`<li>fileQueued:file<br/>${Object.entries(file)}</li>`);
                     this.fileObject[file.id] = {};
                     this.fileObject[file.id].name = file.name;
-                    this.fileObject[file.id].status = "ready";
                     this.fileObject[file.id].blobUrl = URL.createObjectURL(file.source.source);
                 }
             );
@@ -217,41 +215,41 @@
                 (file, percentage) => {
                     this.$progress.append(`<li>uploadProgress:file,percentage<br/>${Object.entries(file)} ${Math.ceil(percentage * 100) + "%"}</li>`);
                     this.fileObject[file.id].percentage = Math.ceil(percentage * 100);
-                    this.fileObject[file.id].status = "uploading";
                     $("#percent").text(this.fileObject[file.id].percentage + "%");
                 }
             );
             webUploader.on(
                 "uploadAccept",
-                (file, res) => {
-                    this.$progress.append(`<li>uploadAccept:file,res<br/>${Object.entries(file)} ${Object.entries(res)}</li>`);
-                    if (res.code !== 0) {
-                        return false;
-                    }
-                    this.fileObject[file.id].status = "uploading";
-                    return true;
+                (obj, res) => {
+                    this.$progress.append(`<li>uploadAccept:file,res<br/>${Object.entries(obj.file)} ${Object.entries(res)}</li>`);
+                    return res.code === 0;
+
                 }
             );
             webUploader.on(
                 "uploadSuccess",
-                (file, res) => {
-                    this.$progress.append(`<li>uploadSuccess:file<br/>${Object.entries(file)} ${Object.entries(res)}</li>`);
-                    this.fileObject[file.id].status = "success";
+                file => {
+                    this.$progress.append(`<li>uploadSuccess:file<br/>${Object.entries(file)}</li>`);
                     setTimeout(() => clearInterval(this.interval), 1000);
                 }
             );
             webUploader.on(
                 "uploadError",
                 (file, res) => {
-                    this.$progress.append(`<li>uploadError:file<br/>${Object.entries(file)} res:${Object.entries(res)}</li>`);
-                    this.fileObject[file.id].status = "error";
+                    if (res === FileUploader.ALREADY_UPLOADED) {
+                        this.fileObject[file.id].percentage = 100;
+                        $("#percent").text(this.fileObject[file.id].percentage + "%");
+                    } else {
+                        this.$progress.append(`<li>uploadError:file<br/>${Object.entries(file)} res:${res}</li>`);
+                        this.fileObject[file.id].hasError = true;
+                    }
                 }
             );
             webUploader.on(
                 "uploadComplete",
                 file => {
-                    this.$progress.append(`<li>uploadComplete:file<br/>${Object.entries(file)}</li>`);
-                    if (this.fileObject[file.id].status !== "success") {
+                    this.$progress.append(`<li>uploadComplete:file<br/>${Object.entries(file)} ${file.getStatus()}</li>`);
+                    if (this.fileObject[file.id].hasError) {
                         $("#percent").text("上传出错,请重试");
                     }
                     setTimeout(() => clearInterval(this.interval), 1000);
