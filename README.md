@@ -39,3 +39,5 @@ springboot devtools(开发者工具)依赖导致的序列化和反序列化问�
 spring @Transactional注解实现原理解析
 ## java-agent
 阿里arthas的常见用法及其原理解析,并根据其实现原理写了示例代码,模拟其watch命令的功能
+## spring-file
+SpringBoot结合百度webUploader实现大文件上传断点续传

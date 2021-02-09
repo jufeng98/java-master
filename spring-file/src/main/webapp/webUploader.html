@@ -5,6 +5,12 @@
     <title>文件上传测试</title>
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
     <script src="http://cdn.staticfile.org/webuploader/0.1.5/webuploader.js"></script>
+    <style>
+        ul li:first-line {
+            font-weight: bold;
+            color: red;
+        }
+    </style>
 </head>
 <body>
 <div>
@@ -14,7 +20,7 @@
               method="post"
               enctype="multipart/form-data">
             <label for="normal">一般文件上传</label>
-            <input id="normal" type="file">
+            <input id="normal" name="file" type="file">
             <input type="submit" value="提交">
         </form>
     </div>
@@ -25,37 +31,39 @@
         <label for="big">大文件上传断点续传</label>
         <input id="big" type="file" onchange="uploadBigFile(event)">
         <div>
-            <span>进度:</span>
-            <span id="progress"></span>
+            <span>进度:</span><span id="percent"></span>
+            <ul id="progress" style="height: 600px;overflow-y: auto"></ul>
         </div>
     </div>
 </div>
 <script>
+    let fileUploader = null;
+    $(document).ready(() => {
+        // 按5MB进行分片
+        fileUploader = new FileUploader(5 * 1024 * 1024);
+    })
+
     function uploadBigFile(event) {
-        let fileUploader = new FileUploader(5 * 1024 * 1024,
-            percent => {
-                document.getElementById("progress").innerHTML = percent + "%";
-            }
-        );
-        let selectedFiles = event.target.files;
-        fileUploader.startUpload(selectedFiles);
+        fileUploader.startUpload(event.target.files);
     }
 
     class FileUploader {
         /**
          * @param chunkSize 分片大小
-         * @param progress 发送过程回调函数
          */
-        constructor(chunkSize, progress) {
+        constructor(chunkSize) {
             this.chunkSize = chunkSize;
-            this.progress = progress;
             this.fileObject = {};
             this.wulObj = {};
+            this.$progress = $("#progress");
             this._initGlobalWebUploader();
             this.webUploader = this._newWebUploader();
         }
 
         startUpload(files) {
+            this.interval = setInterval(() => {
+                this.$progress[0].scrollTop = this.$progress[0].scrollHeight;
+            }, 300);
             this.webUploader.addFiles(files);
         }
 
@@ -68,54 +76,58 @@
                 },
                 {
                     beforeSendFile: file => {
-                        console.log("beforeSendFile:", file);
+                        this.$progress.append(`<li>beforeSendFile 每个文件只会触发一次<br/>file ${Object.entries(file)}</li>`);
                         let deferred = WebUploader.Deferred();
                         // 计算文件MD5
                         this.webUploader
                             .md5File(file)
+                            .progress(percent => {
+                                this.$progress.append(`<li>文件md5计算进度: ${Math.ceil(percent * 100) + "%"}</li>`);
+                            })
                             .then(fileMd5 => {
-                                    console.log("检查文件中...");
                                     this.wulObj[file.id] = {};
                                     this.wulObj[file.id].fileMd5 = fileMd5;
                                     this.wulObj[file.id].fileSize = file.size;
                                     this.wulObj[file.id].chunkSize = this.chunkSize;
                                     this.wulObj[file.id].fileName = file.name;
                                     let reqJsonObj = Object.assign({}, this.wulObj[file.id]);
+                                    this.$progress.append(`<li>调用checkBigFile检查文件中...</li>`);
                                     $.ajax({
                                         type: "POST",
                                         url: "http://localhost:8896/upload/checkBigFile",
                                         data: reqJsonObj,
                                         dataType: "json",
                                         success: resJsonObj => {
-                                            if (resJsonObj.code === 0) {
-                                                console.log("文件检查完成,状态:已完成上传,url:", resJsonObj.data);
+                                            if (typeof resJsonObj.data === "string") {
+                                                this.$progress.append(`<li>文件检查完成,状态:已完成上传,访问链接:${resJsonObj.data}</li>`);
                                                 this.fileObject[file.id].url = resJsonObj.data;
                                                 deferred.reject();
                                             } else {
-                                                console.log("文件检查完成,状态:缺失分片", resJsonObj.data);
+                                                this.$progress.append(`<li>文件检查完成,状态:缺失分片${resJsonObj.data}</li>`);
                                                 this.fileObject[file.id].missingChunks = resJsonObj.data;
                                                 deferred.resolve();
                                             }
                                         },
                                         error: e => {
-                                            console.error("上传失败,请联系管理员", e);
+                                            this.$progress.append(`<li>检查失败,请联系管理员${e}</li>`);
                                             deferred.reject();
                                         },
                                     });
-                                    return deferred.promise();
                                 }
                             );
                         return deferred.promise();
                     },
                     beforeSend: block => {
-                        console.log("beforeSend:", block);
+                        this.$progress.append(`<li>beforeSend:block 文件每个分片上传前触发一次<br/>${Object.entries(block)}</li>`);
                         let deferred = WebUploader.Deferred();
                         if (this.fileObject[block.file.id].missingChunks.indexOf(block.chunk) === -1) {
+                            this.$progress.append(`<li>服务器已存在该分片${block.chunk},跳过上传</li>`);
                             return deferred.reject();
                         }
                         this.webUploader
                             .md5File(block.blob)
                             .then(chunkMd5 => {
+                                    this.$progress.append(`<li>完成计算block ${block.chunk} md5:${chunkMd5}</li>`);
                                     this.wulObj[block.file.id][block.chunk] = {};
                                     this.wulObj[block.file.id][block.chunk].formData = {
                                         chunk: block.chunk,
@@ -128,7 +140,7 @@
                         return deferred.promise();
                     },
                     afterSendFile: file => {
-                        console.log("afterSendFile:", file, "所有分片上传完成,通知服务器合并文件分片...");
+                        this.$progress.append(`<li>afterSendFile:file 所有分片上传完成,调用mergeBigFile合并文件分片<br/>${Object.entries(file)} </li>`);
                         $.ajax({
                             type: "POST",
                             url: "http://localhost:8896/upload/mergeBigFile",
@@ -139,20 +151,14 @@
                                 size: this.wulObj[file.id].fileSize,
                             },
                             success: resJsonObj => {
-                                if (resJsonObj.code === 0) {
-                                    console.log("服务器合并文件分片完成");
-                                    if (this.fileObject[file.id]) {
-                                        this.fileObject[file.id].status = "success";
-                                        this.fileObject[file.id].percentage = 100;
-                                        this.fileObject[file.id].url = resJsonObj.url;
-                                    }
-                                } else {
-                                    console.log("文件分片合并失败:" + resJsonObj);
-                                    if (this.fileObject[file.id]) {
-                                        this.fileObject[file.id].status = "exception";
-                                    }
+                                this.$progress.append(`<li>服务器合并文件分片完成,文件链接:${resJsonObj.data}</li>`);
+                                if (this.fileObject[file.id]) {
+                                    this.fileObject[file.id].status = "success";
+                                    this.fileObject[file.id].percentage = 100;
+                                    this.fileObject[file.id].url = resJsonObj.data;
                                 }
                                 this.wulObj[file.id] = {};
+                                setTimeout(() => clearInterval(this.interval), 1000);
                             }
                         });
                     }
@@ -193,7 +199,7 @@
             webUploader.on(
                 "fileQueued",
                 file => {
-                    console.log("fileQueued:", file);
+                    this.$progress.append(`<li>fileQueued:file<br/>${Object.entries(file)}</li>`);
                     this.fileObject[file.id] = {};
                     this.fileObject[file.id].name = file.name;
                     this.fileObject[file.id].status = "ready";
@@ -203,31 +209,30 @@
             webUploader.on(
                 "uploadBeforeSend",
                 (block, headers) => {
-                    console.log("uploadBeforeSend:", block, headers);
+                    this.$progress.append(`<li>uploadBeforeSend:block,headers<br/>${Object.entries(block)} ${Object.entries(headers)}</li>`);
                     Object.assign(headers, this.wulObj[block.file.id][block.chunk].formData);
                 }
             );
             webUploader.on(
                 "uploadProgress",
                 (file, percentage) => {
-                    console.log("uploadProgress:", file, percentage);
-                    this.fileObject[file.id].showPercentage = true;
+                    this.$progress.append(`<li>uploadProgress:file,percentage<br/>${Object.entries(file)} ${Math.ceil(percentage * 100) + "%"}</li>`);
                     this.fileObject[file.id].percentage = Math.ceil(percentage * 100);
                     this.fileObject[file.id].status = "uploading";
-                    this.progress(this.fileObject[file.id].percentage);
+                    $("#percent").text(this.fileObject[file.id].percentage + "%");
                 }
             );
             webUploader.on(
                 "uploadComplete",
                 file => {
-                    console.log("uploadComplete:", file);
-                    this.fileObject[file.id].showPercentage = false;
+                    this.$progress.append(`<li>uploadComplete:file<br/>${Object.entries(file)}</li>`);
                     this.fileObject[file.id].status = "complete";
                 }
             );
             webUploader.on(
                 "error",
                 type => {
+                    this.$progress.append(`<li>error:file ${type}</li>`);
                     console.error("error:", type);
                 }
             );

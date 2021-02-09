@@ -56,7 +56,7 @@ public class UploadServiceImpl implements UploadService {
         File currentFile = new File(filePath, fileName);
         if (currentFile.exists()) {
             // 文件已经被成功上传过,直接返回url
-            return builder.path("file").path("/").path(fileName).build().toUriString();
+            return builder.path("file").path("/").path(fileMd5).path("/").path(fileName).build().toUriString();
         }
         // 计算文件总分片数
         int chunkNum = (int) Math.ceil(1.0 * fileSize / chunkSize);
@@ -77,9 +77,12 @@ public class UploadServiceImpl implements UploadService {
         String md5 = DigestUtils.md5DigestAsHex(chunkBytes);
         Assert.isTrue(chunkMd5.equals(md5), "分片已损坏,请重新上传");
         File filePath = new File(servletContext.getRealPath("/") + "/file/" + fileMd5, String.valueOf(chunk));
-        @Cleanup
-        FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-        StreamUtils.copy(chunkBytes, fileOutputStream);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+            StreamUtils.copy(chunkBytes, fileOutputStream);
+        } catch (Exception e) {
+            Files.delete(filePath.toPath());
+            throw e;
+        }
         return "分片上传成功";
     }
 
@@ -90,7 +93,7 @@ public class UploadServiceImpl implements UploadService {
         File currentFile = new File(filePath, fileName);
         if (currentFile.exists()) {
             // 文件已经被成功合并过,直接返回url
-            return builder.path("file").path("/").path(fileName).build().toUriString();
+            return builder.path("file").path("/").path(fileMd5).path("/").path(fileName).build().toUriString();
         }
         List<Path> chunkFiles = Files.walk(filePath.toPath())
                 .filter(Files::isRegularFile)
@@ -105,12 +108,9 @@ public class UploadServiceImpl implements UploadService {
             Files.delete(chunkFile);
         }
         byte[] fileBytes = byteArrayOutputStream.toByteArray();
-        // 计算文件md5
-        String currentFileMd5 = DigestUtils.md5DigestAsHex(fileBytes);
-        Assert.isTrue(currentFileMd5.equals(fileMd5), "文件已损坏,请重新上传");
         @Cleanup
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(currentFile));
         StreamUtils.copy(fileBytes, bufferedOutputStream);
-        return builder.path("file").path("/").path(fileName).build().toUriString();
+        return builder.path("file").path("/").path(fileMd5).path("/").path(fileName).build().toUriString();
     }
 }
