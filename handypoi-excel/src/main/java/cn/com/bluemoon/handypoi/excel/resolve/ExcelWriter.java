@@ -149,10 +149,15 @@ public class ExcelWriter<T> {
             Sheet sheet = sheetInfo.getSheet();
             List<BeanColumnField> beanColumnFields = sheetInfo.getBeanColumnFields();
 
-            Map<String, List<Integer>> multiValuedMap = new HashMap<>(64);
+            Map<String, Integer> rowIndexMap = new HashMap<>();
+            Map<String, List<Integer>> multiValuedMap = new LinkedHashMap<>();
             for (int i = 0; i < beanColumnFields.size(); i++) {
                 BeanColumnField beanColumnField = beanColumnFields.get(i);
                 beanColumnField.setColumnIndex(i);
+
+                for (int k = 0; k < beanColumnField.getColumnName().length; k++) {
+                    rowIndexMap.put(beanColumnField.getColumnName()[k], k);
+                }
 
                 // 处理行合并
                 Set<String> set = new HashSet<>(Arrays.asList(beanColumnField.getColumnName()));
@@ -177,9 +182,10 @@ public class ExcelWriter<T> {
             for (Map.Entry<String, List<Integer>> stringListEntry : multiValuedMap.entrySet()) {
                 List<Integer> list = stringListEntry.getValue();
                 if (list.size() > 1) {
+                    int rowIndex = rowIndexMap.get(stringListEntry.getKey());
                     int firstCel = list.get(0);
                     int lastCel = list.get(list.size() - 1);
-                    sheet.addMergedRegion(new CellRangeAddress(0, 0, firstCel, lastCel));
+                    sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex, firstCel, lastCel));
                 }
             }
 
