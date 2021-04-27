@@ -1,6 +1,8 @@
 package org.javamaster.b2c.test.validation;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.javamaster.b2c.test.model.jackson.Address;
 import org.javamaster.b2c.test.model.validation.Car;
 import org.javamaster.b2c.test.model.validation.Driver;
 import org.javamaster.b2c.test.model.validation.Person;
@@ -19,7 +21,7 @@ import java.util.Set;
  * @date 2019/6/17
  */
 public class ValidationTest {
-    private static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Test
     public void test() {
@@ -65,9 +67,13 @@ public class ValidationTest {
     public void test1() {
         // 测试自定义校验注解
         Person person = new Person("John");
-        Set<ConstraintViolation<Person>> constraintViolations = validator.validate(person);
-        ConstraintViolation<Person> constraintViolation = constraintViolations.iterator().next();
-        System.out.println(constraintViolation.getMessage());
+        validateBean(person);
+        person.setName("JOHN");
+        validateBean(person);
+        Address address = new Address("tianhe");
+        address.setCity("GZ");
+        person.setAddress(address);
+        validateBean(person);
     }
 
     public static <T> void validateBean(T bean, Class<?>... groups) {

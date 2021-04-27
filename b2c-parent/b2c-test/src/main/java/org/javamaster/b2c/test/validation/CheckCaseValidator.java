@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidatorContext;
  * @date 2019/6/17
  */
 public class CheckCaseValidator implements ConstraintValidator<CheckCase, String> {
-    private CaseMode caseMode;
+    private CheckCase.CaseMode caseMode;
 
     @Override
     public void initialize(CheckCase constraintAnnotation) {
@@ -22,7 +22,7 @@ public class CheckCaseValidator implements ConstraintValidator<CheckCase, String
         if (value == null) {
             return true;
         }
-        if (caseMode == CaseMode.UPPER) {
+        if (caseMode == CheckCase.CaseMode.UPPER) {
             return value.equals(value.toUpperCase());
         } else {
             return value.equals(value.toLowerCase());

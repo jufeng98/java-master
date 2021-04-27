@@ -2,8 +2,8 @@ package org.javamaster.b2c.test.model.validation;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.javamaster.b2c.test.model.jackson.Address;
-import org.javamaster.b2c.test.validation.CaseMode;
 import org.javamaster.b2c.test.validation.CheckCase;
+import org.javamaster.b2c.test.validation.CheckPerson;
 
 import java.util.Date;
 
@@ -14,7 +14,7 @@ import java.util.Date;
 public class Person {
     private long personId = 0;
     @NotBlank
-    @CheckCase(value = CaseMode.UPPER, message = "名字必须为大写")
+    @CheckCase(value = CheckCase.CaseMode.UPPER, message = "名字必须为大写")
     private String name;
     public Address address;
     public Date birthday;

@@ -11,16 +11,21 @@ import java.lang.annotation.Target;
  * @author yudong
  * @date 2019/6/17
  */
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE })
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = CheckCaseValidator.class)
 @Documented
 public @interface CheckCase {
-	String message() default "";
+    String message() default "";
 
-	Class<?>[] groups() default {};
+    Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default {};
+    Class<? extends Payload>[] payload() default {};
 
-	CaseMode value();
+    CaseMode value();
+
+    enum CaseMode {
+        UPPER,
+        LOWER
+    }
 }
