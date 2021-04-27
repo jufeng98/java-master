@@ -1,16 +1,11 @@
 package org.javamaster.b2c.test.model.validation;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Range;
 import org.javamaster.b2c.test.validation.CarChecks;
 import org.javamaster.b2c.test.validation.CarTypeEnum;
 
 import javax.validation.Valid;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +39,7 @@ public class Car {
     private String brand;
 
 
-    @Range(min = 2,max = 4) // 作用同@Min @Max
+    @Range(min = 2,max = 4,message = "车门数量必须位于${min}和${max}之间,当前值为:${validatedValue}") // 作用同@Min @Max
     private Integer doors;
 
     private CarTypeEnum carTypeEnum;

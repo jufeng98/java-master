@@ -12,7 +12,9 @@ import org.junit.Test;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +40,7 @@ public class ValidationTest {
         car.setDriver(driver);
         car.setPassengers(new ArrayList<>());
         car.setBrand("");
-        car.setDoors(4);
+        car.setDoors(5);
         car.setCarTypeEnum(CarTypeEnum.BENZ);
         // 不传递校验顺序,则只校验group为Default的,没有显式在注解写明groups属性的,则默认为Default
         validateBean(car);
@@ -76,17 +78,44 @@ public class ValidationTest {
         validateBean(person);
     }
 
+    @Test
+    public void test2() throws Exception {
+        Person person = new Person("John", null);
+        Class<?> clazz = person.getClass();
+
+        Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, Date.class);
+        Set<? extends ConstraintViolation<?>> constraintViolations = validator.forExecutables()
+                .validateConstructorParameters(constructor, new Object[]{"John", null});
+        printErrors(constraintViolations);
+
+        Date birthday = DateUtils.addDays(new Date(), 1);
+        Set<ConstraintViolation<Person>> constraintViolations1 = validator.forExecutables().validateParameters(person,
+                clazz.getDeclaredMethod("setBirthday", Date.class), new Date[]{birthday});
+        printErrors(constraintViolations1);
+
+        person.setBirthday(DateUtils.addDays(new Date(), 1));
+        birthday = person.getBirthday();
+        constraintViolations1 = validator.forExecutables().validateReturnValue(person,
+                clazz.getDeclaredMethod("getBirthday"), birthday);
+        printErrors(constraintViolations1);
+    }
+
     public static <T> void validateBean(T bean, Class<?>... groups) {
         Set<ConstraintViolation<T>> constraintViolations = validator.validate(bean, groups);
         if (constraintViolations.isEmpty()) {
             System.out.println("校验通过");
             return;
         }
+        printErrors(constraintViolations);
+    }
+
+    public static void printErrors(Set<?> constraintViolations) {
         List<String> errors = new ArrayList<>(10);
-        for (ConstraintViolation<T> constraintViolation : constraintViolations) {
-            errors.add(constraintViolation.getPropertyPath() + constraintViolation.getMessage());
+        for (Object constraintViolation : constraintViolations) {
+            ConstraintViolation<?> constraintViolation1 = (ConstraintViolation<?>) constraintViolation;
+            errors.add(constraintViolation1.getPropertyPath() + constraintViolation1.getMessage());
+
         }
-        //throw new ValidationException(StringUtils.join(errors, ","));
-        System.err.println(StringUtils.join(errors, ","));
+        System.err.println("校验不通过:" + StringUtils.join(errors, ","));
     }
 }

@@ -1,16 +1,19 @@
 package org.javamaster.b2c.test.model.validation;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.javamaster.b2c.test.model.jackson.Address;
 import org.javamaster.b2c.test.validation.CheckCase;
 import org.javamaster.b2c.test.validation.CheckPerson;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.util.Date;
 
 /**
  * @author yudong
  * @date 2019/6/17
  */
+@CheckPerson(name = "JOHN", city = "GZ", message = "地址信息有误")
 public class Person {
     private long personId = 0;
     @NotBlank
@@ -24,6 +27,11 @@ public class Person {
 
     public Person(String name) {
         this.name = name;
+    }
+
+    public Person(@NotBlank String name, @NotNull @Past Date birthday) {
+        this.name = name;
+        this.birthday = birthday;
     }
 
     public long getPersonId() {
@@ -50,11 +58,13 @@ public class Person {
         this.address = address;
     }
 
+    @NotNull
+    @Past
     public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(@NotNull @Past Date birthday) {
         this.birthday = birthday;
     }
 }
