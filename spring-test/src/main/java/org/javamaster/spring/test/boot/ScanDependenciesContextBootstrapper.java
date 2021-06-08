@@ -98,12 +98,12 @@ public class ScanDependenciesContextBootstrapper extends WebTestContextBootstrap
                 List<Class<?>> allSubClass = getInterfaceImplClasses(fieldTypeClass);
                 list.addAll(allSubClass);
                 for (Class<?> subClass : allSubClass) {
-                    List<Class<?>> relateClasses = getFieldRelateClasses(Arrays.asList(subClass.getDeclaredFields()));
+                    List<Class<?>> relateClasses = getFieldRelateClasses(getFields(subClass));
                     list.addAll(relateClasses);
                 }
             } else {
                 list.add(fieldTypeClass);
-                List<Class<?>> relateClasses = getFieldRelateClasses(Arrays.asList(fieldTypeClass.getDeclaredFields()));
+                List<Class<?>> relateClasses = getFieldRelateClasses(getFields(fieldTypeClass));
                 list.addAll(relateClasses);
             }
         }
