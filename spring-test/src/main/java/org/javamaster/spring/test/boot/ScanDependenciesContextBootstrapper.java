@@ -2,7 +2,7 @@ package org.javamaster.spring.test.boot;
 
 import lombok.SneakyThrows;
 import org.javamaster.spring.test.annos.ScanTestedDependencies;
-import org.javamaster.spring.test.utils.TestUtils;
+import org.javamaster.spring.test.utils.ReflectTestUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -27,22 +27,27 @@ public class ScanDependenciesContextBootstrapper extends WebTestContextBootstrap
 
     private final Set<Class<?>> alreadyHandle = new HashSet<>();
 
-    private Vector<?> allTargetClasses;
+    private final List<Class<?>> allTargetClasses = new ArrayList<>();
 
     @Override
     @SuppressWarnings("all")
     protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
         MergedContextConfiguration mergedContextConfiguration = super.processMergedContextConfiguration(mergedConfig);
         Class<?> testClass = mergedConfig.getTestClass();
-        ScanTestedDependencies annotation = testClass.getAnnotation(ScanTestedDependencies.class);
+        ScanTestedDependencies scanTestedDependencies = testClass.getAnnotation(ScanTestedDependencies.class);
+        if (scanTestedDependencies == null) {
+            return mergedContextConfiguration;
+        }
 
-        Class<?> targetTestedClass = annotation.value();
+        initTargetAllClasses(testClass.getClassLoader());
 
-        initTargetAllClasses(targetTestedClass.getClassLoader());
-
+        Class<?> targetTestedClass = scanTestedDependencies.value();
+        if (targetTestedClass.isInterface()) {
+            throw new IllegalArgumentException("待测试的类不能是接口:" + targetTestedClass.getSimpleName());
+        }
         List<Class<?>> list = getDependencyClasses(targetTestedClass);
 
-        Class<?>[] interfaces = annotation.additionalInterfaces();
+        Class<?>[] interfaces = scanTestedDependencies.additionalInterfaces();
         for (Class<?> additionalInterface : interfaces) {
             List<Class<?>> implClasses = getInterfaceImplClasses(additionalInterface);
             list.addAll(implClasses);
@@ -51,6 +56,7 @@ public class ScanDependenciesContextBootstrapper extends WebTestContextBootstrap
             }
         }
 
+        list.add(targetTestedClass);
         list = list.stream()
                 .filter(clz -> !clz.getName().startsWith("org.springframework") && !Modifier.isAbstract(clz.getModifiers()))
                 .collect(Collectors.toList());
@@ -62,7 +68,7 @@ public class ScanDependenciesContextBootstrapper extends WebTestContextBootstrap
         System.arraycopy(classes, 0, allClasses, 0, classes.length);
         System.arraycopy(targetClasses, 0, allClasses, classes.length, targetClasses.length);
 
-        TestUtils.reflectSet(mergedContextConfiguration, "classes", allClasses);
+        ReflectTestUtils.reflectSet(mergedContextConfiguration, "classes", allClasses);
         return mergedContextConfiguration;
     }
 
@@ -144,19 +150,16 @@ public class ScanDependenciesContextBootstrapper extends WebTestContextBootstrap
                             .replace(classPathStr, "")
                             .replace(".class", "")
                             .replace("\\", ".");
-                    Class.forName(str.substring(1));
+                    try {
+                        Class<?> clz = Class.forName(str.substring(1));
+                        allTargetClasses.add(clz);
+                    } catch (Throwable e) {
+                        System.err.println("load class " + str.substring(1) + " failed:" + e.getMessage());
+                    }
                 }
                 return FileVisitResult.CONTINUE;
             }
         });
-
-        Class<?> clazz = classLoader.getClass();
-        while (clazz != ClassLoader.class) {
-            clazz = clazz.getSuperclass();
-        }
-        Field field = clazz.getDeclaredField("classes");
-        field.setAccessible(true);
-        allTargetClasses = (Vector<?>) field.get(classLoader);
     }
 
 }

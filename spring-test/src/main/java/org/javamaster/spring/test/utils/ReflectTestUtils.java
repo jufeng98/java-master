@@ -10,7 +10,7 @@ import java.util.Objects;
  * @author yudong
  * @date 2021/5/15
  */
-public class TestUtils {
+public class ReflectTestUtils {
 
     @SneakyThrows
     public static Object reflectGet(Object object, String fieldName) {

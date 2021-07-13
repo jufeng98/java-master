@@ -12,8 +12,8 @@ import java.lang.reflect.Proxy;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.javamaster.spring.test.utils.TestUtils.reflectGet;
-import static org.javamaster.spring.test.utils.TestUtils.reflectSet;
+import static org.javamaster.spring.test.utils.ReflectTestUtils.reflectGet;
+import static org.javamaster.spring.test.utils.ReflectTestUtils.reflectSet;
 
 /**
  * @author yudong

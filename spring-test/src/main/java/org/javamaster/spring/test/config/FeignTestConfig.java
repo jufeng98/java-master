@@ -17,8 +17,8 @@ import org.springframework.context.annotation.Profile;
 import java.util.HashMap;
 
 import static org.javamaster.spring.test.GeneralTestCode.PROFILE_UNIT_TEST;
-import static org.javamaster.spring.test.utils.TestUtils.reflectGet;
-import static org.javamaster.spring.test.utils.TestUtils.reflectSet;
+import static org.javamaster.spring.test.utils.ReflectTestUtils.reflectGet;
+import static org.javamaster.spring.test.utils.ReflectTestUtils.reflectSet;
 
 /**
  * 修改feign service的url以便用于能正常调用
