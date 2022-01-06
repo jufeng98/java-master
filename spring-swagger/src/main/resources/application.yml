@@ -1,0 +1,8 @@
+server:
+  port: 8964
+spring:
+  application:
+    name: spring-swagger
+user:
+  enabled: true
+  desc: super administration

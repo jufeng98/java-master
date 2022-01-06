@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,13 +36,13 @@ import java.util.stream.Collectors;
  */
 public class ExcelWriter<T> {
 
-    private ExcelContext context;
+    private final ExcelContext context;
 
-    private Workbook workbook;
+    private final Workbook workbook;
     /**
      * 待写入的sheet信息
      */
-    private List<SheetInfo<T>> sheetInfoList = new ArrayList<>(6);
+    private final List<SheetInfo<T>> sheetInfoList = new ArrayList<>(6);
     /**
      * 行写入监听器
      */
@@ -149,7 +150,7 @@ public class ExcelWriter<T> {
             Sheet sheet = sheetInfo.getSheet();
             List<BeanColumnField> beanColumnFields = sheetInfo.getBeanColumnFields();
 
-            Map<String, Integer> rowIndexMap = new HashMap<>();
+            Map<String, Integer> rowIndexMap = new HashMap<>(16);
             Map<String, List<Integer>> multiValuedMap = new LinkedHashMap<>();
             for (int i = 0; i < beanColumnFields.size(); i++) {
                 BeanColumnField beanColumnField = beanColumnFields.get(i);
@@ -224,7 +225,7 @@ public class ExcelWriter<T> {
                     // 金额类型特殊处理
                     Number money = (Number) field.get(writeBean);
                     if (beanColumnField.getMoneyUnit() == MoneyUnit.CENT) {
-                        money = BigDecimal.valueOf(money.longValue()).divide(BigDecimal.valueOf(100), BigDecimal.ROUND_HALF_DOWN).doubleValue();
+                        money = BigDecimal.valueOf(money.longValue()).divide(BigDecimal.valueOf(100), RoundingMode.HALF_DOWN).doubleValue();
                     }
                     CellUtils.fillMoneyCell(cell, money, beanColumnField.getCellStyle());
                     continue;
@@ -340,23 +341,23 @@ public class ExcelWriter<T> {
         if (fieldType == Date.class || fieldType == Timestamp.class) {
             beanColumnField.setDateField(true);
             ExcelColumnDate excelColumnDate = field.getAnnotation(ExcelColumnDate.class);
+            CellStyle style;
             if (excelColumnDate != null) {
-                CellStyle style = StyleUtils.getDateCellStyle(workbook, excelColumnDate.datePattern());
-                beanColumnField.setCellStyle(style);
+                style = StyleUtils.getDateCellStyle(workbook, excelColumnDate.datePattern());
             } else {
-                CellStyle style = StyleUtils.getDateCellStyle(workbook);
-                beanColumnField.setCellStyle(style);
+                style = StyleUtils.getDateCellStyle(workbook);
             }
+            beanColumnField.setCellStyle(style);
         } else if (fieldType == Double.class || fieldType == double.class || fieldType == BigDecimal.class) {
             beanColumnField.setDecimalField(true);
             ExcelColumnDecimal excelColumnDecimal = field.getAnnotation(ExcelColumnDecimal.class);
+            CellStyle style;
             if (excelColumnDecimal != null) {
-                CellStyle style = StyleUtils.getDecimalCellStyle(workbook, excelColumnDecimal.decimalFormat());
-                beanColumnField.setCellStyle(style);
+                style = StyleUtils.getDecimalCellStyle(workbook, excelColumnDecimal.decimalFormat());
             } else {
-                CellStyle style = StyleUtils.getDecimalCellStyle(workbook);
-                beanColumnField.setCellStyle(style);
+                style = StyleUtils.getDecimalCellStyle(workbook);
             }
+            beanColumnField.setCellStyle(style);
         } else {
             beanColumnField.setCellStyle(contentCellStyle);
         }

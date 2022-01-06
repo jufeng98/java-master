@@ -17,19 +17,19 @@ public class SheetInfo<T> {
     /**
      * 待写入的list
      */
-    private List<T> dataList;
+    private final List<T> dataList;
     /**
      * 待写入的对象class类型
      */
-    private Class<T> dataClz;
+    private final Class<T> dataClz;
     /**
      * 工作簿名字
      */
-    private String sheetName;
+    private final String sheetName;
     /**
      * 头部标题行数
      */
-    private int headerNum;
+    private final int headerNum;
 
     private Sheet sheet;
     private List<BeanColumnField> beanColumnFields;

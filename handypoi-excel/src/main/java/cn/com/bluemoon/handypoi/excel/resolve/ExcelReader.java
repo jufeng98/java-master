@@ -28,24 +28,24 @@ import static cn.com.bluemoon.handypoi.excel.resolve.ExcelWriter.initBeanColumnF
  */
 public class ExcelReader<T> {
 
-    private ExcelContext context;
+    private final ExcelContext context;
 
     private Workbook workbook;
-    private Sheet sheet;
+    private final Sheet sheet;
     /**
      * 头部标题行数
      */
-    private int headerNum;
+    private final int headerNum;
 
     /**
      * 尾部行数
      */
-    private int footerNum;
+    private final int footerNum;
 
     /**
      * 待转换的bean类型
      */
-    private Class<T> beanClz;
+    private final Class<T> beanClz;
     private Map<String, BeanColumnField> columnNameBeanFieldMap;
     /**
      * 收集读取结果的list
@@ -62,13 +62,17 @@ public class ExcelReader<T> {
      * @param footerNum   尾部非数据行数
      */
     public ExcelReader(ExcelType excelType, InputStream inputStream, Class<T> beanClz, int headerNum, int footerNum) {
+        this(excelType, inputStream, beanClz, headerNum, footerNum, 0);
+    }
+
+    public ExcelReader(ExcelType excelType, InputStream inputStream, Class<T> beanClz, int headerNum, int footerNum, int sheetNum) {
         try {
             if (ExcelType.XLS == excelType) {
                 this.workbook = new HSSFWorkbook(inputStream);
             } else {
                 this.workbook = new XSSFWorkbook(inputStream);
             }
-            this.sheet = workbook.getSheetAt(0);
+            this.sheet = workbook.getSheetAt(sheetNum);
             this.headerNum = headerNum;
             this.footerNum = footerNum;
             this.beanClz = beanClz;
@@ -77,7 +81,7 @@ public class ExcelReader<T> {
             context.setWorkbook(this.workbook);
             context.setSheet(this.sheet);
         } catch (Exception e) {
-            throw new RuntimeException("construct workbook failed", e);
+            throw new RuntimeException("construct workbook failed,excelType:" + excelType, e);
         } finally {
             if (this.workbook != null) {
                 try {
@@ -112,7 +116,7 @@ public class ExcelReader<T> {
                         try {
                             bean = beanClz.newInstance();
                         } catch (Exception e) {
-                            throw new RuntimeException("try to construct bean failed", e);
+                            throw new RuntimeException("try to construct bean failed,bean class:" + beanClz, e);
                         }
                         // 解析内容行的列信息
                         IntStream.range(headerRow.getFirstCellNum(), headerRow.getLastCellNum()).forEach(j -> {
@@ -123,6 +127,9 @@ public class ExcelReader<T> {
                                     return;
                                 }
                                 Cell cell = row.getCell(j);
+                                if (cell == null) {
+                                    return;
+                                }
                                 Field beanField = beanColumnField.getField();
                                 Object beanValue;
                                 if (beanField.getType() == String.class) {
