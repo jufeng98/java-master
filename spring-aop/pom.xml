@@ -57,6 +57,21 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.javamaster</groupId>
+                <artifactId>git-hook-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <configuration>
+                    <gitTestBranchName>test_for_all_group</gitTestBranchName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>add-git-hook</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

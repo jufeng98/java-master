@@ -1,0 +1,20 @@
+#!/bin/sh
+# @author liangyudong
+# @date 20220226
+echo "开始检查最近20天的git merge信息,如果有merge测试分支到别的分支,则无法push"
+git_test_branch_name=$gitTestBranchName
+time_range=$(date "+%Y/%m/%d %H:%M:%S" -d '20 day ago')
+
+for commit_id in $(git rev-list --all --merges --grep="Merge branch '$git_test_branch_name' into" --since "$time_range"); do
+  oldifs="$IFS"
+  IFS=$'\n'
+  echo "存在merge测试分支操作，记录如下："
+  for content in $(git show $commit_id); do
+	  echo "$content"
+	  IFS="$oldifs"
+  done
+  echo "merge了测试分支 $git_test_branch_name 到别的分支,无法push!!!"
+  echo "警告: 测试分支严格禁止往任何别的分支合并!!!"
+  exit 1
+done
+exit 0
