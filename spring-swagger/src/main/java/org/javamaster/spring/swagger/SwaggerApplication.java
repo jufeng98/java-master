@@ -3,9 +3,9 @@ package org.javamaster.spring.swagger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * @author yudong
@@ -13,6 +13,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Slf4j
 @SpringBootApplication
+@ServletComponentScan
 public class SwaggerApplication {
 
     private static ApplicationContext context;

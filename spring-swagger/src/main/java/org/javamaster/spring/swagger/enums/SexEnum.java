@@ -17,6 +17,19 @@ public enum SexEnum implements EnumBase {
         this.name = name;
     }
 
+    public static SexEnum getByCode(String code) {
+        if (code == null) {
+            return null;
+        }
+        int i = Integer.parseInt(code);
+        for (SexEnum value : SexEnum.values()) {
+            if (value.code == i) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("wrong code for SexEnum:" + code);
+    }
+
     @Override
     public int getCode() {
         return code;

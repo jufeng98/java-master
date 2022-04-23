@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.javamaster.spring.swagger.convert.SexEnumConvert;
+import org.javamaster.spring.swagger.convert.SexEnumFormatter;
+import org.javamaster.spring.swagger.convert.SexEnumGenericConverter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -42,5 +46,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 objectMapper.registerModule(simpleModule);
             }
         }
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry formatterRegistry) {
+        formatterRegistry.addFormatter(new SexEnumFormatter());
+
+        // formatterRegistry.addConverter(new SexEnumConvert());
+
+        // formatterRegistry.addConverter(new SexEnumGenericConverter());
     }
 }
