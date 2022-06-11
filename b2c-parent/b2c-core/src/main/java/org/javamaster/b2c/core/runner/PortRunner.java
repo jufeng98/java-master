@@ -24,12 +24,15 @@ public class PortRunner implements CommandLineRunner {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired
+    @Autowired(required = false)
     private ServletWebServerApplicationContext server;
 
     @Override
     public void run(String... args) {
         try {
+            if (server == null) {
+                return;
+            }
             StringBuilder stringBuilder = new StringBuilder();
             int port = server.getWebServer().getPort();
             String time = DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");

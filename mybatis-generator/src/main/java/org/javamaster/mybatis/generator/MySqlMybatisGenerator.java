@@ -1,8 +1,10 @@
 package org.javamaster.mybatis.generator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.javamaster.mybatis.generator.utils.PropertiesUtils;
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
+import org.mybatis.generator.config.PluginConfiguration;
 import org.mybatis.generator.config.xml.ConfigurationParser;
 import org.mybatis.generator.internal.DefaultShellCallback;
 import org.slf4j.Logger;
@@ -72,6 +74,14 @@ public class MySqlMybatisGenerator {
             List<String> warnings = new ArrayList<>();
             ConfigurationParser cp = new ConfigurationParser(properties, warnings);
             Configuration config = cp.parseConfiguration(inputStream);
+            String plugins = properties.getProperty("plugins");
+            if (StringUtils.isNotBlank(plugins)) {
+                for (String pluginClz : plugins.split(",")) {
+                    PluginConfiguration pluginConfiguration = new PluginConfiguration();
+                    pluginConfiguration.setConfigurationType(pluginClz);
+                    config.getContext("MySQL").addPluginConfiguration(pluginConfiguration);
+                }
+            }
             DefaultShellCallback callback = new DefaultShellCallback(true);
             MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
             myBatisGenerator.generate(null);

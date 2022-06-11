@@ -166,13 +166,13 @@ public class SpELTest {
         List<Inventor> list = (List<Inventor>) parser.parseExpression("#inventors.?[serbian=='Serbian']").getValue(context);
         logger.info(list.toString());
 
-        List<Inventor> list1 = (List<Inventor>) parser.parseExpression("#inventors.![serbian]").getValue(context);
+        List<String> list1 = (List<String>) parser.parseExpression("#inventors.![serbian]").getValue(context);
         logger.info(list1.toString());
 
-        List<Inventor> list2 = (List<Inventor>) parser.parseExpression("#inventors.![serbian=='Serbian']").getValue(context);
+        List<Boolean> list2 = (List<Boolean>) parser.parseExpression("#inventors.![serbian=='Serbian']").getValue(context);
         logger.info(list2.toString());
 
-        List<Inventor> list3 = (List<Inventor>) parser.parseExpression("#inventors.![#this.getSerbian()]").getValue(context);
+        List<String> list3 = (List<String>) parser.parseExpression("#inventors.![#this.getSerbian()]").getValue(context);
         logger.info(list3.toString());
     }
 

@@ -1,0 +1,4 @@
+server.port: 8898
+spring:
+  application:
+    name: spring-embed-arthas

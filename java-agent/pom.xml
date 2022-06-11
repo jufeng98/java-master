@@ -119,7 +119,8 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
                 <configuration>
-                    <dependencyReducedPomLocation>${basedir}/target/dependency-reduced-pom.xml
+                    <dependencyReducedPomLocation>
+                        ${basedir}/target/dependency-reduced-pom.xml
                     </dependencyReducedPomLocation>
                 </configuration>
                 <executions>

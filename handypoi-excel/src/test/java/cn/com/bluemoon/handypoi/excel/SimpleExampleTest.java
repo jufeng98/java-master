@@ -52,7 +52,7 @@ public class SimpleExampleTest {
         ExcelWriterService excelWriterService = excelWriter.addSheetFinish();
 
         Workbook workbook = excelWriterService.getWorkBook();
-        File file = new File("D:\\simple-excel-test.xls");
+        File file = new File("target/simple-excel-test.xls");
         OutputStream outputStream = new FileOutputStream(file);
         workbook.write(outputStream);
         outputStream.close();
@@ -63,7 +63,7 @@ public class SimpleExampleTest {
     @Test
     public void testRead() throws Exception {
 
-        File file = new File("D:\\simple-excel-test.xls");
+        File file = new File("target/simple-excel-test.xls");
         InputStream inputStream = new FileInputStream(file);
         ExcelReader<SimpleExampleBean> excelReader = new ExcelReader<>(ExcelType.XLS, inputStream, SimpleExampleBean.class, 1, 0);
         excelReader.setRowReadListener((bean, context) -> {
