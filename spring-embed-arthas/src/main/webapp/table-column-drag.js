@@ -1,4 +1,4 @@
-Vue.component('el-table-drag',{
+Vue.component('el-table-drag', {
     props: {
         id: {
           type: String,
@@ -164,7 +164,7 @@ Vue.component('el-table-drag',{
             let cls = (columnIndex === this.dragState.move ? `drag_active_${this.dragState.direction}` : '')
             return cls +" table-header-row-style"
         },
-        // 按下鼠标开始拖动
+        // 按下鼠标开始拖动,记录起始列
         handleMouseDown (e, column) {
             this.dragState.dragging = true
             this.dragState.start = parseInt(column.columnKey)
@@ -172,7 +172,6 @@ Vue.component('el-table-drag',{
         // 拖动中
         handleMouseMove (e, column) {
             if (this.dragState.dragging) {
-                // 记录起始列
                 let index = parseInt(column.columnKey)
                 if (index - this.dragState.start !== 0) {
                     // 判断拖动方向
@@ -189,7 +188,6 @@ Vue.component('el-table-drag',{
             this.dragState.end = parseInt(column.columnKey)
             this.dragColumn(this.dragState)
             this.resetDragState()
-                this.$forceUpdate();
         },
         // 拖动易位
         dragColumn ({start, end, direction}) {
