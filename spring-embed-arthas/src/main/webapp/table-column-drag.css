@@ -1,0 +1,48 @@
+body {
+    width: 80%;
+    margin: auto;
+}
+
+.tag-cls {
+    font-size: 22px;
+    width:100%;
+    text-align:center;
+    margin:20px 0;
+}
+
+.table-header-row-style {
+    color: rgb(32, 31, 53);
+    font-size: 9pt;
+    font-weight: normal;
+    font-family: Tahoma, Verdana, 微软雅黑, serif;
+}
+
+.table-drag .el-table th {
+    padding: 0;
+}
+
+.table-drag .el-table th.drag_active_left {
+    border-left: 3px solid #409EFF;
+}
+
+.table-drag .el-table th.drag_active_right {
+    border-right: 3px solid #409EFF;
+}
+
+.table-drag .table-header-row-style {
+    height: 40px;
+}
+
+.table-drag .table-header-row-style .thead-cell {
+    cursor: pointer;
+    overflow: initial;
+    width: 100%;
+}
+
+.table-drag.table-drag_moving .el-table th .thead-cell {
+    cursor: move !important;
+}
+
+.table-drag.table-drag_moving .el-table__fixed {
+    cursor: not-allowed;
+}

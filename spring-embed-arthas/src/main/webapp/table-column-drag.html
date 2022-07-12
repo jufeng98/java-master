@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>elementUI表格列拖拽研究</title>
+    <link href="./index.css" rel="stylesheet" type="text/css">
+    <link href="./table-column-drag.css" rel="stylesheet" type="text/css">
+    <script src="./vue.js" type="text/javascript"></script>
+    <script src="./index.js" type="text/javascript"></script>
+    <script src="./table-column-drag.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="layout" style="width: 100%">
+    <el-tag type="primary" class="tag-cls">
+        elementUI table组件列拖拽研究
+    </el-tag>
+    <el-table-drag
+        id="listTable"
+        ref="listTableRef"
+        :data="listTableData"
+        :border="true"
+        v-loading="loadings.length>0"
+        @select-all="checkChange"
+        @change="checkChange"
+        :height="tableHeight"
+        :header.sync="tableHeader">
+        <template slot="status" slot-scope="scope">
+            <span :style="'color:' + (scope.row.status===0 ? 'red' : 'green')">
+                {{statusMap[scope.row.status]}}
+            </span>
+        </template>
+        <template slot="tag" slot-scope="scope">
+            <el-tag
+                :type="scope.row.tag === '家' ? 'primary' : 'success'"
+                disable-transitions>
+                {{scope.row.tag}}
+            </el-tag>
+        </template>
+    </el-table-drag>
+</div>
+<script type="text/javascript">
+    initVue();
+
+    function initVue() {
+        new Vue({
+            el: '#layout',
+            data() {
+                return {
+                    tableHeight: null,
+                    loadings: [],
+                    tableHeader: [
+                        { type:"selection", width:"55"},
+                        { prop:"date", label:"日期", width:"100"},
+                        { prop:"name", label:"姓名", width:"100"},
+                        { prop:"address", label:"地址", width:"200", showOverflowTooltip:true},
+                        { prop:"status", label:"状态", width:"80", sortable:true},
+                        { prop:"tag", label:"标签"},
+                    ],
+                    statusMap: {
+                        0: '无效',
+                        1: '有效'
+                    },
+                    listTableData: [{
+                      date: '2016-05-01',
+                      name: '王小虎1',
+                      address: '上海市普陀区金沙江路 1518 弄',
+                      status: 0,
+                      tag: '家'
+                    }, {
+                      date: '2016-05-02',
+                      name: '王小虎2',
+                      address: '上海市普陀区金沙江路 1517223 XXX栋 XXX座 弄',
+                      status: 1,
+                      tag: '公司2'
+                    }, {
+                      date: '2016-05-03',
+                      name: '王小虎3',
+                      address: '上海市普陀区金沙江路 1519 弄',
+                      status: 0,
+                      tag: '家'
+                    }, {
+                      date: '2016-05-04',
+                      name: '王小虎4',
+                      address: '上海市普陀区金沙江路 1516 弄',
+                      status: 1,
+                      tag: '公司4'
+                    }]
+                }
+            },
+            methods: {
+                checkChange() {
+					let selection = this.$refs.listTableRef.selection
+				},
+                recalculateTableHeight() {
+                    // 动态计算表格高度,做到table高度自适应
+                    let frameHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+                    // 除了表格以外其他元素占用的高度
+					let otherHeight = 100
+                    this.tableHeight = Math.max(frameHeight - otherHeight, 200)
+                },
+            },
+            mounted() {
+                this.recalculateTableHeight()
+                window.onresize = this.recalculateTableHeight
+            }
+        })
+    }
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package org.javamaster.b2c.core.config;
 
 import com.github.pagehelper.PageHelper;
+import org.apache.ibatis.builder.xml.XMLConfigBuilder;
 import org.apache.ibatis.logging.slf4j.Slf4jImpl;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -63,10 +64,13 @@ public class DatabaseConfig {
         sqlSessionFactoryBean.setPlugins(new Interceptor[]{pageHelper});
 
         final String mapperLocation = "classpath*:mapper/**/*.xml";
+        final String configLocation = "classpath:mybatis-config.xml";
         sqlSessionFactoryBean.setMapperLocations(resourcePatternResolver.getResources(mapperLocation));
         // 只指定包名,则mybatis会自动为 JavaBean 注册一个小写字母开头的非完全限定的类名形式的别名
         sqlSessionFactoryBean.setTypeAliasesPackage("org.javamaster.b2c.core.entity");
-        org.apache.ibatis.session.Configuration configuration = new org.apache.ibatis.session.Configuration();
+        XMLConfigBuilder builder = new XMLConfigBuilder(resourcePatternResolver.getResources(configLocation)[0].getInputStream(),
+                null, null);
+        org.apache.ibatis.session.Configuration configuration = builder.getConfiguration();
         configuration.setLogImpl(Slf4jImpl.class);
 
         TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
