@@ -43,7 +43,7 @@ Vue.component('el-table-drag', {
                 :element-loading-text="elementLoadingText"
                 :height="height"
                 :header-cell-class-name="headerCellClassName"
-                cell-class-name="table-header-row-style"
+                cell-class-name="table-body-cell-style"
                 @header-dragend="headerDragend"
                 @select-all="toggleSelectionAll">
                 <el-table-column v-for="(col, index) in tableHeader"
@@ -162,7 +162,7 @@ Vue.component('el-table-drag', {
         },
         headerCellClassName({column, columnIndex}) {
             let cls = (columnIndex === this.dragState.move ? `drag_active_${this.dragState.direction}` : '')
-            return cls +" table-header-row-style"
+            return cls +" table-header-cell-style"
         },
         // 按下鼠标开始拖动,记录起始列
         handleMouseDown (e, column) {
@@ -227,3 +227,171 @@ Vue.component('el-table-drag', {
         }
     },
 })
+
+
+/**
+ * @author yudong
+ * @date   2022/7/14
+ * 为elementUI的table组件加上列拖拽功能,用法:
+ * this.$nextTick(()=>{
+ *     new BmTableDrag({tableRef: this.$refs.tableRef})
+ * })
+ */
+ (function (global, factory) {
+    global.BmTableDrag = factory(global)
+}(window, function (global) {
+
+    function BmTableDrag(options = {}) {
+        if (!(this instanceof BmTableDrag)) {
+            throw new Error('BmTableDrag is a constructor and should be called with the `new` keyword')
+        }
+        this._initParams(options)
+    }
+
+    let btd
+    BmTableDrag.prototype._initParams = function (options) {
+        btd = this
+        btd.dragState = {
+            // 起始元素的 index
+            start: -1, 
+            // 结束元素的 index
+            end: -1, 
+            // 移动鼠标时所覆盖的元素 index
+            move: -1, 
+            // 是否正在拖动
+            dragging: false, 
+            // 拖动方向
+            direction: undefined 
+        }
+        btd.tableRef = options.tableRef
+        btd.tableDiv = btd.tableRef.$el
+        let prev = btd.tableDiv.previousElementSibling
+        btd.$wTableDiv = $('<div class="table-drag"></div>')
+        btd.$wTableDiv.append(btd.tableDiv).insertAfter(prev)
+        btd.columns = btd.tableRef.store.states._columns
+        let existSelection = btd.columns[0].type==="selection"
+        btd.headThCells = btd.tableDiv.querySelectorAll("div.el-table__header-wrapper .table-header-cell-style .cell")
+        btd.headThCells.forEach((it,index) => {
+            if(index===0 && existSelection){
+                return
+            }
+            it.addEventListener("mousedown", btd._handleMouseDown)
+            it.addEventListener("mousemove", btd._handleMouseMove)
+            it.addEventListener("mouseup", btd._handleMouseUp)
+        })
+        
+        document.addEventListener("mouseup", btd.resetDragIfNecessary)
+    }
+
+    // 按下鼠标开始拖动
+    BmTableDrag.prototype._handleMouseDown = function(e) {
+        if($(e.currentTarget).hasClass("noclick")){
+            return
+        }
+        btd.$wTableDiv.addClass("table-drag_moving")
+        btd.dragState.dragging = true
+        btd.dragState.start = btd._realIndex(e)
+    }
+
+    // 拖动中
+    BmTableDrag.prototype._handleMouseMove = function(e) {
+        if (!btd.dragState.dragging) {
+            return
+        }
+        // 记录起始列
+        let index = btd._realIndex(e)
+        if (index - btd.dragState.start !== 0) {
+            // 判断拖动方向
+            btd.dragState.direction = index - btd.dragState.start < 0 ? 'left' : 'right'
+            btd.dragState.move = index
+        } else {
+            btd.dragState.direction = undefined
+        }
+
+        if(btd.columns[index].type==="selection"){
+            return
+        }
+
+        btd._resetHeadThCellCls()
+        let targetTh
+        let $target = $(e.target)
+        if($target.hasClass("sort-caret")){
+            targetTh = e.target.parentElement.parentElement.parentElement
+        }else if($target.hasClass("caret-wrapper")){
+            targetTh = e.target.parentElement.parentElement
+        }else{
+            targetTh = e.target.parentElement
+        }
+        $(targetTh).addClass(`drag_active_${btd.dragState.direction}`)
+    }
+
+    // 鼠标放开结束拖动
+    BmTableDrag.prototype._handleMouseUp = function(e) {
+        let key = btd._realIndex(e)
+        btd.dragState.end = parseInt(key) 
+        btd._dragColumn(btd.dragState)
+        // 初始化拖动状态
+        btd._resetDragState()
+    }
+
+    // 拖动易位
+    BmTableDrag.prototype._dragColumn = function({ start, end, direction }) {
+        if (btd.dragState.start !== -1 && btd.dragState.start !== btd.dragState.end) {
+            let tempData = []
+            let left = direction === 'left'
+            let min = left ? end : start - 1
+            let max = left ? start + 1 : end
+            for (let i = 0; i < btd.columns.length; i++) {
+                if (i === end) {
+                    tempData.push(btd.columns[start])
+                } else if (i > min && i < max) {
+                    tempData.push(btd.columns[left ? i - 1 : i + 1])
+                } else {
+                    tempData.push(btd.columns[i])
+                }
+            }
+            btd.tableRef.store.states._columns.splice(0, btd.columns.length)
+            btd.tableRef.store.states._columns.push(...tempData)
+
+            btd.tableRef.store.updateColumns()
+            btd.tableRef.data.splice(0,0)
+        }
+    }
+
+    BmTableDrag.prototype._realIndex = function(e){
+        let list = btd.columns
+        for (let i = 0; i < list.length; i++) {
+            const id = list[i].id
+            if(id === e.currentTarget.parentElement.classList[0]){
+                return i
+            }
+        }
+        return -1
+    }
+
+    BmTableDrag.prototype._resetHeadThCellCls = function() {
+        btd.headThCells.forEach(it=>{
+            $(it.parentElement).removeClass(`drag_active_left drag_active_right`)
+        })
+    }
+
+    BmTableDrag.prototype.resetDragIfNecessary = function(e) {
+        if (e.buttons === 0) {
+            btd._resetDragState()
+        }
+    }
+
+    BmTableDrag.prototype._resetDragState = function() {
+        if (btd.dragState.dragging) {
+            btd._resetHeadThCellCls()
+            btd.$wTableDiv.removeClass("table-drag_moving")
+            btd.dragState.start = -1
+            btd.dragState.end = -1
+            btd.dragState.move = -1
+            btd.dragState.dragging = false
+            btd.dragState.direction = undefined
+        }
+    }
+
+    return BmTableDrag
+}))

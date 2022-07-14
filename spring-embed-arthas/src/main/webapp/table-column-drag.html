@@ -7,6 +7,7 @@
     <link href="./table-column-drag.css" rel="stylesheet" type="text/css">
     <script src="./vue.js" type="text/javascript"></script>
     <script src="./index.js" type="text/javascript"></script>
+    <script src="./jquery-1.9.1.min.js" type="text/javascript"></script>
     <script src="./table-column-drag.js" type="text/javascript"></script>
 </head>
 <body>
@@ -14,6 +15,7 @@
     <el-tag type="primary" class="tag-cls">
         elementUI table组件列拖拽研究
     </el-tag>
+    <div>实现方式一:通过自定义组件</div>
     <el-table-drag
         id="listTable"
         ref="listTableRef"
@@ -37,6 +39,39 @@
             </el-tag>
         </template>
     </el-table-drag>
+    <div>实现方式二:通过修改elementUI table组件的内部状态</div>
+    <el-table 
+        ref="listTableRef1"
+        :data="listTableData" 
+        :height="260" 
+        border
+        v-loading="loadings.length>0" 
+        element-loading-text="请稍后..."
+        header-cell-class-name="table-header-cell-style"
+        cell-class-name="table-body-cell-style">
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column prop="date" label="日期" width="100"></el-table-column>
+        <el-table-column prop="name" label="姓名" width="100"></el-table-column>
+        <el-table-column prop="address" label="地址" width="200" show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column prop="status" sortable label="状态" width="80">
+            <template slot-scope="scope">
+                <span :style="'color:' + (scope.row.status===0 ? 'red' : 'green')">
+                    {{statusMap[scope.row.status]}}
+                </span>
+            </template>
+        </el-table-column>
+        <el-table-column prop="tag" label="标签">
+            <template slot-scope="scope">
+                <el-tag
+                    :type="scope.row.tag === '家' ? 'primary' : 'success'"
+                    disable-transitions>
+                    {{scope.row.tag}}
+                </el-tag>
+            </template>
+        </el-table-column>
+    </el-table>
+
 </div>
 <script type="text/javascript">
     initVue();
@@ -95,13 +130,16 @@
                     // 动态计算表格高度,做到table高度自适应
                     let frameHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
                     // 除了表格以外其他元素占用的高度
-					let otherHeight = 100
-                    this.tableHeight = Math.max(frameHeight - otherHeight, 200)
+					let otherHeight = 430
+                    this.tableHeight = Math.max(frameHeight - otherHeight, 180)
                 },
             },
             mounted() {
                 this.recalculateTableHeight()
                 window.onresize = this.recalculateTableHeight
+                this.$nextTick(() => {
+                    new BmTableDrag({tableRef: this.$refs.listTableRef1})
+                })
             }
         })
     }
