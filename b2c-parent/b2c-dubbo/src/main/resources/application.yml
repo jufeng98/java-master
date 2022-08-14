@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: b2c-dubbo
+  dubbo:
+    scan:
+      basePackages: org.javamaster.b2c
 dubbo:
   application:
     name: b2c-dubbo

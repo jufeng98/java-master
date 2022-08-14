@@ -10,7 +10,7 @@ import java.util.Date;
  * @author yudong
  * @date 2019/6/13
  */
-@Service(version = "1.0.0")
+@Service(version = "2.0.0")
 public class UserDubboServiceImpl implements UserDubboService {
     @Override
     public UserBaseDto getByUsername(String username) {
