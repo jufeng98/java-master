@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
@@ -14,11 +15,13 @@ import org.springframework.core.env.Environment;
 @Slf4j
 @SpringBootApplication
 @ServletComponentScan
+@EnableFeignClients
 public class SwaggerApplication {
 
     private static ApplicationContext context;
 
     public static void main(String[] args) {
+        System.setProperty("feign.debug.swagger.url", "localhost:8964");
         context = SpringApplication.run(SwaggerApplication.class, args);
         Environment environment = context.getEnvironment();
         log.info("swagger2 url: http://localhost:{}/doc.html#/", environment.getProperty("server.port"));

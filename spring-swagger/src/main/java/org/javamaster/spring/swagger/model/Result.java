@@ -17,6 +17,9 @@ public class Result<T> implements Serializable {
     private String responseMsg;
     private T data;
 
+    public Result() {
+    }
+
     public static <T> Result<T> success(T data) {
         return new Result<>(data);
     }
