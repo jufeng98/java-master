@@ -2,7 +2,10 @@ package org.javamaster.spring.swagger.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.javamaster.spring.swagger.anno.ApiEnum;
 import org.javamaster.spring.swagger.enums.SexEnum;
 
@@ -13,6 +16,9 @@ import java.util.Date;
  * @date 2022/1/4
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel
 public class User {
     @ApiModelProperty(value = "用户id", example = "10000001")
