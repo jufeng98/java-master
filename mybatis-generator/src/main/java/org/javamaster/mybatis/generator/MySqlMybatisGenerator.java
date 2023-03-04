@@ -64,9 +64,16 @@ public class MySqlMybatisGenerator {
     }
 
     public static void generator() throws Exception {
+        generator(null);
+    }
+
+    public static void generator(Properties source) throws Exception {
         InputStream inputStream = null;
         try {
             Properties properties = PropertiesUtils.getInstance();
+            if (source != null) {
+                properties.putAll(source);
+            }
             inputStream = addTableToXml();
             inputStream.mark(inputStream.available());
             logger.info("xml content:\r\n{}", StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8));
