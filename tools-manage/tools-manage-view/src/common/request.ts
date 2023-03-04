@@ -18,7 +18,7 @@ service.interceptors.response.use(
         if (response.data.code === 1) {
             ElMessage({
                 type: "error",
-                message: response.data.error,
+                message: response.data.msg,
                 duration: 3000,
                 showClose: true
             });

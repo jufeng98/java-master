@@ -124,6 +124,7 @@ public class RedisServiceImpl implements RedisService {
     public List<Tree> listKeys(String connectId, Integer redisDbIndex, String pattern) {
         int count = 10000;
         if (pattern.equals("*")) {
+            // 限制返回的key数量
             count = 100;
         }
         RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(connectId, redisDbIndex);
@@ -142,7 +143,7 @@ public class RedisServiceImpl implements RedisService {
                     for (byte[] resultBytes : resultBytesList) {
                         String base64 = "";
                         if (resultBytes[0] <= 0) {
-                            // JDK 序列化方式的key
+                            // 可能是 JDK 序列化方式的key
                             base64 = Base64.getEncoder().encodeToString(resultBytes);
                         }
                         list.add(Pair.of(new String(resultBytes, StandardCharsets.UTF_8), base64));
@@ -183,6 +184,7 @@ public class RedisServiceImpl implements RedisService {
             return list;
         });
         if (Objects.requireNonNull(resList).size() > 200) {
+            // 限制返回的key数量,防止过多数据导致浏览器卡住
             resList = resList.subList(0, 200);
         }
         return resList.stream()

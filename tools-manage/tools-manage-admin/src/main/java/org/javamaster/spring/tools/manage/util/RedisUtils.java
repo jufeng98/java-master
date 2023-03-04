@@ -22,15 +22,21 @@ import static org.javamaster.spring.tools.manage.service.impl.RedisServiceImpl.H
 @SuppressWarnings("unchecked")
 public class RedisUtils {
 
+    /**
+     * 获取连接对象信息
+     */
     public static ConnectionVo getConnectionVo(String connectId) {
-        RedisTemplate<String, Object> redisTemplate = (RedisTemplate<String, Object>) SpringUtil.getContext()
+        RedisTemplate<String, Object> redisTemplate = (RedisTemplate<String, Object>) SpringUtils.getContext()
                 .getBean("redisTemplateJackson");
         return (ConnectionVo) redisTemplate.opsForHash().get(HASH_KEY_DBS, connectId);
     }
 
+    /**
+     * 获取对应的RedisTemplate对象
+     */
     public static RedisTemplate<Object, Object> getRedisTemplate(String connectId, Integer db) {
         ConnectionVo connectionVo = getConnectionVo(connectId);
-        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtil.getContext()
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getContext()
                 .getAutowireCapableBeanFactory();
         String id = connectId + ":" + db;
         if (beanFactory.containsBean(id)) {
@@ -40,6 +46,7 @@ public class RedisUtils {
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.afterPropertiesSet();
+        // 将对象纳入到Spring中管理
         beanFactory.registerSingleton(id, redisTemplate);
         return redisTemplate;
     }
