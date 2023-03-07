@@ -2,6 +2,7 @@ package org.javamaster.spring.tools.manage.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.micrometer.common.util.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -75,12 +76,13 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public List<ConnectionVo> listConnects() {
         List<Object> values = redisTemplateJackson.opsForHash().values(HASH_KEY_DBS);
-        return values.stream().map(obj -> {
-            ConnectionVo connectionVo = (ConnectionVo) obj;
-            connectionVo.setPassword("");
-            connectionVo.setUser("");
-            return connectionVo;
-        }).collect(Collectors.toList());
+        return values.stream()
+                .map(obj -> {
+                    ConnectionVo connectionVo = (ConnectionVo) obj;
+                    connectionVo.setPassword("");
+                    connectionVo.setUser("");
+                    return connectionVo;
+                }).collect(Collectors.toList());
     }
 
 
@@ -159,6 +161,7 @@ public class RedisServiceImpl implements RedisService {
                 ConnectionVo connectionVo = getConnectionVo(connectId);
                 Set<RedisNode> clusterNodes = redisNodes(connectionVo.getNodes());
                 ScanOptions scanOptions = ScanOptions.scanOptions().count(finalCount).match(pattern).build();
+                Set<String> keys = Sets.newHashSet();
                 outer:
                 for (RedisNode clusterNode : clusterNodes) {
                     RedisClusterNode redisClusterNode = new RedisClusterNode(Objects.requireNonNull(clusterNode.getHost()),
@@ -171,7 +174,11 @@ public class RedisServiceImpl implements RedisService {
                                 // 可能是JDK序列化方式的key
                                 base64 = Base64.getEncoder().encodeToString(resultBytes);
                             }
-                            list.add(Pair.of(new String(resultBytes, StandardCharsets.UTF_8), base64));
+                            String key = new String(resultBytes, StandardCharsets.UTF_8);
+                            if (!keys.contains(key)) {
+                                list.add(Pair.of(key, base64));
+                                keys.add(key);
+                            }
                             if (list.size() >= 100) {
                                 break outer;
                             }
@@ -188,7 +195,6 @@ public class RedisServiceImpl implements RedisService {
             resList = resList.subList(0, 200);
         }
         return resList.stream()
-                .distinct()
                 .sorted(Comparator.comparing(Pair::getLeft))
                 .map(pair -> Tree.builder()
                         .label(pair.getLeft())
@@ -209,7 +215,7 @@ public class RedisServiceImpl implements RedisService {
         } else {
             keyBytes = commonVo.getRedisKey().getBytes(StandardCharsets.UTF_8);
         }
-        Object res = redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<ValueVo>) connection -> {
             DataType type = connection.keyCommands().type(keyBytes);
             if (type == DataType.NONE) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key不存在");
@@ -285,7 +291,6 @@ public class RedisServiceImpl implements RedisService {
             valueVo.setFieldVos(fieldVos);
             return valueVo;
         });
-        return (ValueVo) res;
     }
 
     @Override
@@ -295,7 +300,7 @@ public class RedisServiceImpl implements RedisService {
         byte[] keyBytes = commonVo.getRedisKey().getBytes(StandardCharsets.UTF_8);
         byte[] valueBytes = commonVo.getRedisValue().getBytes(StandardCharsets.UTF_8);
         DataType dataType = DataType.fromCode(commonVo.getRedisKeyType());
-        Object res = redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<String>) connection -> {
             if (Boolean.FALSE.equals(connection.keyCommands().exists(keyBytes))) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key不存在");
             }
@@ -310,7 +315,6 @@ public class RedisServiceImpl implements RedisService {
             }
             return "删除成功";
         });
-        return (String) res;
     }
 
     @Override
@@ -321,7 +325,7 @@ public class RedisServiceImpl implements RedisService {
         byte[] valueBytes = commonVo.getRedisValue().getBytes(StandardCharsets.UTF_8);
         byte[] fieldKeyBytes = commonVo.getFieldKey().getBytes(StandardCharsets.UTF_8);
         DataType dataType = DataType.fromCode(commonVo.getRedisKeyType());
-        Object res = redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<String>) connection -> {
             if (Boolean.FALSE.equals(connection.keyCommands().exists(keyBytes))) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key不存在");
             }
@@ -336,7 +340,6 @@ public class RedisServiceImpl implements RedisService {
             }
             return "新增成功";
         });
-        return (String) res;
     }
 
     @Override
@@ -344,7 +347,7 @@ public class RedisServiceImpl implements RedisService {
         RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonVo.getConnectId(),
                 commonVo.getRedisDbIndex());
         byte[] keyBytes = commonVo.getRedisKey().getBytes(StandardCharsets.UTF_8);
-        Object res = redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<ValueVo>) connection -> {
             DataType type = connection.keyCommands().type(keyBytes);
             if (type == DataType.NONE) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key不存在");
@@ -370,7 +373,6 @@ public class RedisServiceImpl implements RedisService {
                     .redisKeyTtl(commonVo.getRedisKeyTtl() + "")
                     .build();
         });
-        return (ValueVo) res;
     }
 
     @Override
@@ -378,15 +380,14 @@ public class RedisServiceImpl implements RedisService {
         RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonVo.getConnectId(),
                 commonVo.getRedisDbIndex());
         byte[] keyBytes = commonVo.getRedisKey().getBytes(StandardCharsets.UTF_8);
-        redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<String>) connection -> {
             DataType type = connection.keyCommands().type(keyBytes);
             if (type == DataType.NONE) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key不存在");
             }
             connection.keyCommands().expire(keyBytes, Integer.parseInt(commonVo.getRedisKeyTtl()));
-            return null;
+            return "设置成功";
         });
-        return "设置成功";
     }
 
     @Override
@@ -395,7 +396,7 @@ public class RedisServiceImpl implements RedisService {
                 commonVo.getRedisDbIndex());
         byte[] keyBytes = commonVo.getRedisKey().getBytes(StandardCharsets.UTF_8);
         DataType dataType = DataType.fromCode(commonVo.getRedisKeyType());
-        Object res = redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<ValueVo>) connection -> {
             if (Boolean.TRUE.equals(connection.keyCommands().exists(keyBytes))) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key已存在");
             }
@@ -433,7 +434,6 @@ public class RedisServiceImpl implements RedisService {
             }
             return commonVo;
         });
-        return (ValueVo) res;
     }
 
 
@@ -442,15 +442,14 @@ public class RedisServiceImpl implements RedisService {
         RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonVo.getConnectId(),
                 commonVo.getRedisDbIndex());
         byte[] keyBytes = commonVo.getRedisKey().getBytes(StandardCharsets.UTF_8);
-        redisTemplate.execute((RedisCallback<Object>) connection -> {
+        return redisTemplate.execute((RedisCallback<String>) connection -> {
             DataType type = connection.keyCommands().type(keyBytes);
             if (type == DataType.NONE) {
                 throw new RuntimeException(commonVo.getRedisKey() + " key不存在");
             }
             connection.keyCommands().del(keyBytes);
-            return null;
+            return "删除成功";
         });
-        return "删除成功";
     }
 
     @Override
