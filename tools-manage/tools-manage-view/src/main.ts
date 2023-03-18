@@ -9,7 +9,7 @@ import './assets/main.css'
 
 const app = createApp(App)
 app.config.errorHandler = (err) => {
-    console.log(err);
+    console.error(err);
 
 }
 app.config.globalProperties.$request = request

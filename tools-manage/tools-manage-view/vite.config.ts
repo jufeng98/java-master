@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/manage": {
-          target: "http://localhost:8899",
+          target: "http://localhost:8885",
           changeOrigin: true,
           rewrite: path => path.replace(/^\/manage/, "manage")
         }

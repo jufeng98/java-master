@@ -255,6 +255,8 @@
             valueFormatChange(data) {
                 if (data === 2) {
                     this.commonVo.redisValue = JSON.stringify(JSON.parse(this.commonVo.redisValue), null, "  ")
+                } else {
+                    this.commonVo.redisValue = JSON.stringify(JSON.parse(this.commonVo.redisValue))
                 }
             },
             saveConnect() {
@@ -289,7 +291,7 @@
                 }).then(res => {
                     if (res.data.code === 0) {
                         this.connectVos = res.data.data
-                        if(this.connectVos.length>0){
+                        if (this.connectVos.length > 0) {
                             this.commonVo.connectId = this.connectVos[0].connectId
                         }
                     }
@@ -339,7 +341,9 @@
                 this.listKeys(this.node_had, this.resolve_had);
             },
             nodeClick(data, node) {
-                if (node.level == 2) {
+                if (node.level === 1) {
+                    this.commonVo.redisDbIndex = data.redisDbIndex
+                } else if (node.level == 2) {
                     this.commonVo.redisKey = data.label
                     this.commonVo.redisKeyBase64 = data.labelBase64
                     this.commonVo.oldRedisKey = data.label
