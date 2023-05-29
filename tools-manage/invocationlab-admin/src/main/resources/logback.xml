@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="project.name" value="rpc-postman"/>
+    <property name="local.logging.path" value="logs"/>
+    <property name="logging.file.path" value="${local.logging.path}"/>
+    <property name="logging.file.name" value="${logging.file.path}/${project.name}"/>
+    <property name="layout" value="%d %p [%t] %c{10}:%M:%L %m%n"/>
+
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${layout}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="infoFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <file>${logging.file.name}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logging.file.name}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${layout}</pattern>
+        </encoder>
+    </appender>
+
+    <root>
+        <level value="info"/>
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="infoFile"/>
+    </root>
+</configuration>
