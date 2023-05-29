@@ -79,7 +79,7 @@
                         </el-col>
                     </el-row>
 
-                    <el-table v-if="fieldVos.length>0" :key="Math.random()" :data="fieldVos" @row-click="fieldRowClick"
+                    <el-table v-if="fieldVos.length>0" :data="fieldVos" @row-click="fieldRowClick"
                         border style="width: 98%" height="170">
                         <el-table-column prop="fieldKey" label="field" v-if="commonVo.redisKeyType==='hash'">
                         </el-table-column>

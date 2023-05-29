@@ -1,0 +1,725 @@
+{
+  "modules": [],
+  "profile": {
+    "defaultFields": [
+      {
+        "chnname": "主键ID",
+        "name": "id",
+        "typeName": "无符号大整数",
+        "type": "BigIntUnsigned",
+        "dataType": "BIGINT UNSIGNED",
+        "remark": "",
+        "pk": true,
+        "notNull": true,
+        "autoIncrement": true,
+        "relationNoShow": false,
+        "defaultValue": "",
+        "uiHint": ""
+      },
+      {
+        "chnname": "创建人编码",
+        "name": "create_code",
+        "typeName": "变长字符串",
+        "type": "String",
+        "dataType": "VARCHAR",
+        "remark": "(16)",
+        "pk": false,
+        "notNull": false,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": "",
+        "uiHint": ""
+      },
+      {
+        "chnname": "创建人名称",
+        "name": "create_name",
+        "typeName": "变长字符串",
+        "type": "String",
+        "dataType": "VARCHAR",
+        "remark": "(32)",
+        "pk": false,
+        "notNull": false,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": "",
+        "uiHint": ""
+      },
+      {
+        "chnname": "创建时间",
+        "name": "create_time",
+        "typeName": "日期时间",
+        "type": "DateTime",
+        "dataType": "DATETIME",
+        "remark": "",
+        "pk": false,
+        "notNull": false,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": "CURRENT_TIMESTAMP",
+        "uiHint": ""
+      },
+      {
+        "chnname": "操作人编码",
+        "name": "op_code",
+        "typeName": "变长字符串",
+        "type": "String",
+        "dataType": "VARCHAR",
+        "remark": "(16)",
+        "pk": false,
+        "notNull": false,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": "",
+        "uiHint": ""
+      },
+      {
+        "chnname": "操作人名称",
+        "name": "op_name",
+        "typeName": "变长字符串",
+        "type": "String",
+        "dataType": "VARCHAR",
+        "remark": "(32)",
+        "pk": false,
+        "notNull": false,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": "",
+        "uiHint": ""
+      },
+      {
+        "chnname": "操作时间",
+        "name": "create_time",
+        "typeName": "日期时间",
+        "type": "DateTime",
+        "dataType": "DATETIME",
+        "remark": "",
+        "pk": false,
+        "notNull": false,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": "CURRENT_TIMESTAMP",
+        "uiHint": ""
+      },
+      {
+        "chnname": "状态枚举-INVALID:0:失效;VALID:1:有效",
+        "name": "state",
+        "typeName": "微小整数",
+        "type": "TinyInt",
+        "dataType": "TINYINT",
+        "remark": "(4)",
+        "pk": false,
+        "notNull": true,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": 1,
+        "uiHint": ""
+      },
+      {
+        "chnname": "删除标识枚举-DEL:0:已删除;NORMAL:1:正常",
+        "name": "state",
+        "typeName": "微小整数",
+        "type": "TinyInt",
+        "dataType": "TINYINT",
+        "remark": "(4)",
+        "pk": false,
+        "notNull": true,
+        "autoIncrement": false,
+        "relationNoShow": false,
+        "defaultValue": 1,
+        "uiHint": ""
+      }
+    ]
+  },
+  "dataTypeDomains": {
+    "datatype": [
+      {
+        "name": "变长字符串",
+        "code": "String",
+        "apply": {
+          "java": {
+            "type": "String"
+          },
+          "mysql": {
+            "type": "VARCHAR"
+          },
+          "oracle": {
+            "type": "NVARCHAR2"
+          },
+          "sqlserver": {
+            "type": "NVARCHAR"
+          },
+          "JAVA": {
+            "type": "String"
+          },
+          "MYSQL": {
+            "type": "VARCHAR"
+          },
+          "ORACLE": {
+            "type": "NVARCHAR2"
+          },
+          "SQLServer": {
+            "type": "NVARCHAR"
+          },
+          "PostgreSQL": {
+            "type": "VARCHAR"
+          }
+        }
+      },
+      {
+        "name": "字符串",
+        "code": "Char",
+        "apply": {
+          "java": {
+            "type": "String"
+          },
+          "mysql": {
+            "type": "CHAR"
+          },
+          "oracle": {
+            "type": "CHAR"
+          },
+          "sqlserver": {
+            "type": "CHAR"
+          },
+          "JAVA": {
+            "type": "String"
+          },
+          "MYSQL": {
+            "type": "CHAR"
+          },
+          "ORACLE": {
+            "type": "CHAR"
+          },
+          "SQLServer": {
+            "type": "CHAR"
+          },
+          "PostgreSQL": {
+            "type": "CHAR"
+          }
+        }
+      },
+      {
+        "name": "文本",
+        "code": "Text",
+        "apply": {
+          "java": {
+            "type": "String"
+          },
+          "mysql": {
+            "type": "TEXT"
+          },
+          "oracle": {
+            "type": "CLOB"
+          },
+          "sqlserver": {
+            "type": "NTEXT"
+          },
+          "JAVA": {
+            "type": "String"
+          },
+          "MYSQL": {
+            "type": "TEXT"
+          },
+          "ORACLE": {
+            "type": "CLOB"
+          },
+          "SQLServer": {
+            "type": "NTEXT"
+          },
+          "PostgreSQL": {
+            "type": "TEXT"
+          }
+        }
+      },
+      {
+        "name": "浮点数",
+        "code": "Double",
+        "apply": {
+          "java": {
+            "type": "Double"
+          },
+          "mysql": {
+            "type": "DECIMAL"
+          },
+          "oracle": {
+            "type": "NUMBER"
+          },
+          "sqlserver": {
+            "type": "DECIMAL"
+          },
+          "JAVA": {
+            "type": "Double"
+          },
+          "MYSQL": {
+            "type": "DECIMAL"
+          },
+          "ORACLE": {
+            "type": "NUMBER"
+          },
+          "SQLServer": {
+            "type": "DECIMAL"
+          },
+          "PostgreSQL": {
+            "type": "DECIMAL"
+          }
+        }
+      },      
+      {
+        "name": "微小整数",
+        "code": "TinyInt",
+        "apply": {
+          "java": {
+            "type": "Integer"
+          },
+          "mysql": {
+            "type": "TINYINT"
+          },
+          "oracle": {
+            "type": "TINYINT"
+          },
+          "sqlserver": {
+            "type": "TINYINT"
+          },
+          "JAVA": {
+            "type": "Integer"
+          },
+          "MYSQL": {
+            "type": "TINYINT"
+          },
+          "ORACLE": {
+            "type": "TINYINT"
+          },
+          "SQLServer": {
+            "type": "TINYINT"
+          },
+          "PostgreSQL": {
+            "type": "TINYINT"
+          }
+        }
+      },
+      {
+        "name": "无符号微小整数",
+        "code": "TinyIntUnsigned",
+        "apply": {
+          "java": {
+            "type": "Integer"
+          },
+          "mysql": {
+            "type": "TINYINT UNSIGNED"
+          },
+          "oracle": {
+            "type": "TINYINT UNSIGNED"
+          },
+          "sqlserver": {
+            "type": "TINYINT UNSIGNED"
+          },
+          "JAVA": {
+            "type": "Integer"
+          },
+          "MYSQL": {
+            "type": "TINYINT UNSIGNED"
+          },
+          "ORACLE": {
+            "type": "TINYINT UNSIGNED"
+          },
+          "SQLServer": {
+            "type": "TINYINT UNSIGNED"
+          },
+          "PostgreSQL": {
+            "type": "TINYINT UNSIGNED"
+          }
+        }
+      },
+      {
+        "name": "小整数",
+        "code": "SmallInt",
+        "apply": {
+          "java": {
+            "type": "Integer"
+          },
+          "mysql": {
+            "type": "SMALLINT"
+          },
+          "oracle": {
+            "type": "SMALLINT"
+          },
+          "sqlserver": {
+            "type": "SMALLINT"
+          },
+          "JAVA": {
+            "type": "Integer"
+          },
+          "MYSQL": {
+            "type": "SMALLINT"
+          },
+          "ORACLE": {
+            "type": "SMALLINT"
+          },
+          "SQLServer": {
+            "type": "SMALLINT"
+          },
+          "PostgreSQL": {
+            "type": "SMALLINT"
+          }
+        }
+      },
+      {
+        "name": "无符号小整数",
+        "code": "SmallIntUnsigned",
+        "apply": {
+          "java": {
+            "type": "Integer"
+          },
+          "mysql": {
+            "type": "SMALLINT UNSIGNED"
+          },
+          "oracle": {
+            "type": "NUMBER UNSIGNED"
+          },
+          "sqlserver": {
+            "type": "SMALLINT UNSIGNED"
+          },
+          "JAVA": {
+            "type": "Integer"
+          },
+          "MYSQL": {
+            "type": "SMALLINT UNSIGNED"
+          },
+          "ORACLE": {
+            "type": "NUMBER UNSIGNED"
+          },
+          "SQLServer": {
+            "type": "SMALLINT UNSIGNED"
+          },
+          "PostgreSQL": {
+            "type": "SMALLINT UNSIGNED"
+          }
+        }
+      },
+      {
+        "name": "整数",
+        "code": "Integer",
+        "apply": {
+          "java": {
+            "type": "Integer"
+          },
+          "mysql": {
+            "type": "INT"
+          },
+          "oracle": {
+            "type": "INT"
+          },
+          "sqlserver": {
+            "type": "INT"
+          },
+          "JAVA": {
+            "type": "Integer"
+          },
+          "MYSQL": {
+            "type": "INT"
+          },
+          "ORACLE": {
+            "type": "INT"
+          },
+          "SQLServer": {
+            "type": "INT"
+          },
+          "PostgreSQL": {
+            "type": "INT"
+          }
+        }
+      },
+      {
+        "name": "无符号整数",
+        "code": "IntegerUnsigned",
+        "apply": {
+          "java": {
+            "type": "Long"
+          },
+          "mysql": {
+            "type": "INT UNSIGNED"
+          },
+          "oracle": {
+            "type": "INT UNSIGNED"
+          },
+          "sqlserver": {
+            "type": "INT UNSIGNED"
+          },
+          "JAVA": {
+            "type": "Long"
+          },
+          "MYSQL": {
+            "type": "INT UNSIGNED"
+          },
+          "ORACLE": {
+            "type": "INT UNSIGNED"
+          },
+          "SQLServer": {
+            "type": "INT UNSIGNED"
+          },
+          "PostgreSQL": {
+            "type": "INT UNSIGNED"
+          }
+        }
+      },
+      {
+        "name": "大整数",
+        "code": "BigInt",
+        "apply": {
+          "java": {
+            "type": "Long"
+          },
+          "mysql": {
+            "type": "BIGINT"
+          },
+          "oracle": {
+            "type": "NUMBER"
+          },
+          "sqlserver": {
+            "type": "BIGINT"
+          },
+          "JAVA": {
+            "type": "Long"
+          },
+          "MYSQL": {
+            "type": "BIGINT"
+          },
+          "ORACLE": {
+            "type": "NUMBER"
+          },
+          "SQLServer": {
+            "type": "BIGINT"
+          },
+          "PostgreSQL": {
+            "type": "BIGINT"
+          }
+        }
+      },
+      {
+        "name": "无符号大整数",
+        "code": "BigIntUnsigned",
+        "apply": {
+          "java": {
+            "type": "Long"
+          },
+          "mysql": {
+            "type": "BIGINT UNSIGNED"
+          },
+          "oracle": {
+            "type": "NUMBER UNSIGNED"
+          },
+          "sqlserver": {
+            "type": "BIGINT UNSIGNED"
+          },
+          "JAVA": {
+            "type": "Long"
+          },
+          "MYSQL": {
+            "type": "BIGINT UNSIGNED"
+          },
+          "ORACLE": {
+            "type": "NUMBER UNSIGNED"
+          },
+          "SQLServer": {
+            "type": "BIGINT UNSIGNED"
+          },
+          "PostgreSQL": {
+            "type": "BIGINT UNSIGNED"
+          }
+        }
+      },
+      {
+        "name": "日期",
+        "code": "Date",
+        "apply": {
+          "java": {
+            "type": "Date"
+          },
+          "mysql": {
+            "type": "DATE"
+          },
+          "oracle": {
+            "type": "DATE"
+          },
+          "sqlserver": {
+            "type": "DATE"
+          },
+          "JAVA": {
+            "type": "Date"
+          },
+          "MYSQL": {
+            "type": "DATE"
+          },
+          "ORACLE": {
+            "type": "DATE"
+          },
+          "SQLServer": {
+            "type": "DATE"
+          },
+          "PostgreSQL": {
+            "type": "DATE"
+          }
+        }
+      },
+      {
+        "name": "日期",
+        "code": "Timestamp",
+        "apply": {
+          "java": {
+            "type": "Date"
+          },
+          "mysql": {
+            "type": "TIMESTAMP"
+          },
+          "oracle": {
+            "type": "TIMESTAMP"
+          },
+          "sqlserver": {
+            "type": "TIMESTAMP"
+          },
+          "JAVA": {
+            "type": "Date"
+          },
+          "MYSQL": {
+            "type": "TIMESTAMP"
+          },
+          "ORACLE": {
+            "type": "TIMESTAMP"
+          },
+          "SQLServer": {
+            "type": "TIMESTAMP"
+          },
+          "PostgreSQL": {
+            "type": "TIMESTAMP"
+          }
+        }
+      },
+      {
+        "name": "年份",
+        "code": "Year",
+        "apply": {
+          "java": {
+            "type": "Date"
+          },
+          "mysql": {
+            "type": "YEAR"
+          },
+          "oracle": {
+            "type": "DATE"
+          },
+          "sqlserver": {
+            "type": "DATE"
+          },
+          "JAVA": {
+            "type": "Date"
+          },
+          "MYSQL": {
+            "type": "YEAR"
+          },
+          "ORACLE": {
+            "type": "DATE"
+          },
+          "SQLServer": {
+            "type": "DATE"
+          },
+          "PostgreSQL": {
+            "type": "DATE"
+          }
+        }
+      },
+      {
+        "name": "日期时间",
+        "code": "DateTime",
+        "apply": {
+          "java": {
+            "type": "Date"
+          },
+          "mysql": {
+            "type": "DATETIME"
+          },
+          "oracle": {
+            "type": "DATE"
+          },
+          "sqlserver": {
+            "type": "DATE"
+          },
+          "JAVA": {
+            "type": "Date"
+          },
+          "MYSQL": {
+            "type": "DATETIME"
+          },
+          "ORACLE": {
+            "type": "DATE"
+          },
+          "SQLServer": {
+            "type": "DATE"
+          },
+          "PostgreSQL": {
+            "type": "DATE"
+          }
+        }
+      }
+    ],
+    "database": [
+      {
+        "code": "MYSQL",
+        "template": "DROP TABLE `{{=it.entity.title}}`;\n$blankline\nCREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}} {{= field.pk ? 'NOT NULL' : '' }} COMMENT '{{=it.func.join(field.chnname,field.remark,';')}}' {{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n) COMMENT = '{{=it.func.join(it.entity.chnname,it.entity.remark,';') }}'",
+        "fileShow": true,
+        "defaultDatabase": true,
+        "createTableTemplate": "CREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.dataType}}{{=field.remark}} {{= field.notNull ? 'NOT NULL' : '' }} {{= field.autoIncrement ? 'AUTO_INCREMENT' : '' }} {{= field.defaultValue ? it.func.join('DEFAULT',field.defaultValue,' ') : '' }} COMMENT '{{=it.func.join(field.chnname,' ')}}' {{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n) COMMENT = '{{=it.func.join(it.entity.chnname,' ') }}';{{=it.separator}}\n$blankline\n",
+        "deleteTableTemplate": "DROP TABLE `{{=it.entity.title}}`;{{=it.separator}}",
+        "rebuildTableTemplate": "create table ERD_UP_{{=it.oldEntity.title}}\nas select * from {{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n\ndrop table {{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n\nCREATE TABLE {{=it.newEntity.title}}(\n{{ pkList = [] ; }}\n{{~it.newEntity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}} {{= field.notNull ? 'NOT NULL' : '' }} COMMENT '{{=it.func.join(field.chnname,field.remark,';')}}' {{= index < it.newEntity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n) COMMENT = '{{=it.func.join(it.newEntity.chnname,it.newEntity.remark,';') }}';{{=it.separator}}\n$blankline\n\n{{ sameCols = it.func.intersect(it.newEntity.fields,it.oldEntity.fields) ;}}\ninsert into {{=it.newEntity.title}}(\n{{~sameCols:field:index}}\n    `{{=field.name}}`{{? index<sameCols.length-1}},{{?}}\n{{~}}\n) \nselect \n{{~sameCols:field:index}}\n    `{{=field.name}}`{{? index<sameCols.length-1}},{{?}}\n{{~}}\nfrom ERD_UP_{{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n\ndrop table ERD_UP_{{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n{{~it.newEntity.indexs:index}}\nALTER TABLE {{=it.newEntity.title}} ADD {{? index.isUnique}}UNIQUE{{??}}INDEX{{?}} {{=index.name}}({{=it.func.join(...index.fields,',')}});{{=it.separator}}\n{{~}}",
+        "createFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` ADD COLUMN `{{=it.field.name}}` {{=it.field.type}} {{? it.field.notNull}}NOT NULL{{?}} {{? it.field.defaultValue}}DEFAULT {{? null==it.field.defaultValue}}NULL{{??}}{{=it.field.defaultValue}}{{?}}{{?}} {{? it.field.autoIncrement}}AUTO_INCREMENT{{?}} {{? it.field.pk}}PRIMARY KEY{{?}} {{? it.field.chnname}}COMMENT '{{=it.field.chnname}}'{{?}} {{? it.field.addAfter}}AFTER {{=it.field.addAfter}}{{?}};{{=it.separator}}",
+        "updateFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` MODIFY COLUMN `{{=it.field.name}}` {{=it.field.type}} {{? it.field.notNull}}NOT NULL{{?}} {{? it.field.defaultValue}}DEFAULT {{? null==it.field.defaultValue}}NULL{{?? 'CURRENT_TIMESTAMP' == it.field.defaultValue}}CURRENT_TIMESTAMP{{??}}{{=it.field.defaultValue}}{{?}} {{?}} {{? it.field.autoIncrement}}AUTO_INCREMENT{{?}} {{? it.field.chnname}}COMMENT '{{=it.field.chnname}}'{{?}};{{=it.separator}}",
+        "deleteFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` DROP `{{=it.field.name}}`;{{=it.separator}}",
+        "deleteIndexTemplate": "ALTER TABLE `{{=it.entity.title}}` DROP INDEX `{{=it.index.name}}`;{{=it.separator}}",
+        "createIndexTemplate": "ALTER TABLE `{{=it.entity.title}}` ADD {{? it.index.isUnique}}UNIQUE{{??}}INDEX{{?}} `{{=it.index.name}}`({{=it.func.join(...it.index.fields,',')}});{{=it.separator}}",
+        "updateTableComment": "ALTER TABLE `{{=it.entity.title}}` COMMENT '{{=it.entity.chnname}}';{{=it.separator}}"
+      },
+      {
+        "code": "ORACLE",
+        "template": "DROP TABLE `{{=it.entity.title}}`;{{=it.separator}}\n$blankline\nCREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}}  {{= field.pk ? 'NOT NULL' : '' }} {{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n);{{=it.separator}}\n$blankline\nCOMMENT ON TABLE `{{=it.entity.title}}` IS '{{=it.func.join(it.entity.chnname,it.entity.remark,';') }}';{{=it.separator}}\n{{~it.entity.fields:field:index}}\nCOMMENT ON COLUMN `{{=it.entity.title}}`.`{{=field.name}}` IS '{{=it.func.join(field.chnname,field.remark,';')}}';{{=it.separator}}\n{{~}}",
+        "createTableTemplate": "CREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}}{{? field.defaultValue}} DEFAULT {{=field.defaultValue}}{{?}}{{= field.notNull ? ' NOT NULL' : '' }}{{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n);{{=it.separator}}\n$blankline\n{{? it.entity.chnname || it.entity.remark}}COMMENT ON TABLE `{{=it.entity.title}}` IS {{? it.entity.remark}}'{{=it.entity.remark}}'{{??}}'{{=it.entity.chnname}}'{{?}};{{=it.separator}}{{?}}\n{{~it.entity.fields:field:index}}\n{{? field.chnname || field.remark}}COMMENT ON COLUMN `{{=it.entity.title}}`.`{{=field.name}}` IS {{? field.remark}}'{{=field.remark}}'{{??}}'{{=field.chnname}}'{{?}};{{=it.separator}}{{?}}\n{{~}}",
+        "deleteTableTemplate": "DROP TABLE `{{=it.entity.title}}`;{{=it.separator}}\r\n$blankline",
+        "rebuildTableTemplate": "CREATE TABLE ERD_UP_{{=it.oldEntity.title}}\nAS SELECT * FROM {{=it.oldEntity.title}};{{=it.separator}}\n$blankline\nDROP TABLE {{=it.oldEntity.title}};{{=it.separator}}\n$blankline\nCREATE TABLE {{=it.newEntity.title}}(\n{{ pkList = [] ; }}{{~it.newEntity.fields:field:index}}{{? field.pk }}{{ pkList.push(field.name) }}{{?}}    `{{=field.name}}` {{=field.type}}{{? field.defaultValue}} DEFAULT {{=field.defaultValue}}{{?}}{{= field.notNull ? ' NOT NULL' : '' }}{{= index < it.newEntity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}{{? pkList.length >0 }}    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}}){{?}}\n);{{=it.separator}}\n$blankline\n{{? it.newEntity.chnname || it.newEntity.remark}}COMMENT ON TABLE {{=it.newEntity.title}} IS {{? it.newEntity.remark}}'{{=it.entity.remark}}'{{??}}'{{=it.newEntity.chnname}}'{{?}};{{?}}{{=it.separator}}\n{{~it.newEntity.fields:field:index}}\n{{? field.chnname || field.remark}}COMMENT ON COLUMN {{=it.newEntity.title}}.`{{=field.name}}` IS {{? field.remark}}'{{=field.remark}}'{{??}}'{{=field.chnname}}'{{?}};{{?}}{{=it.separator}}\n{{~}}\n{{ sameCols = it.func.intersect(it.newEntity.fields,it.oldEntity.fields) ;}}\n$blankline\nINSERT INTO {{=it.newEntity.title}}(\n{{~sameCols:field:index}}   `{{=field.name}}`{{? index<sameCols.length-1}},{{?}}\n{{~}}) \nSELECT\n{{~sameCols:field:index}}   `{{=field.name}}`{{? index<sameCols.length-1}},{{?}}\n{{~}}FROM ERD_UP_{{=it.oldEntity.title}};{{=it.separator}}\n\nDROP TABLE ERD_UP_{{=it.oldEntity.title}};{{=it.separator}}\n{{~it.newEntity.indexs:index}}\nCREATE{{? index.isUnique}} UNIQUE{{?}} INDEX {{=index.name}} ON {{=it.newEntity.title}}({{=it.func.join(index.fields,',')}});{{=it.separator}}\n{{~}}",
+        "createFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` ADD(`{{=it.field.name}}` {{=it.field.type}}{{? it.field.defaultValue}} DEFAULT {{=it.field.defaultValue}}{{?}}{{? it.field.notNull}} NOT NULL{{?}});{{=it.separator}}\r\n{{? it.field.chnname || it.field.remark}}COMMENT ON COLUMN `{{=it.entity.title}}`.`{{=it.field.name}}` IS {{? it.field.remark}}'{{=it.field.remark}}'{{??}}'{{=it.field.chnname}}'{{?}};{{=it.separator}}{{?}}\r\n$blankline",
+        "updateFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` MODIFY(`{{=it.field.name}}` {{=it.field.type}}{{? it.field.defaultValue}} DEFAULT {{=it.field.defaultValue}}{{?}}{{? it.field.notNull}} NOT NULL{{?}});{{=it.separator}}\r\n{{? it.field.chnname || it.field.remark}}COMMENT ON COLUMN `{{=it.entity.title}}`.`{{=it.field.name}}` IS {{? it.field.remark}}'{{=it.field.remark}}'{{??}}'{{=it.field.chnname}}'{{?}};{{=it.separator}}{{=it.separator}}{{?}}\r\n$blankline",
+        "deleteFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` DROP(`{{=it.field.name}}`);{{=it.separator}}\r\n$blankline",
+        "deleteIndexTemplate": "DROP INDEX `{{=it.entity.title}}`.`{{=it.index.name}}`;{{=it.separator}}\r\n$blankline",
+        "createIndexTemplate": "CREATE{{? it.index.isUnique}} UNIQUE{{?}} INDEX `{{=it.index.name}}` ON `{{=it.entity.title}}`({{=it.func.join(it.index.fields,',')}});{{=it.separator}}\r\n$blankline",
+        "updateTableComment": "{{? it.entity.chnname || it.entity.remark}}COMMENT ON TABLE `{{=it.entity.title}}` IS {{? it.entity.remark}}'{{=it.entity.remark}}'{{??}}'{{=it.entity.chnname}}'{{?}};{{=it.separator}}{{?}}\r\n$blankline"
+      },
+      {
+        "code": "SQLServer",
+        "createTableTemplate": "CREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}} {{= field.notNull ? 'NOT NULL' : '' }} {{= field.autoIncrement ? 'IDENTITY(1,1)' : '' }} {{= field.defaultValue ? it.func.join('DEFAULT',field.defaultValue,' ') : '' }}  {{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    CONSTRAINT PK_`{{=it.entity.title}}` PRIMARY KEY CLUSTERED ({{~pkList:pkName:i}}{{= pkName }} ASC {{= i<pkList.length-1 ? ',' : '' }}{{~}}) ON [PRIMARY] \n{{?}}\n) ;{{=it.separator}}\n\n$blankline\nEXECUTE sp_addextendedproperty N'MS_Description', '{{= it.entity.chnname || it.entity.remark}}', N'user', N'dbo', N'table', N'`{{=it.entity.title}}`', NULL, NULL;{{=it.separator}}\n{{~it.entity.fields:field:index}}\n{{? field.chnname || field.remark}}EXECUTE sp_addextendedproperty N'MS_Description', {{? field.remark}}'{{=field.remark}}'{{??}}'{{=field.chnname}}'{{?}}, N'user', N'dbo', N'table', N'`{{=it.entity.title}}`', N'column', N'`{{=field.name}}`';{{=it.separator}}{{?}}\n{{~}}\n"
+      },
+      {
+        "code": "PostgreSQL",
+        "template": "DROP TABLE `{{=it.entity.title}}`;\n$blankline\nCREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}} {{= field.pk ? 'NOT NULL' : '' }} COMMENT '{{=it.func.join(field.chnname,field.remark,';')}}' {{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n) COMMENT = '{{=it.func.join(it.entity.chnname,it.entity.remark,';') }}'",
+        "createTableTemplate": "CREATE TABLE `{{=it.entity.title}}`(\n{{ pkList = [] ; }}\n{{~it.entity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}}{{? field.defaultValue}} DEFAULT {{=field.defaultValue}}{{?}}{{= field.notNull ? ' NOT NULL' : '' }}{{= index < it.entity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n);{{=it.separator}}\n$blankline\n{{? it.entity.chnname || it.entity.remark}}COMMENT ON TABLE `{{=it.entity.title}}` IS {{? it.entity.remark}}'{{=it.entity.remark}}'{{??}}'{{=it.entity.chnname}}'{{?}};{{=it.separator}}{{?}}\n{{~it.entity.fields:field:index}}\n{{? field.chnname || field.remark}}COMMENT ON COLUMN `{{=it.entity.title}}`.`{{=field.name}}` IS {{? field.remark}}'{{=field.remark}}'{{??}}'{{=field.chnname}}'{{?}};{{=it.separator}}{{?}}\n{{~}}",
+        "deleteTableTemplate": "DROP TABLE `{{=it.entity.title}}`;{{=it.separator}}",
+        "rebuildTableTemplate": "create table ERD_UP_{{=it.oldEntity.title}}\nas select * from {{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n\ndrop table {{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n\nCREATE TABLE {{=it.newEntity.title}}(\n{{ pkList = [] ; }}\n{{~it.newEntity.fields:field:index}}\n    {{? field.pk }}{{ pkList.push(field.name) }}{{?}}\n    `{{=field.name}}` {{=field.type}} {{= field.notNull ? 'NOT NULL' : '' }} COMMENT '{{=it.func.join(field.chnname,field.remark,';')}}' {{= index < it.newEntity.fields.length-1 ? ',' : ( pkList.length>0 ? ',' :'' ) }}\n{{~}}\n{{? pkList.length >0 }}\n    PRIMARY KEY ({{~pkList:pkName:i}}{{= pkName }}{{= i<pkList.length-1 ? ',' : '' }}{{~}})\n{{?}}\n) COMMENT = '{{=it.func.join(it.newEntity.chnname,it.newEntity.remark,';') }}';{{=it.separator}}\n$blankline\n\n{{ sameCols = it.func.intersect(it.newEntity.fields,it.oldEntity.fields) ;}}\ninsert into {{=it.newEntity.title}}(\n{{~sameCols:field:index}}\n    `{{=field.name}}`{{? index<sameCols.length-1}},{{?}}\n{{~}}\n) \nselect \n{{~sameCols:field:index}}\n    `{{=field.name}}`{{? index<sameCols.length-1}},{{?}}\n{{~}}\nfrom ERD_UP_{{=it.oldEntity.title}};{{=it.separator}}\n$blankline\n\ndrop table ERD_UP_{{=it.oldEntity.title}};{{=it.separator}}",
+        "createFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` ADD COLUMN `{{=it.field.name}}` {{=it.field.type}} {{? it.field.notNull}}NOT NULL{{?}} {{? it.field.defaultValue}}DEFAULT {{? null==it.field.defaultValue}}NULL{{??}}{{=it.field.defaultValue}}{{?}}{{?}} {{? it.field.autoIncrement}}AUTO_INCREMENT{{?}} {{? it.field.pk}}PRIMARY KEY{{?}} {{? it.field.chnname}}COMMENT '{{=it.field.chnname}}'{{?}} {{? it.field.addAfter}}AFTER {{=it.field.addAfter}}{{?}};{{=it.separator}}",
+        "updateFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` MODIFY COLUMN `{{=it.field.name}}` {{=it.field.type}} {{? it.field.notNull}}NOT NULL{{?}} {{? it.field.defaultValue}}DEFAULT {{? null==it.field.defaultValue}}NULL{{??}}{{=it.field.defaultValue}}{{?}}{{?}} {{? it.field.autoIncrement}}AUTO_INCREMENT{{?}} {{? it.field.chnname}}COMMENT '{{=it.field.chnname}}'{{?}};{{=it.separator}}",
+        "deleteFieldTemplate": "ALTER TABLE `{{=it.entity.title}}` DROP `{{=it.field.name}}`;{{=it.separator}}",
+        "deleteIndexTemplate": "ALTER TABLE `{{=it.entity.title}}` DROP INDEX `{{=it.index.name}}`;{{=it.separator}}",
+        "createIndexTemplate": "ALTER TABLE `{{=it.entity.title}}` ADD {{? it.index.isUnique}}UNIQUE{{??}}INDEX{{?}} `{{=it.index.name}}`({{=it.func.join(...it.index.fields,',')}});{{=it.separator}}",
+        "updateTableComment": "ALTER TABLE `{{=it.entity.title}}` COMMENT '{{=it.entity.chnname}}';{{=it.separator}}"
+      },
+      {
+        "code": "JAVA",
+        "template": "package group.rober.erd.{{=it.module.name}}.entity;\n$blankline\nimport javax.persistence.*;\nimport java.io.Serializable;\nimport java.util.Date;\n$blankline\n$blankline\n\n/** {{=it.entity.chnname}} */\n@Table(name=\"`{{=it.entity.title}}`\")\npublic class {{=it.func.camel(it.entity.title,true) }} implements Serializable,Cloneable{\n{{~it.entity.fields:field:index}}\n    /** {{=it.func.join(field.chnname,field.remark,';')}} */\n    {{? field.pk }}\n    @Id\n    @GeneratedValue\n    {{?}}\n    private {{=field.type}} {{=it.func.camel(field.name,false)}} ;\n{{~}}\n$blankline\n{{~it.entity.fields:field:index}}\n    /** {{=it.func.join(field.chnname,field.remark,';')}} */\n    public {{=field.type}} get{{=it.func.camel(field.name,true)}}(){\n        return this.{{=it.func.camel(field.name,false)}};\n    }\n    /** {{=it.func.join(field.chnname,field.remark,';')}} */\n    public void set{{=it.func.camel(field.name,true)}}({{=field.type}} {{= it.func.camel(field.name,false) }}){\n        this.{{=it.func.camel(field.name,false)}} = {{= it.func.camel(field.name,false) }};\n    }\n{{~}}\n}",
+        "createTableTemplate": "package group.rober.erd.{{=it.module.name}}.entity;\n$blankline\nimport javax.persistence.*;\nimport java.io.Serializable;\nimport java.util.Date;\n$blankline\n$blankline\n@Table(name=\"`{{=it.entity.title}}`\")\npublic class {{=it.func.camel(it.entity.title,true) }} implements Serializable,Cloneable{\n{{~it.entity.fields:field:index}}\n    /** {{=it.func.join(field.chnname,field.remark,';')}} */\n    {{? field.pk }}\n    @Id\n    @GeneratedValue\n    {{?}}\n    private {{=field.type}} {{=it.func.camel(field.name,false)}} ;\n{{~}}\n$blankline\n{{~it.entity.fields:field:index}}\n    /** {{=it.func.join(field.chnname,field.remark,';')}} */\n    public {{=field.type}} get{{=it.func.camel(field.name,true)}}(){\n        return this.{{=it.func.camel(field.name,false)}};\n    }\n    /** {{=it.func.join(field.chnname,field.remark,';')}} */\n    public void set{{=it.func.camel(field.name,true)}}({{=field.type}} {{= it.func.camel(field.name,false) }}){\n        this.{{=it.func.camel(field.name,false)}} = {{= it.func.camel(field.name,false) }};\n    }\n{{~}}\n}",
+        "deleteTableTemplate": "",
+        "rebuildTableTemplate": "",
+        "createFieldTemplate": "",
+        "updateFieldTemplate": "",
+        "deleteFieldTemplate": "",
+        "deleteIndexTemplate": "",
+        "createIndexTemplate": "",
+        "updateTableComment": ""
+      }
+    ]
+  }
+}
