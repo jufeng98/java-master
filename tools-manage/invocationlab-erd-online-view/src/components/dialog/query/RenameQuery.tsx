@@ -4,6 +4,8 @@ import shallow from "zustand/shallow";
 import {Button} from "antd";
 import {EditOutlined} from "@ant-design/icons";
 import useQueryStore from "@/store/query/useQueryStore";
+import * as cache from "@/utils/cache";
+import { CONSTANT } from "@/utils/constant";
 
 export type RenameQueryProps = {
   model: any;
@@ -29,6 +31,7 @@ const RenameQuery: React.FC<RenameQueryProps> = (props) => {
         await queryDispatch.renameQuery({
           id:props.model.id,
           title: values.title,
+          projectId: cache.getItem(CONSTANT.PROJECT_ID),
         });
         return true;
       }}

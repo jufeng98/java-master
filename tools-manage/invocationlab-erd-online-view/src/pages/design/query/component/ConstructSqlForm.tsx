@@ -52,6 +52,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
       }
     })
       .then(res => {
+        form.setFieldValue('conditionsChoose', [])
         setCodeLoading(false)
         if (!res.data) {
           return;
@@ -246,6 +247,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
         </Form.Item>
         <Form.Item name="tableColumnNamesChoose" label="选择要查询的列" rules={[{ required: true }]} >
           <Select
+            showSearch
             style={{ width: 630 }}
             size='middle'
             mode="multiple"

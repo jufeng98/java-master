@@ -16,12 +16,12 @@ export default {
   },
   test: {
     '/ncnb/': {
-      target: 'http://127.0.0.1:8083', // http://192.168.241.106:8083
+      target: 'http://127.0.0.1:8083',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
     '/auth/': {
-      target: 'http://192.168.241.106:8083', // http://192.168.241.106:8083
+      target: 'http://127.0.0.1:8083',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

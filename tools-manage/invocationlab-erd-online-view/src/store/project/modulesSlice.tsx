@@ -68,16 +68,10 @@ const ModulesSlice = (set: SetState<ProjectState>, get: GetState<ProjectState>) 
     }
   })),
   renameModule: (payload: any) => set(produce(state => {
-    const moduleName = payload.name;
     const { currentModuleIndex } = state;
-    const findIndex = state.project.projectJSON?.modules?.findIndex((m: any) => m.name === moduleName);
-    if (findIndex === -1) {
-      state.project.projectJSON.modules[currentModuleIndex].name = payload.name;
-      state.project.projectJSON.modules[currentModuleIndex].chnname = payload.chnname;
-      message.success('修改成功');
-    } else {
-      message.error(`${moduleName}已经存在`);
-    }
+    state.project.projectJSON.modules[currentModuleIndex].name = payload.name;
+    state.project.projectJSON.modules[currentModuleIndex].chnname = payload.chnname;
+    message.success('修改成功');
   })),
   removeModule: () => set(produce(state => {
     const { currentModuleIndex } = state;

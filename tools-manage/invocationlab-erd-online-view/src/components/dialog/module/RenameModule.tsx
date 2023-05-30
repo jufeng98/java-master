@@ -22,7 +22,6 @@ const RenameModule: React.FC<RenameModuleProps> = (props) => {
                 disabled={props.moduleDisable}>重命名模块</Button>
       }
       onFinish={async (values: any) => {
-        console.log(39, values);
         await projectDispatch.renameModule({
           name: values.name,
           chnname: values.chnname,

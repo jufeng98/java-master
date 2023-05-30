@@ -374,6 +374,7 @@ const Query: React.FC<QueryProps> = (props) => {
           queryDispatch.updateSqlInfo({
             id: props.id,
             sqlInfo: queryInfo.sqlInfo,
+            projectId,
             selectDB
           });
         }}>保存SQL</Button>

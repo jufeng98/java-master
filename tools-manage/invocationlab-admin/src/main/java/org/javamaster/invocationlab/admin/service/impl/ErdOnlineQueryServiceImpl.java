@@ -32,6 +32,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -207,6 +208,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
     public Tree saveQueryTree(JSONObject jsonObjectReq, String treeNodeId, TokenVo tokenVo) throws Exception {
         String jsonStrData = (String) stringRedisTemplate.opsForHash().get(QUERY_TREE_TREE_NODE, treeNodeId);
         Tree tree = objectMapper.readValue(jsonStrData, Tree.class);
+        String projectId = jsonObjectReq.getString("projectId");
         String sqlInfo = jsonObjectReq.getString("sqlInfo");
         String selectDB = jsonObjectReq.getString("selectDB");
         if (StringUtils.isNotBlank(sqlInfo)) {
@@ -219,7 +221,33 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
             tree.setLabel(title);
         }
         stringRedisTemplate.opsForHash().put(QUERY_TREE_TREE_NODE, treeNodeId, objectMapper.writeValueAsString(tree));
+
+        List<Tree> queryTreeList = getQueryTreeList(projectId);
+        modifyTreeList(queryTreeList, tree);
+
+        stringRedisTemplate.opsForHash().put(PROJECT_QUERY_TREE, projectId, objectMapper.writeValueAsString(queryTreeList));
         return tree;
+    }
+
+    private void modifyTreeList(List<Tree> queryTreeList, Tree tree) {
+        queryTreeList
+                .forEach(it -> {
+                    if (tree.getIsLeaf()) {
+                        it.getChildren()
+                                .forEach(innerIt -> {
+                                    if (innerIt.getId().equals(tree.getId())) {
+                                        BeanUtils.copyProperties(tree, innerIt);
+                                    }
+                                });
+                    } else {
+                        if (it.getId().equals(tree.getId())) {
+                            it.setSqlInfo(tree.getSqlInfo());
+                            it.setSelectDB(tree.getSelectDB());
+                            it.setLabel(tree.getLabel());
+                            it.setTitle(tree.getTitle());
+                        }
+                    }
+                });
     }
 
     public DbsBean getDefaultDb(String projectId, TokenVo tokenVo) throws Exception {
