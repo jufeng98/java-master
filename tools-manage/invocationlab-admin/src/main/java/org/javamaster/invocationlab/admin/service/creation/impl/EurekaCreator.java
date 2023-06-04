@@ -48,13 +48,16 @@ public class EurekaCreator extends AbstractCreator {
         postmanService.setGav(gav);
         postmanService.setGenerateTime(System.currentTimeMillis());
 
+        // 找到api包里所有带有FeignClient注解的接口
         List<Class<?>> feignClientClasses = loadAllFeignClientClass(serviceName, gav);
+        // 获取所有带有FeignClient注解的接口里的所有方法
         List<InterfaceEntity> list = getAllFeignClientMethods(feignClientClasses);
         postmanService.getInterfaceModels().addAll(list);
 
         saveRedisAndLoad(postmanService);
 
         String serviceKey = BuildUtils.buildServiceKey(postmanService.getCluster(), postmanService.getServiceName());
+        // 将所有带有FeignClient注解的接口注册到Spring上下文中，以便于后续可以调用
         GenericApplicationContext context = FeignServiceRegistrar.register(gav, JarLocalFileLoader.getAllClassLoader().get(serviceKey));
         InvokeContext.putContext(serviceKey, context);
         return new Pair<>(true, "成功");
