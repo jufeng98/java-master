@@ -116,7 +116,7 @@
         <el-dialog title="新增连接" :visible.sync="dialogVisible" v-if="dialogVisible">
             <el-form ref="form" :model="connectInfo" label-width="80px">
                 <el-form-item label="连接名称">
-                    <el-input v-model="connectInfo.name"></el-input>
+                    <el-input placeholder="单机or集群" v-model="connectInfo.name"></el-input>
                 </el-form-item>
                 <el-form-item label="host">
                     <el-input v-model="connectInfo.host"></el-input>
@@ -224,10 +224,10 @@
                 connectInfo: {
                     connectId: '',
                     nodes: '',
-                    name: 'localhost单机',
-                    host: '127.0.0.1',
-                    port: '6379',
-                    password: '123456',
+                    name: '',
+                    host: '',
+                    port: '',
+                    password: '',
                 },
                 dialogVisible: false,
                 dialogKeyVisible: false,
