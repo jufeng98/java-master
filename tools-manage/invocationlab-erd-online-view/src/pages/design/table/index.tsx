@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
-import type { MenuProps } from 'antd';
+import React from "react";
+import { FloatButton } from 'antd';
 import "./index.scss";
 import TableTab from "@/pages/design/table/component/tab/TableTab";
 import useTabStore, { ModuleEntity, TabGroup } from "@/store/tab/useTabStore";
+import useProjectStore from "@/store/project/useProjectStore";
 import Relation from "@/pages/design/relation";
 import { Dropdown, Empty, Menu, Tabs, TabsProps } from "antd";
 import Query from "@/pages/design/query";
@@ -13,7 +14,7 @@ const Table: React.FC<TableProps> = (props) => {
   const tableTabs = useTabStore(state => state.tableTabs);
   const selectTabId = useTabStore(state => state.selectTabId);
   const tabDispatch = useTabStore(state => state.dispatch);
-
+  const { showErrorTipFloatButton } = useProjectStore()
 
   // console.log('tableTabs', tableTabs)
   // console.log('selectTabId', selectTabId)
@@ -146,6 +147,10 @@ const Table: React.FC<TableProps> = (props) => {
           description={
             <span>这里空空如也!</span>
           } />
+      }
+      {
+        showErrorTipFloatButton && <FloatButton description="服务器数据已被人修改，所有保存都将失败。为避免数据互相覆盖导致丢失，请刷新页面后再重试！"
+          shape="square" style={{ right: 50, bottom: 20, width: 340, backgroundColor: "#00000000" }} />
       }
     </>
   );

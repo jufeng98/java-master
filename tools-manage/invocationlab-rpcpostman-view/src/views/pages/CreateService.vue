@@ -41,7 +41,7 @@
                 <el-col :span="14">
 
                     <el-form-item label="API MAVEN依赖：">
-                        <el-input type="textarea" :autosize="{ minRows: 7, maxRows: 7}" placeholder="推荐直接从nexus复制过来比较准确
+                        <el-input type="textarea" :autosize="{ minRows: 7, maxRows: 7}" placeholder="推荐直接从nexus复制过来比较准确（可以没有version元素，此时version将会从私服解析，优先级：最新快照版本、最新稳定版本
 <dependency>
   <groupId>com.xx.yy</groupId>
   <artifactId>cc-service-api</artifactId>

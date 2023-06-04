@@ -135,6 +135,11 @@ request.interceptors.response.use(async (response, options) => {
       message.warning(msg);
       return
     }
+
+    if (code && code === 405) {
+      return response;
+    }
+
     if (code && code !== 200) {
       const errorText = msg || codeMessage[code];
       message.error(errorText);

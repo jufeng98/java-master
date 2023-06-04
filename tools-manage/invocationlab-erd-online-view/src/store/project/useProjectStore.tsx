@@ -201,7 +201,8 @@ const useProjectStore = create<ProjectState, SetState<ProjectState>, GetState<Pr
           }),
           ...ProjectJsonSlice(set, get),
           ...ConfigJsonSlice(set, get),
-        }
+        },
+        showErrorTipFloatButton: false,
       })
     )
   )

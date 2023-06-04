@@ -34,3 +34,6 @@ hs_err_pid*
 target
 logs
 tmp/
+.m2
+.dubbo
+dubbo-postman

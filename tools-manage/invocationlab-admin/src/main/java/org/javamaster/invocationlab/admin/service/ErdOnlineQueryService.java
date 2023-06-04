@@ -3,6 +3,7 @@ package org.javamaster.invocationlab.admin.service;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.erd.Tree;
+import org.javamaster.invocationlab.admin.model.erd.Table;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.tuple.Triple;
@@ -34,7 +35,7 @@ public interface ErdOnlineQueryService {
 
     List<String> getDbs(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception;
 
-    List<String> getTableNames(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception;
+    List<Table> getTables(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception;
 
     List<Column> getTableColumns(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception;
 

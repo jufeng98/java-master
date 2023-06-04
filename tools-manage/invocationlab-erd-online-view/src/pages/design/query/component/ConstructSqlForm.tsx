@@ -20,7 +20,7 @@ export type ConstructSqlFormProps = {
 
 const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
   const [codeLoading, setCodeLoading] = useState(false);
-  const [tableNames, setTableNames] = useState([]);
+  const [tables, setTables] = useState([]);
   const [sql, setSql] = useState('');
   const [tableColumns, setTableColumns] = useState([]);
   const [form] = Form.useForm();
@@ -38,7 +38,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
         if (!res.data) {
           return;
         }
-        setTableNames(res.data)
+        setTables(res.data)
       })
   }, [props.selectDB])
 
@@ -238,8 +238,8 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
           >
             <OptGroup>
               {
-                tableNames.map((tableName: string) => {
-                  return <Option key={tableName} value={tableName}>{tableName}</Option>
+                tables.map((table: any) => {
+                  return <Option key={table.name} value={table.name}>{table.name + "(" + table.remarks + ")"}</Option>
                 })
               }
             </OptGroup>

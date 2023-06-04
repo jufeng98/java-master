@@ -7,6 +7,7 @@ import org.javamaster.invocationlab.admin.model.ResultVo;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.erd.Tree;
+import org.javamaster.invocationlab.admin.model.erd.Table;
 import org.javamaster.invocationlab.admin.service.ErdOnlineQueryService;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -82,9 +83,9 @@ public class ErdOnlineQueryController {
     }
 
     @RequestMapping(value = {"/getTables"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public ResultVo<List<String>> getTables(@RequestBody JSONObject jsonObjectReq, HttpServletRequest request,
-                                            @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
-        return ResultVo.success(erdOnlineQueryService.getTableNames(jsonObjectReq, tokenVo));
+    public ResultVo<List<Table>> getTables(@RequestBody JSONObject jsonObjectReq, HttpServletRequest request,
+                                           @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
+        return ResultVo.success(erdOnlineQueryService.getTables(jsonObjectReq, tokenVo));
     }
 
     @RequestMapping(value = {"/getTableColumns"}, method = {RequestMethod.GET, RequestMethod.POST})

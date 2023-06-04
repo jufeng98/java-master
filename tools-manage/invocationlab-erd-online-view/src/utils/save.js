@@ -1,13 +1,14 @@
 import * as cache from './cache';
 
 import request from "../utils/request";
-import {message} from "antd";
-import {CONSTANT} from "@/utils/constant";
+import { message } from "antd";
+import { CONSTANT } from "@/utils/constant";
+import useProjectStore from "@/store/project/useProjectStore";
 
 const updateFieldName = (data) => {
   // 将带下划线的属性转化为驼峰
   return Object.keys(data).reduce((a, b) => {
-    const tempA = {...a};
+    const tempA = { ...a };
     const tempB = b.replace(/_([\w+])/g, (all, letter) => {
       return letter.toUpperCase();
     });
@@ -18,7 +19,7 @@ const updateFieldName = (data) => {
 
 // 新增项目
 export const addProject = (data) => {
-  return request.post('/ncnb/project/add', {data: data});
+  return request.post('/ncnb/project/add', { data: data });
 };
 
 // 查询项目
@@ -29,7 +30,7 @@ export const pageProject = (params) => {
       limit: params.limit,
       projectName: params.projectName,
       order: params.order,
-      type:params.type
+      type: params.type
     }
   });
 };
@@ -41,6 +42,10 @@ export const saveProject = (data) => {
     data: {
       ...data,
       id
+    }
+  }).then(resJson => {
+    if (resJson.code === 405) {
+      useProjectStore.setState((state) => ({ ...state, showErrorTipFloatButton: true }))
     }
   });
 };
@@ -59,18 +64,18 @@ export const refreshProjectModule = (moduleName) => {
 
 export const ping = (data) => {
   const projectId = cache.getItem(CONSTANT.PROJECT_ID);
-  return request.post('/ncnb/connector/ping', {data: {...updateFieldName(data), projectId}});
+  return request.post('/ncnb/connector/ping', { data: { ...updateFieldName(data), projectId } });
 };
 
 export const sqlexec = (data) => {
   const projectId = cache.getItem(CONSTANT.PROJECT_ID);
-  return request.post('/ncnb/connector/sqlexec', {data: {...updateFieldName(data), projectId}});
+  return request.post('/ncnb/connector/sqlexec', { data: { ...updateFieldName(data), projectId } });
 };
 
 
 export const dbsync = (data) => {
   const projectId = cache.getItem(CONSTANT.PROJECT_ID);
-  return request.post('/ncnb/connector/dbsync', {data: {...updateFieldName(data), projectId}});
+  return request.post('/ncnb/connector/dbsync', { data: { ...updateFieldName(data), projectId } });
 };
 
 export const dbReverseParse = (data) => {

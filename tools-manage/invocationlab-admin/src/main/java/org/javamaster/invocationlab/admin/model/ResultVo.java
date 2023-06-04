@@ -21,4 +21,8 @@ public class ResultVo<T> {
     public static <T> ResultVo<T> fail(String msg) {
         return new ResultVo<>(400, msg, null);
     }
+
+    public static <T> ResultVo<T> fail(Integer code, String msg) {
+        return new ResultVo<>(code, msg, null);
+    }
 }

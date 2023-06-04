@@ -6,6 +6,7 @@ import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.DbsBean;
 import org.javamaster.invocationlab.admin.model.erd.ErdOnlineModel;
 import org.javamaster.invocationlab.admin.model.erd.ExecuteHistoryBean;
+import org.javamaster.invocationlab.admin.model.erd.Table;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.erd.Tree;
 import org.javamaster.invocationlab.admin.service.ErdOnlineProjectService;
@@ -168,19 +169,12 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
     }
 
     @Override
-    public List<String> getTableNames(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception {
+    public List<Table> getTables(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception {
         String projectId = jsonObjectReq.getString("projectId");
         String selectDB = jsonObjectReq.getString("selectDB");
         JdbcTemplate jdbcTemplate = getJdbcTemplate(projectId, tokenVo);
-        List<Map<String, Object>> tables = executeAndResetDefaultDb(jdbcTemplate, selectDB,
-                () -> jdbcTemplate.queryForList("show tables")
+        return executeAndResetDefaultDb(jdbcTemplate, selectDB, () -> DbUtils.getTables(selectDB, jdbcTemplate)
         );
-        return tables.stream()
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .map(Object::toString)
-                .sorted()
-                .collect(Collectors.toList());
     }
 
     @Override

@@ -86,6 +86,18 @@ public class DbUtils {
         }
     }
 
+    public static List<Table> getTables(String dbName, JdbcTemplate jdbcTemplate) {
+        String sql = "select table_name,table_comment from information_schema.tables where table_schema = '" + dbName + "'";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        return list.stream()
+                .map(map -> {
+                    String tableName = (String) map.get("table_name");
+                    String remarks = (String) map.get("table_comment");
+                    return new Table(tableName, remarks);
+                })
+                .collect(Collectors.toList());
+    }
+
     public static String getTableName(PlainSelect plainSelect) {
         net.sf.jsqlparser.schema.Table table = (net.sf.jsqlparser.schema.Table) plainSelect.getFromItem();
         return table.getName();

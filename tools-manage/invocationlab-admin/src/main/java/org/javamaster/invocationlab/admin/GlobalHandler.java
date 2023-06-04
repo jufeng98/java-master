@@ -21,7 +21,7 @@ public class GlobalHandler {
     @ExceptionHandler(ErdException.class)
     public ResultVo<String> exceptionHandler(ErdException e) {
         logger.error("error", e);
-        return ResultVo.fail(e.getMessage());
+        return ResultVo.fail(e.getCode(), e.getMessage());
     }
 
     @ResponseBody

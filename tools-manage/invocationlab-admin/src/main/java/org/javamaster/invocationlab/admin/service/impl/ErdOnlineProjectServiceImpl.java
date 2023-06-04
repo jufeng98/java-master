@@ -328,7 +328,7 @@ public class ErdOnlineProjectServiceImpl implements ErdOnlineProjectService {
             Long redisModCount = (Long) session.getAttribute(SESSION_SAVE_KEY);
             if (redisModCount != null) {
                 if (!Objects.equals(sessionModCount, redisModCount)) {
-                    throw new ErdException("服务器数据已发生变化，本次保存失败。为避免数据互相覆盖导致丢失，请刷新页面后再重试！");
+                    throw new ErdException(405, "服务器数据已被人修改，所有保存都将失败。为避免数据互相覆盖导致丢失，请刷新页面后再重试！");
                 }
             }
             try {
