@@ -224,10 +224,10 @@
                 connectInfo: {
                     connectId: '',
                     nodes: '',
-                    name: '33单机',
-                    host: '192.168.234.33',
-                    port: '56379',
-                    password: 'Mon56BuEcXzZ',
+                    name: 'localhost单机',
+                    host: '127.0.0.1',
+                    port: '6379',
+                    password: '123456',
                 },
                 dialogVisible: false,
                 dialogKeyVisible: false,
@@ -244,7 +244,7 @@
                 node_had: null, // 触发 tree 的 :load=loadNode 重复触发  动态更新tree
                 resolve_had: null, // 触发 tree 的 :load=loadNode 重复触发  动态更新tree
                 commonVo: {
-                    connectId: 'DZBKknaphZiy',
+                    connectId: '',
                     oldRedisKey: '',
                     redisKey: '',
                     redisKeyBase64: '',
