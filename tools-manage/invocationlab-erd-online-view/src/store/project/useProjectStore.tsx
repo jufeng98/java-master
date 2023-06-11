@@ -112,9 +112,11 @@ const useProjectStore = create<ProjectState, SetState<ProjectState>, GetState<Pr
             location = '/invocationlab-erd-online-view/project/recent'
             return
           }
+          useProjectStore.setState((state) => ({ ...state, loadingProjectDetail: true }))
           await request.get(`/ncnb/project/info/${projectId}`).then((res: any) => {
             // console.log(45, res);
             const data = res?.data;
+            useProjectStore.setState((state) => ({ ...state, loadingProjectDetail: false }))
             if (res?.code === 200 && data) {
               set({
                 project: data
@@ -203,6 +205,7 @@ const useProjectStore = create<ProjectState, SetState<ProjectState>, GetState<Pr
           ...ConfigJsonSlice(set, get),
         },
         showErrorTipFloatButton: false,
+        loadingProjectDetail: false,
       })
     )
   )

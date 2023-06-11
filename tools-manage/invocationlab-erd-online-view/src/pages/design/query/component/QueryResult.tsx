@@ -58,7 +58,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
           field = {
             name: tmp.name,
             value: tmp.name,
-            meta: tmp.remarks,
+            remarks: tmp.remarks,
             dataType: tmp.typeName,
             notNull: tmp.isNullable === 'NO',
             autoIncrement: tmp.isAutoincrement === 'YES',
@@ -82,9 +82,9 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         }
         if (field) {
           if (field.pk) {
-            tooltip = `${field.meta} --- ` + (field.autoIncrement ? '(自增)' : '(非自增)') + "(" + field.dataType + ")"
+            tooltip = `${field.remarks} --- ` + (field.autoIncrement ? '(自增)' : '(非自增)') + "(" + field.dataType + ")"
           } else {
-            tooltip = `${field.meta}` + " --- " + "(" + field.dataType + ")" + (field.defaultValue ? `(默认值:${field.defaultValue})` : '')
+            tooltip = `${field.remarks}` + " --- " + "(" + field.dataType + ")" + (field.defaultValue ? `(默认值:${field.defaultValue})` : '')
           }
         }
         return {

@@ -95,7 +95,8 @@ const CodeEditor: React.FC<CodeEditorProps> = (props) => {
             return {
               name: field.name,
               value: field.name,
-              meta: field.chnname,
+              meta: `${field.chnname}(${table.title})`,
+              remarks: field.chnname,
               dataType: field.dataType,
               notNull: field.notNull,
               autoIncrement: field.autoIncrement,

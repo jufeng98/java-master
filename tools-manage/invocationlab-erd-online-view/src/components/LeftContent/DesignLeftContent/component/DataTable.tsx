@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import type { MenuProps } from 'antd';
+import { MenuProps, Spin } from 'antd';
 import useProjectStore from "@/store/project/useProjectStore";
 import shallow from "zustand/shallow";
 import useTabStore, { TabGroup } from "@/store/tab/useTabStore";
@@ -153,6 +153,8 @@ const DataTable: React.FC<DataTableProps> = (props) => {
   // @ts-ignore
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
+  const { loadingProjectDetail } = useProjectStore()
+
   useEffect(() => {
     setExpandedKeys(projectDispatch.getExpandedKeys(searchKey || ''));
     // console.log(130, expandedKeys)
@@ -178,90 +180,95 @@ const DataTable: React.FC<DataTableProps> = (props) => {
   }
   
   return (<>
-
-    {modules && modules.length > 0 ? <Tree
-      showIcon={false}
-      height={getTreeHeight()}
-      onExpand={(newExpandedKeys) => onExpand(newExpandedKeys)}
-      expandedKeys={expandedKeys}
-      autoExpandParent={autoExpandParent}
-      treeData={projectDispatch.getModuleEntityTree(searchKey || '')}
-      blockNode={true}
-      className={classes.label}
-      rootStyle={{ textAlign: 'left' }}
-      onClick={(e, node: any) => {
-        // console.log(198, 'node', node);
-        if (node.type === "module") {
-          projectDispatch.setCurrentModule(node.module)
-        } else if (node.type === "entity") {
-          tabDispatch.addTab({ group: TabGroup.MODEL, module: node.module, entity: node.title });
-          activeEntity(node.module, node.title)
-        } else if (node.type === "relation") {
-          shortcutDispatch.setShow(false);
-          tabDispatch.addTab({ group: TabGroup.MODEL, module: node.module, entity: `关系图-${node.module}` });
-          activeEntity(node.module, node.title)
-        }
-      }}
-      titleRender={(node: any) => {
-        // console.log(185, 'node', node);
-        const type = node.type;
-        const module = node.module;
-        const entity = node.title;
-
-        return <Dropdown trigger={['contextMenu']}
-          overlay={node.type === "module"
-            ? renderModuleRightContext({ name: node.name, chnname: node.chnname })
-            : node.type === "entity" ? renderEntityRightContext({
-              title: node.title,
-              chnname: node.chnname
-            }) : <></>
+    {
+      <Spin tip="拼命加载中" size="large" style={{ top: "18%", position: "fixed", transform: "scale(1.6)" }} spinning={loadingProjectDetail}>
+        <div />
+      </Spin>
+    }
+    {
+      modules && modules.length > 0 ? <Tree
+        showIcon={false}
+        height={getTreeHeight()}
+        onExpand={(newExpandedKeys) => onExpand(newExpandedKeys)}
+        expandedKeys={expandedKeys}
+        autoExpandParent={autoExpandParent}
+        treeData={projectDispatch.getModuleEntityTree(searchKey || '')}
+        blockNode={true}
+        className={classes.label}
+        rootStyle={{ textAlign: 'left' }}
+        onClick={(e, node: any) => {
+          // console.log(198, 'node', node);
+          if (node.type === "module") {
+            projectDispatch.setCurrentModule(node.module)
+          } else if (node.type === "entity") {
+            tabDispatch.addTab({ group: TabGroup.MODEL, module: node.module, entity: node.title });
+            activeEntity(node.module, node.title)
+          } else if (node.type === "relation") {
+            shortcutDispatch.setShow(false);
+            tabDispatch.addTab({ group: TabGroup.MODEL, module: node.module, entity: `关系图-${node.module}` });
+            activeEntity(node.module, node.title)
           }
-          onOpenChange={(open: boolean) => {
-            if (node.type === "module") {
-              projectDispatch.setCurrentModule(node.module)
-            } else if (node.type === "entity") {
-              projectDispatch.setCurrentModule(node.module)
-              activeEntity(node.module, node.title)
-            } else if (node.type === "relation") {
-              projectDispatch.setCurrentModule(node.module)
-              activeEntity(node.module, node.title)
-            }
-          }}
+        }}
+        titleRender={(node: any) => {
+          // console.log(185, 'node', node);
+          const type = node.type;
+          const module = node.module;
+          const entity = node.title;
 
-        >
-          <div className={classes.labelRoot} onDragStart={(e) => {
-
-            console.log('开始拖');
-            e.stopPropagation();
-            let value = '';
-            if (type === "module") {
-              value = `module&${module}`;
-            } else {
-              if (type === "entity") {
-                value = `entity&${module}&${entity}`;
-              } else if (type === "relation") {
-                value = `map&${module}/关系图`;
-              }
+          return <Dropdown trigger={['contextMenu']}
+            overlay={node.type === "module"
+              ? renderModuleRightContext({ name: node.name, chnname: node.chnname })
+              : node.type === "entity" ? renderEntityRightContext({
+                title: node.title,
+                chnname: node.chnname
+              }) : <></>
             }
-            e.dataTransfer.setData("Text", value);
-          }} draggable="true">
-            <div style={{ marginRight: "6px" }} title={node.formatName}>
-              {node.type === "module" ? <Data theme="filled" size="12" fill="#DE2910" strokeWidth={2} />
-                : node.type === "relation" ?
-                  <ChartGraph theme="filled" size="12" fill="#DE2910" strokeWidth={2} strokeLinejoin="miter" />
-                  : <TableFile theme="filled" size="12" fill="#DE2910" strokeWidth={2} />
+            onOpenChange={(open: boolean) => {
+              if (node.type === "module") {
+                projectDispatch.setCurrentModule(node.module)
+              } else if (node.type === "entity") {
+                projectDispatch.setCurrentModule(node.module)
+                activeEntity(node.module, node.title)
+              } else if (node.type === "relation") {
+                projectDispatch.setCurrentModule(node.module)
+                activeEntity(node.module, node.title)
               }
+            }}
+
+          >
+            <div className={classes.labelRoot} onDragStart={(e) => {
+
+              console.log('开始拖');
+              e.stopPropagation();
+              let value = '';
+              if (type === "module") {
+                value = `module&${module}`;
+              } else {
+                if (type === "entity") {
+                  value = `entity&${module}&${entity}`;
+                } else if (type === "relation") {
+                  value = `map&${module}/关系图`;
+                }
+              }
+              e.dataTransfer.setData("Text", value);
+            }} draggable="true">
+              <div style={{ marginRight: "6px" }} title={node.formatName}>
+                {node.type === "module" ? <Data theme="filled" size="12" fill="#DE2910" strokeWidth={2} />
+                  : node.type === "relation" ?
+                    <ChartGraph theme="filled" size="12" fill="#DE2910" strokeWidth={2} strokeLinejoin="miter" />
+                    : <TableFile theme="filled" size="12" fill="#DE2910" strokeWidth={2} />
+                }
+              </div>
+              <Typography variant="body2" className={classes.labelText} title={node.formatName}>
+                {node.formatName}
+              </Typography>
+              <Typography variant="caption" color="inherit">
+                {node.type !== 'relation' ? node.length : null}
+              </Typography>
             </div>
-            <Typography variant="body2" className={classes.labelText} title={node.formatName}>
-              {node.formatName}
-            </Typography>
-            <Typography variant="caption" color="inherit">
-              {node.type !== 'relation' ? node.length : null}
-            </Typography>
-          </div>
-        </Dropdown>;
-      }}
-    />
+          </Dropdown>;
+        }}
+      />
       :
       <Empty
         image="/invocationlab-erd-online-view/empty.svg"

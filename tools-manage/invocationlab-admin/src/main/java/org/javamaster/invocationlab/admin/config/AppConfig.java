@@ -37,8 +37,16 @@ public class AppConfig {
         //统一设置路径入口,其他地方通过System.getProperty获取
         System.setProperty(Constant.USER_HOME, apiJarPath);
         initializer.copySettingXml(apiJarPath);
-        initializer.loadZkAddress(redisRepository);
-        initializer.loadCreatedService(redisRepository, RedisKeys.RPC_MODEL_KEY);
+        try {
+            initializer.loadZkAddress(redisRepository);
+        } catch (Exception e) {
+            log.error("zookeeper down", e);
+        }
+        try {
+            initializer.loadCreatedService(redisRepository, RedisKeys.RPC_MODEL_KEY);
+        } catch (Exception e) {
+            log.error("redis down", e);
+        }
         return initializer;
     }
 }

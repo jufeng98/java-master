@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javamaster.invocationlab.admin.annos.ErdRolesAllowed;
 import org.javamaster.invocationlab.admin.enums.ProjectType;
 import org.javamaster.invocationlab.admin.enums.RoleEnum;
@@ -12,6 +13,7 @@ import org.javamaster.invocationlab.admin.model.erd.GroupGetVo;
 import org.javamaster.invocationlab.admin.model.erd.ModulesBean;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.service.ErdOnlineProjectService;
+import org.javamaster.invocationlab.admin.util.ResponseUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author yudong
  */
@@ -31,6 +35,8 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 public class ErdOnlineProjectController {
     @Autowired
     private ErdOnlineProjectService erdOnlineProjectService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @RequestMapping(value = "/statistic", method = {RequestMethod.GET, RequestMethod.POST})
     public ResultVo<StatisticVo> statistic() throws Exception {
@@ -57,9 +63,11 @@ public class ErdOnlineProjectController {
 
     @ErdRolesAllowed(RoleEnum.ERD_PROJECT_VIEW)
     @RequestMapping(value = "/info/{id}", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResultVo<ErdOnlineModel> getProjectDetail(@PathVariable String id,
-                                                     @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
-        return ResultVo.success(erdOnlineProjectService.getProjectDetail(id, tokenVo));
+    public void getProjectDetail(@PathVariable String id, HttpServletResponse response,
+                                 @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
+        ResultVo<ErdOnlineModel> resultVo = ResultVo.success(erdOnlineProjectService.getProjectDetail(id, tokenVo));
+        String jsonStr = objectMapper.writeValueAsString(resultVo);
+        ResponseUtils.jsonGzipResponse(response, jsonStr);
     }
 
     @RequestMapping(value = "/add", method = {RequestMethod.GET, RequestMethod.POST})
