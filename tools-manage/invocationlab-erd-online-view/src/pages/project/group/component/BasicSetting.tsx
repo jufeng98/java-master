@@ -16,7 +16,7 @@ export type BasicSettingProps = {};
 const BasicSetting: React.FC<BasicSettingProps> = (props) => {
   const access = useAccess();
   const [searchParams] = useSearchParams();
-  const projectId = searchParams.get("projectId") || '';
+  const projectId = searchParams.get("erd:projectId") || '';
   return (<>
     <ProForm
       submitter={{

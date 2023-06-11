@@ -38,7 +38,7 @@ const Query: React.FC<QueryProps> = (props) => {
   const [open, setOpen] = useState(false);
 
   const [searchParams] = useSearchParams();
-  let projectId = searchParams.get("projectId") || '';
+  let projectId = searchParams.get("erd:projectId") || '';
   if (!projectId || projectId === '') {
     projectId = cache.getItem(CONSTANT.PROJECT_ID) || '';
   }

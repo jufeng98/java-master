@@ -13,7 +13,7 @@ const ConfigProject: React.FC<ConfigProjectProps> = (props) => {
 
   return (<>
     <Button type="link" ghost onClick={() => {
-      cache.setItem("projectId", props.project.id);
+      cache.setItem("erd:projectId", props.project.id);
       history.push({
         pathname: '/project/group/setting/basic?projectId=' + props.project.id
       });

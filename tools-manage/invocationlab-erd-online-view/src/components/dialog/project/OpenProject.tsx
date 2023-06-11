@@ -12,7 +12,7 @@ const OpenProject: React.FC<OpenProjectProps> = (props) => {
 
   return (<>
     <Button type="primary" ghost onClick={() => {
-      cache.setItem("projectId", props.project.id);
+      cache.setItem("erd:projectId", props.project.id);
       history.push({
         pathname: '/design/table/model'
       });

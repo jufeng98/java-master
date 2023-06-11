@@ -1,3 +1,4 @@
 export const CONSTANT= {
-  PROJECT_ID: "projectId"
+  PREFIX: "erd:",
+  PROJECT_ID: "erd:projectId",
 }

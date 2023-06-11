@@ -28,7 +28,7 @@ const QueryTree: React.FC<QueryTreeProps> = (props) => {
   }), shallow);
 
   const [searchParams] = useSearchParams();
-  let projectId = searchParams.get("projectId") || '';
+  let projectId = searchParams.get("erd:projectId") || '';
   if (!projectId || projectId === '') {
     projectId = cache.getItem(CONSTANT.PROJECT_ID) || '';
   }

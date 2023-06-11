@@ -16,7 +16,6 @@ import { useAccess } from "@@/plugin-access";
 import { GET } from "@/services/crud";
 import { CONSTANT } from "@/utils/constant";
 import QueryLeftContent from "@/components/LeftContent/QueryLeftContent";
-import { io } from "socket.io-client";
 import {
   useMount,
   useUnmount,
@@ -88,7 +87,7 @@ const DesignLayout: React.FC<DesignLayoutLayoutProps> = props => {
   // console.log(17, props);
   const [pathname, setPathname] = useState('/design/table/model');
   const [searchParams] = useSearchParams();
-  let projectId = searchParams.get("projectId") || '';
+  let projectId = searchParams.get("erd:projectId") || '';
   if (!projectId || projectId === '') {
     projectId = cache.getItem(CONSTANT.PROJECT_ID) || '';
   }
