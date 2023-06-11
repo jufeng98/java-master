@@ -799,18 +799,16 @@
                     }
                 }
 
-                let tmpSceneScript = window.localStorage.getItem(this.cachePageName+"_script");
+                let tmpSceneScript = AppUtils.getItem(this.cachePageName+"_script");
                 if(tmpSceneScript){
                     this.sceneScript = tmpSceneScript;
                 }
-                let arrayStr = window.localStorage.getItem(this.cachePageName);
-                this.selectGroupWithCases = JSON.parse(arrayStr);
-
-                if(!this.selectGroupWithCases){
+                let arrayStr = AppUtils.getItem(this.cachePageName);                
+                if(!this.arrayStr){
                     this.selectGroupWithCases = [];
                     //nothing to do
                 }else{
-                    let arrayStr = window.localStorage.getItem(this.cachePageName);
+                    let arrayStr = AppUtils.getItem(this.cachePageName);
                     this.selectGroupWithCases = JSON.parse(arrayStr);
                     this.getList();
 
@@ -832,12 +830,13 @@
                     this.selectGroupWithCases = tmpArray;
                 }
 
-                this.currentSceneName = window.localStorage.getItem(this.cachePageName+"_1");
+                this.currentSceneName = AppUtils.getItem(this.cachePageName+"_1");
 
-                let scriptResultStr = window.localStorage.getItem(this.cachePageName+"_2");
-                this.scriptResult = JSON.parse(scriptResultStr);
-                if(!this.scriptResult){
+                let scriptResultStr = AppUtils.getItem(this.cachePageName+"_2");
+                if(!scriptResultStr){
                     this.scriptResult = {};
+                } else {
+                    this.scriptResult = JSON.parse(scriptResultStr);
                 }
             }
         },
@@ -848,15 +847,15 @@
         destroyed: function () {
 
             let arrayStr = JSON.stringify(this.selectGroupWithCases);
-            window.localStorage.setItem(this.cachePageName,arrayStr);
+            AppUtils.setItem(this.cachePageName,arrayStr);
 
-            window.localStorage.setItem(this.cachePageName+"_1",this.currentSceneName);
+            AppUtils.setItem(this.cachePageName+"_1",this.currentSceneName);
 
             let scriptResultStr = JSON.stringify(this.scriptResult);
 
-            window.localStorage.setItem(this.cachePageName+"_2",scriptResultStr);
+            AppUtils.setItem(this.cachePageName+"_2",scriptResultStr);
             //脚本
-            window.localStorage.setItem(this.cachePageName+"_script",this.sceneScript);
+            AppUtils.setItem(this.cachePageName+"_script",this.sceneScript);
         },
         computed: {
             codemirror() {

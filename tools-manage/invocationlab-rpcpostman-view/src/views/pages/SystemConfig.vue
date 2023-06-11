@@ -94,7 +94,7 @@
                     let code = res.data.code;
                     if(code === 0){
                         this.$message.success("保存成功");
-                        window.localStorage.clear();
+                        AppUtils.clearItems();
                         window.location.reload();
                     }
                     this.getConfigs();
@@ -121,7 +121,7 @@
                     let code = res.data.code;
                     if(code === 0){
                         this.$message.success("删除成功");
-                        window.localStorage.clear();
+                        AppUtils.clearItems();
                         window.location.reload();
                     }
                     this.getConfigs();

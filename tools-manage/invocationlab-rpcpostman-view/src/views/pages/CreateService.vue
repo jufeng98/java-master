@@ -41,12 +41,12 @@
                 <el-col :span="14">
 
                     <el-form-item label="API MAVEN依赖：">
-                        <el-input type="textarea" :autosize="{ minRows: 7, maxRows: 7}" placeholder="推荐直接从nexus复制过来比较准确（可以没有version元素，此时version将会从私服解析，优先级：最新快照版本、最新稳定版本
-<dependency>
-  <groupId>com.xx.yy</groupId>
-  <artifactId>cc-service-api</artifactId>
-  <version>1.1.3-SNAPSHOT</version>
-</dependency>" v-model="dependency">
+                        <el-input type="textarea" :autosize="{ minRows: 7, maxRows: 7}" placeholder="推荐直接从nexus复制过来比较准确
+    <dependency>
+    <groupId>com.xx.yy</groupId>
+    <artifactId>cc-service-api</artifactId>
+    <version>1.1.3-SNAPSHOT</version>
+    </dependency>" v-model="dependency">
                         </el-input>
                     </el-form-item>
                 </el-col>
@@ -121,7 +121,7 @@
                             type: 'success'
                         });
                         //清空页面缓存
-                        window.localStorage.clear();
+                        AppUtils.clearItems();
                         //相当于页面刷新,注意name属性一定时组件的名称
                         this.$store.dispatch('tagsView/delCachedView', { name: 'accessService' }).then(() => {
                             this.$nextTick(() => {

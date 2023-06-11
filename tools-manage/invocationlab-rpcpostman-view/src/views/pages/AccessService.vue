@@ -706,7 +706,7 @@
                     return;
                 }
                 this.pageArray[this.pageIndex].serviceNames = [];
-                let serviceName = window.localStorage.getItem('serviceName');
+                let serviceName = AppUtils.getItem('serviceName');
                 if (serviceName) {
                     //存在local,不变,因为上一个页面传入
                 } else {
@@ -783,8 +783,7 @@
                 this.getRequest();
             },
             clearPageCache() {
-                window.localStorage.clear();
-                //window.localStorage.removeItem(this.cachePageName);
+                AppUtils.clearItems();
                 window.location.reload();
             },
             // 复制成功
@@ -843,9 +842,8 @@
         },
         async beforeMount() {
             console.log("加载之前", this.$route.query);
-            let pageArrayStr = window.localStorage.getItem(this.cachePageName);
-            this.pageArray = JSON.parse(pageArrayStr);
-            if (!this.pageArray) {
+            let pageArrayStr = AppUtils.getItem(this.cachePageName);
+            if (!pageArrayStr) {
                 console.log("初始化新数组");
 
                 this.pageArray = [];
@@ -884,8 +882,9 @@
                     }
                 }
 
-                window.localStorage.setItem(this.cachePageName, JSON.stringify(this.pageArray));
+                AppUtils.setItem(this.cachePageName, JSON.stringify(this.pageArray));
             } else {
+                this.pageArray = JSON.parse(pageArrayStr);
                 console.log("已有值重新加载");
                 //加载缓存的值,设置创建服务的参数
                 //这个操作不能在复制到其他元素之前执行!
@@ -913,7 +912,7 @@
         async mounted() {
         },
         destroyed: function () {
-            window.localStorage.setItem(this.cachePageName, JSON.stringify(this.pageArray));
+            AppUtils.setItem(this.cachePageName, JSON.stringify(this.pageArray));
         },
         computed: {
             codemirror() {

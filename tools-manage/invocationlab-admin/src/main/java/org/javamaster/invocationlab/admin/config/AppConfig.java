@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.javamaster.invocationlab.admin.service.maven.Maven;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisKeys;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisRepository;
@@ -9,12 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
 /**
  * 启动的时候systemInit()加载需要的zk地址和已经创建的服务
  *
  * @author yudong
  */
 @Configuration
+@Slf4j
 public class AppConfig {
 
     @Value("${dubbo.api.jar.dir}")

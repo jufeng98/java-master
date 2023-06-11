@@ -68,7 +68,7 @@ export default {
   },
   methods: {
       clearPageCache(){
-          window.localStorage.clear();
+          AppUtils.clearItems()
           window.location.reload(true);
       },
       getSysEnv(){

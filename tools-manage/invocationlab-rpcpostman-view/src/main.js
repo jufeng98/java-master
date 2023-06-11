@@ -52,6 +52,7 @@ import router from './router'
 import store from './store'
 import '@/icons'
 import consts from "./consts";
+import AppUtils from "./utils/AppUtils";
 
 //如果是本地调试就使用,在build的时候正注释掉这行
 //import './mock'
@@ -64,6 +65,8 @@ Vue.use(VueCodemirror)
 
 Vue.config.productionTip = false
 Vue.prototype.$ELEMENT = { size: 'mini' }
+
+global.AppUtils = AppUtils
 
 NProgress.configure({
         showSpinner: false
