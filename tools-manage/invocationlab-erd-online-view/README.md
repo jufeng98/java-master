@@ -16,7 +16,7 @@
 <a href="https://github.com/www-zerocode-net-cn/ERD-Online/blob/master/LICENSE"><img src="https://img.shields.io/github/license/www-zerocode-net-cn/ERD-Online?style=flat-square" alt="AGPL-V3 License"></a>
 <a href="https://www.typescriptlang.org"><img alt="Language" src="https://img.shields.io/badge/language-TypeScript-blue.svg?style=flat-square"></a>
 <a href="https://github.com/www-zerocode-net-cn/ERD-Online/pulls"><img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-Welcome-brightgreen.svg?style=flat-square"></a>
-<a href="https://www.zerocode.net.cn"><img alt="website" src="https://img.shields.io/static/v1?label=&labelColor=505050&message=website&color=0076D6&style=flat-square&logo=google-chrome&logoColor=0076D6"></a>
+<a href="https://doc.erdonline.com"><img alt="website" src="https://img.shields.io/static/v1?label=&labelColor=505050&message=website&color=0076D6&style=flat-square&logo=google-chrome&logoColor=0076D6"></a>
 </p>
 
 ## 特性
@@ -53,7 +53,7 @@ ERD Online 体验：[https://erd.zerocode.net.cn](https://erd.zerocode.net.cn)
 
 ERD Online 文档：[https://portal.zerocode.net.cn](https://portal.zerocode.net.cn)
 
-ERD Online 论坛：[https://www.zerocode.net.cn](https://www.zerocode.net.cn)
+ERD Online 论坛：[https://doc.erdonline.com](https://doc.erdonline.com)
 
 低代码 LOCO 体验：[https://loco.zerocode.net.cn](https://loco.zerocode.net.cn)
 

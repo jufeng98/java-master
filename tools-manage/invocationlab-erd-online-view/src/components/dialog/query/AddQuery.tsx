@@ -18,7 +18,7 @@ const AddQuery: React.FC<AddQueryProps> = (props) => {
   }), shallow);
 
   const [searchParams] = useSearchParams();
-  let projectId = searchParams.get("erd:projectId") || '';
+  let projectId = searchParams.get("projectId") || '';
   if (!projectId || projectId === '') {
     projectId = cache.getItem(CONSTANT.PROJECT_ID) || '';
   }

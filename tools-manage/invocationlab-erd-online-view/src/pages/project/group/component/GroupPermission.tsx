@@ -48,7 +48,7 @@ const GroupPermission: React.FC<GroupPermissionProps> = (props) => {
   const getOperationByCheckedMenus = async () => {
     return await GET('/ncnb/project/group/role/permission', {
       roleId: props.values?.id,
-      projectId: searchParams.get(CONSTANT.PROJECT_ID),
+      projectId: searchParams.get("projectId"),
     });
   }
 

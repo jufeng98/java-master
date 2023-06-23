@@ -87,7 +87,7 @@ const DesignLayout: React.FC<DesignLayoutLayoutProps> = props => {
   // console.log(17, props);
   const [pathname, setPathname] = useState('/design/table/model');
   const [searchParams] = useSearchParams();
-  let projectId = searchParams.get("erd:projectId") || '';
+  let projectId = searchParams.get("projectId") || '';
   if (!projectId || projectId === '') {
     projectId = cache.getItem(CONSTANT.PROJECT_ID) || '';
   }

@@ -24,7 +24,7 @@ const GroupLayout: React.FC<GroupLayoutProps> = (props) => {
 
 
   const [searchParams] = useSearchParams();
-  let projectId = searchParams.get("erd:projectId") || '';
+  let projectId = searchParams.get("projectId") || '';
   if (!projectId || projectId === '') {
     projectId = cache.getItem(CONSTANT.PROJECT_ID) || '';
   }
