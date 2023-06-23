@@ -286,7 +286,7 @@ const JExcel: React.FC<JExcelProps> = (props) => {
 
   return (
 
-    <div ref={jRef} />
+    <div ref={jRef} style={{fontSize: 12}} />
   );
 }
 

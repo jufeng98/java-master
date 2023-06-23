@@ -19,15 +19,15 @@ import java.util.TimeZone;
         DataSourceAutoConfiguration.class
 })
 @EnableAspectJAutoProxy
-public class MhWashInvocationlabAdminApplication {
-    private static final Logger logger = LoggerFactory.getLogger(MhWashInvocationlabAdminApplication.class);
+public class InvocationlabAdminApplication {
+    private static final Logger logger = LoggerFactory.getLogger(InvocationlabAdminApplication.class);
 
     public static void main(String[] args) {
-        logger.info("开始启动 MhWashInvocationlabAdminApplication");
+        logger.info("开始启动 InvocationlabAdminApplication");
         TimeZone.setDefault(TimeZone.getTimeZone("GMT+8"));
-        SpringApplication app = new SpringApplication(MhWashInvocationlabAdminApplication.class);
+        SpringApplication app = new SpringApplication(InvocationlabAdminApplication.class);
         app.setBannerMode(Banner.Mode.CONSOLE);
         app.run(args);
-        logger.info("MhWashInvocationlabAdminApplication 启动成功!");
+        logger.info("InvocationlabAdminApplication 启动成功!");
     }
 }

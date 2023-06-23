@@ -424,7 +424,7 @@ const renderRelation = (data, id) => {
           return pkTitles.length > 0 ? `<${pkTitles.join(',')}>` : '';
         } else if (fieldName === 'type' && field[fieldName]) {
           const currType = datatype.filter(type => type.code === field[fieldName])[0];
-          return (currType && currType.name) || field[fieldName];
+          return (currType && currType.name + field.remark) || field[fieldName];
         }
         return field[fieldName] || '';
       };

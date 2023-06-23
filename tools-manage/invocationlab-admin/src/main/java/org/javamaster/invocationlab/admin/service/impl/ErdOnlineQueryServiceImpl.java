@@ -533,7 +533,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         jsonObject.put("primaryKeys", primaryKeys);
         jsonObject.put("showPagination", showPagination);
         jsonObject.put("tableName", tableName);
-        if (useNoneDefaultDb) {
+        if (useNoneDefaultDb && StringUtils.isNotBlank(tableName)) {
             List<Column> tableColumns = DbUtils.getTableColumns1(jdbcTemplate, tableName);
             Map<String, Column> map = Maps.uniqueIndex(tableColumns, Column::getName);
             jsonObject.put("tableColumns", map);

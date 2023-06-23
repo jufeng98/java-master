@@ -38,6 +38,7 @@ import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
 import static org.javamaster.invocationlab.admin.consts.ErdConst.PROJECT_ROLE_GROUP_USERS;
+import static org.javamaster.invocationlab.admin.consts.ErdConst.PROJECT_STATISTIC;
 import static org.javamaster.invocationlab.admin.consts.ErdConst.USER_PROJECT_ROLE_GROUP;
 import static org.javamaster.invocationlab.admin.util.ErdUtils.getPair;
 
@@ -68,11 +70,17 @@ public class ErdOnlineProjectServiceImpl implements ErdOnlineProjectService {
 
     @Override
     public StatisticVo statistic() throws Exception {
-        String jsonDataStr = stringRedisTemplate.opsForValue().get(ERD_PREFIX + "statistic");
-        if (jsonDataStr == null) {
-            jsonDataStr = "{\"yesterday\":8,\"total\":1334,\"month\":48,\"today\":8}";
-        }
-        return objectMapper.readValue(jsonDataStr, StatisticVo.class);
+        Map<Object, Object> map = redisTemplateJackson.opsForHash().entries(PROJECT_STATISTIC);
+        int sum = map.values().stream()
+                .mapToInt(vo -> {
+                    System.out.println(vo);
+                    StatisticVo statisticVo = (StatisticVo) vo;
+                    return statisticVo.getTotal();
+                })
+                .sum();
+        StatisticVo statisticVo = new StatisticVo();
+        statisticVo.setTotal(sum == 0 ? 38 : sum);
+        return statisticVo;
     }
 
     @Override
@@ -193,7 +201,7 @@ public class ErdOnlineProjectServiceImpl implements ErdOnlineProjectService {
             try {
                 DbsBean defaultDb = (DbsBean) redisTemplateJackson.opsForHash().get(ErdConst.PROJECT_DS, erdOnlineModel.getId());
                 DbsBean dbsBean = DbUtils.getDefaultDb(erdOnlineModel);
-                //noinspection DataFlowIssue
+                //noinspection DataFlowIssue,ConstantConditions
                 BeanUtils.copyProperties(defaultDb, dbsBean);
             } catch (Exception e) {
                 // 没有默认数据源,忽略
@@ -204,6 +212,12 @@ public class ErdOnlineProjectServiceImpl implements ErdOnlineProjectService {
     private void saveProjectDetail(ErdOnlineModel erdOnlineModel, TokenVo tokenVo) throws Exception {
         resumeSensitiveInfo(erdOnlineModel, tokenVo.getUserId());
         stringRedisTemplate.opsForValue().set(ERD_PREFIX + erdOnlineModel.getId(), objectMapper.writeValueAsString(erdOnlineModel));
+        int sum = erdOnlineModel.getProjectJSON().getModules().stream()
+                .mapToInt(module -> module.getEntities().size())
+                .sum();
+        StatisticVo statisticVo = new StatisticVo();
+        statisticVo.setTotal(sum);
+        redisTemplateJackson.opsForHash().put(PROJECT_STATISTIC, erdOnlineModel.getId(), statisticVo);
     }
 
     @Override

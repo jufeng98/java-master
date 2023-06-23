@@ -1,4 +1,5 @@
 @prefix: erd;
+
 .g6-plugins-navigation {
   display: none;
   position: fixed !important;
@@ -7,14 +8,17 @@
   bottom: 30px;
   right: 20px;
 }
+
 .@{prefix}-relation {
   position: relative;
   height: 100%;
   overflow: auto;
+
   &-paint {
     outline-style: none;
     height: 100%;
   }
+
   &-empty {
     width: 100%;
     z-index: 1;
@@ -22,14 +26,17 @@
     position: absolute;
     //background: #FFFFFF;
   }
+
   &-edit {
     display: flex;
     flex-direction: row;
     justify-content: center;
+
     span {
       padding-right: 5px;
     }
   }
+
   &-pointer {
     position: absolute;
     background: green;
@@ -40,4 +47,18 @@
     z-index: 1;
     pointer-events: none;
   }
+}
+
+.g6-tooltip {
+  position: absolute !important;
+  transform: translate(0);
+  border: 1px solid #e2e2e2;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #545454;
+  z-index: 99999;
+  background-color: rgba(255, 255, 255, 1);
+  margin: 0;
+  padding: 0;
+  box-shadow: rgb(174, 174, 174) 0px 0px 10px;
 }

@@ -19,8 +19,12 @@ const Home: React.FC<HomeProps> = (props) => {
     total: -1
   });
 
+  const [loading, setLoading] = useState(false);
+
   const fetchStatistic = () => {
+    setLoading(true)
     GET("/ncnb/project/statistic", {}).then(r => {
+      setLoading(false)
       // console.log(24, r);
       if (r?.code === 200) {
         setStatisticInfo(r.data);
@@ -66,6 +70,7 @@ const Home: React.FC<HomeProps> = (props) => {
       }}
     >
       <ProCard
+        loading={loading}
         title="数据概览"
         extra={dateInfo}
         split={responsive ? 'horizontal' : 'vertical'}
@@ -174,7 +179,7 @@ const Home: React.FC<HomeProps> = (props) => {
                 </a>
               </Col>
               <Col span={12}>
-                <a href="https://www.zerocode.net.cn/thread/101" target="_blank">
+                <a href="https://doc.erdonline.comthread/101" target="_blank">
                   ERD Online ERD Online适用场景分析
                 </a>
               </Col>
@@ -196,7 +201,7 @@ const Home: React.FC<HomeProps> = (props) => {
                 </a>
               </Col>
               <Col span={12}>
-                <a href="https://www.zerocode.net.cn/thread/57" target="_blank">
+                <a href="https://doc.erdonline.comthread/57" target="_blank">
                   ERDOnline 一键部署异常问题处理
                 </a>
               </Col>

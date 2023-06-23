@@ -136,11 +136,11 @@ export default () => {
                 size: 'large',
                 prefix: <UserOutlined className={'prefixIcon'} />,
               }}
-              placeholder={'工号'}
+              placeholder={'admin'}
               rules={[
                 {
                   required: true,
-                  message: '请输入工号!',
+                  message: '请输入用户名!',
                 },
               ]}
             />
@@ -150,7 +150,7 @@ export default () => {
                 size: 'large',
                 prefix: <LockOutlined className={'prefixIcon'} />,
               }}
-              placeholder={'初始密码为qq123123'}
+              placeholder={'密码admin'}
               rules={[
                 {
                   required: true,

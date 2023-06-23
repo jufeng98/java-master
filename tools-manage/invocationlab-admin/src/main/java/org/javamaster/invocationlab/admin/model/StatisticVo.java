@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class StatisticVo {
-    private Integer yesterday;
+    private Integer yesterday = 8;
     private Integer total;
-    private Integer month;
-    private Integer today;
+    private Integer month = 18;
+    private Integer today = 8;
 }

@@ -35,8 +35,12 @@ export default () => {
     order: "updateTime"
   });
 
+  const [loading, setLoading] = useState(false);
+
   const fetchProjects = (params: any) => {
+    setLoading(true)
     recentProject(params || state).then(res => {
+      setLoading(false)
       if (res) {
         if (res.data) {
           console.log(44, 'projects', res);
@@ -66,6 +70,7 @@ export default () => {
 
   return <ProList<ProjectItem>
     size={'large'}
+    loading={loading}
     toolbar={{
       menu: {
         items: [

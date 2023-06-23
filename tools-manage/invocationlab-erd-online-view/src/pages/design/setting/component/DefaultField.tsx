@@ -24,12 +24,12 @@ export const column1 = [
     title: '中文名*',
     name: 'chnname',
     type: 'text',
-    width: '100',
+    width: '220',
   }, {
     title: '英文名*',
     name: 'name',
     type: 'text',
-    width: '100'
+    width: '150'
   },];
 
 export const column2 = [
@@ -43,43 +43,43 @@ export const column2 = [
     title: '数据源类型',
     name: 'dataType',
     type: 'text',
-    width: '130',
+    width: '120',
     readOnly: true
   }, {
     title: '说明',
     name: 'remark',
     type: 'text',
-    width: '100',
+    width: '50',
   }, {
     title: '主键',
     name: 'pk',
     type: 'checkbox',
-    width: '50',
+    width: '40',
   }, {
     title: '非空',
     name: 'notNull',
     type: 'checkbox',
-    width: '50',
+    width: '40',
   }, {
     title: '自增',
     name: 'autoIncrement',
     type: 'checkbox',
-    width: '50',
+    width: '40',
   }, {
     title: '在关系图中隐藏',
     name: 'relationNoShow',
     type: 'checkbox',
-    width: '120',
+    width: '100',
   }, {
     title: '默认值',
     name: 'defaultValue',
     type: 'text',
-    width: '100',
+    width: '60',
   }, {
     title: 'UI建议',
     name: 'uiHint',
     type: 'dropdown',
-    width: '100',
+    width: '70',
     source: ['Text', 'Number', 'Money', 'Select', 'Radio', 'CheckBox', 'Email', 'URL', 'DatePicker', 'TextArea', 'AddressPicker'],
   }];
 

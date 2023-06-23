@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.service.creation.impl;
 
+import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.service.GAV;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.creation.AbstractCreator;
@@ -30,6 +31,9 @@ public class DubboCreator extends AbstractCreator {
     public Pair<Boolean, String> create(String cluster, GAV gav, String serviceName) {
         Map<String, InterfaceMetaInfo> providers = dubboRegisterFactory.get(cluster)
                 .getAllService().get(serviceName);
+        if (providers == null) {
+            throw new ErdException("服务名已不存在");
+        }
         DubboPostmanService dubboPostmanService = new DubboPostmanService();
         dubboPostmanService.setCluster(cluster);
         dubboPostmanService.setServiceName(serviceName);

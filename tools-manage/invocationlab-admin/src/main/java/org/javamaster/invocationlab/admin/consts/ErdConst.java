@@ -10,6 +10,7 @@ public class ErdConst {
     public static final String SUB_ROLE_SUFFIX = ":ROLE_IDS";
 
     public static final String PROJECT_DS = ERD_PREFIX + "project:ds";
+    public static final String PROJECT_STATISTIC = ERD_PREFIX + "statistic";
     public static final String PROJECT_ROLE_GROUP_USERS = ERD_PREFIX + "project:roleGroup:user:";
     public static final String USER_PROJECT_ROLE_GROUP = ERD_PREFIX + "userRoleGroup:";
     public static final String PROJECT_ROLE_GROUP_SUB_ROLES = ERD_PREFIX + "roleGroup:subRole:";

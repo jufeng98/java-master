@@ -33,8 +33,8 @@ public class XmlUtils {
         content = nList.item(0).getTextContent();
         dependencyMap.put("artifactId", content.trim());
         nList = doc.getElementsByTagName("version");
-        Node item = nList.item(0);
-        if (item != null) {
+        if (nList.getLength() != 0) {
+            Node item = nList.item(0);
             content = item.getTextContent();
         } else {
             content = "";

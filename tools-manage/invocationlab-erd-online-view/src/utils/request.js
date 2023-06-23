@@ -57,7 +57,6 @@ const errorHandler = error => {
     return;
   }
   if (status <= 504 && status > 500) {
-    console.log(70, 'message');
     message.error(errorText);
     return;
   }
@@ -118,6 +117,9 @@ request.interceptors.request.use((url, options) => {
 
 // clone response in response interceptor
 request.interceptors.response.use(async (response, options) => {
+  if (response.status !== 200) {
+    return response;
+  }
   if (options.responseType === 'blob') {
     return response;
   }

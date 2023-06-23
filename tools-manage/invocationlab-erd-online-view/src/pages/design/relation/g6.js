@@ -23,6 +23,12 @@ export default class G6Relation extends React.Component {
       contextMenus: [],
       count: 1,
       save: props.save,
+      tooltip: {
+        show: false,
+        top: "0",
+        left: "0",
+        text: ''
+      },
     };
     this.table = [];
     this.graphCanvas = this._getData(props.dataSource);
@@ -746,7 +752,7 @@ export default class G6Relation extends React.Component {
             return pkTitles.length > 0 ? `<${pkTitles.join(',')}>` : '';
           } else if (fieldName === 'type' && field[fieldName]) {
             const currType = datatype.filter(type => type.code === field[fieldName])[0];
-            return (currType && currType.name) || field[fieldName];
+            return (currType && currType.name + field.remark) || field[fieldName];
           } else if (fieldName === 'dataType') {
             return getDefaultDataType(field.type);
           }
@@ -775,6 +781,7 @@ export default class G6Relation extends React.Component {
                 x: x,
                 y: y + lineHeight * i,
                 text: getTitle(field, fieldName),
+                name: field[fieldName],
                 fill: getTitleColor(field),
                 textBaseline: 'top',
               },
@@ -974,6 +981,16 @@ export default class G6Relation extends React.Component {
           shape: 'erdRelation',
           relation: '0,n:1'
         });
+      }
+      let name = shape.attr('name')
+      if (name) {
+        this.setState({
+          tooltip: { show: true, top: ev.domY - 10 + "px", left: ev.domX + 10 + "px", text: name },
+        })
+      } else {
+        this.setState({
+          tooltip: { show: false, text: '' },
+        })
       }
     });
     // 离开锚点切换回编辑模式
@@ -1512,6 +1529,7 @@ export default class G6Relation extends React.Component {
     const { empty = false, count = 1 } = this.state;
     const { prefix = 'erd', value, width } = this.props;
     return (<div
+      style={{ overflow: "hidden" }}
       onKeyDown={this._keyDown}
       className={`${prefix}-relation`}
       onDrop={this._onDrop}
@@ -1548,6 +1566,12 @@ export default class G6Relation extends React.Component {
       >
         放大倍数：{count}X
       </div>
+      {
+        this.state.tooltip.show &&
+        <span className='g6-tooltip' style={{ top: this.state.tooltip.top, left: this.state.tooltip.left }}>
+          {this.state.tooltip.text}
+        </span>
+      }
     </div>);
   }
 }

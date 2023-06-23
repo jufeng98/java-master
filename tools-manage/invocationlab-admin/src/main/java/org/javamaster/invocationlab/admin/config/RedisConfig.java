@@ -44,8 +44,8 @@ public class RedisConfig {
         configuration.setPassword(pwd);
         JedisClientConfiguration clientConfiguration = JedisClientConfiguration
                 .builder()
-                .readTimeout(Duration.of(3, ChronoUnit.SECONDS))
-                .connectTimeout(Duration.of(3, ChronoUnit.SECONDS))
+                .readTimeout(Duration.of(6, ChronoUnit.SECONDS))
+                .connectTimeout(Duration.of(6, ChronoUnit.SECONDS))
                 .build();
         return new JedisConnectionFactory(configuration, clientConfiguration);
     }
