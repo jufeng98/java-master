@@ -22,7 +22,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
   const [codeLoading, setCodeLoading] = useState(false);
   const [tables, setTables] = useState([]);
   const [sql, setSql] = useState('');
-  const [tableColumns, setTableColumns] = useState([]);
+  const [tableColumns, setTableColumns] = useState<any>([]);
   const [form] = Form.useForm();
 
   useEffect(() => {

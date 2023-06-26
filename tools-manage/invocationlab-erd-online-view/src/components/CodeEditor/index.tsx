@@ -78,7 +78,7 @@ const dbTableFieldsMap: Map<string, any> = new Map()
 const CodeEditor: React.FC<CodeEditorProps> = (props) => {
   const { selectDB, mode, height, width, name, placeholder, value, theme, onChange, tables, } = props;
 
-  const editorRef = useRef(null);
+  const editorRef = useRef<any>(null);
 
   const initDbTablesMapAndDbTableFieldsMap = () => {
     let tmpTables = tables || []
@@ -120,7 +120,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props) => {
         entries.push(...Object.entries(result[0].joinmap))
       }
       entries.forEach(([alias, obj]) => {
-        let tbName: string = obj.source
+        let tbName: string = (obj as any).source
         let fields = dbTableFieldsMap.get(selectDB)[tbName]
         if (fields) {
           tips.push(...fields)
@@ -138,21 +138,17 @@ const CodeEditor: React.FC<CodeEditorProps> = (props) => {
   useImperativeHandle(props.onRef, () => ({
     // changeVal 就是暴露给父组件的方法
     selectLine: () => {
-      // @ts-ignore
       return editorRef.current.editor.selection.selectLine();
     },
     getEditor: () => {
-      // @ts-ignore
       return editorRef.current.editor
     },
     getSelectValue: () => {
       //console.log(130, editorRef.current)
-      // @ts-ignore
       return editorRef.current.editor.getSelectedText();
     },
     setSelectValue: (value: string) => {
       //console.log(130, editorRef.current)
-      // @ts-ignore
       return editorRef.current.editor.insert(value);
     },
     getDbTableFieldsMap: (tableName: string) => {

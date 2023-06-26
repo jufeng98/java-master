@@ -7,7 +7,7 @@ const InputContextMenu: React.FC<{
   onChange?: (value: string) => void;
 }> = ({ value, onChange }) => {
   const [inputValue, setInputValue] = useState<string>();
-  const contextMenuRef = useRef(null);
+  const contextMenuRef = useRef<any>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
@@ -24,7 +24,7 @@ const InputContextMenu: React.FC<{
     }
   }, [])
 
-  const cellContextMenu = (e: Event) => {
+  const cellContextMenu = (e: React.MouseEvent<HTMLInputElement>) => {
     contextMenuRef?.current?.showContext(e)
     e.preventDefault()
   }

@@ -5,8 +5,8 @@ import InputContextMenu from "./InputContextMenu";
 
 export type QueryResultProps = {
   tableResult: {
-    columns: any, dataSource: any, total: number, queryKey: number, tableName: string,
-    page: number, pageSize: number, showPagination: boolean, primaryKeys: [], tableColumns: {}
+    columns: string[], dataSource: any[], total: number, queryKey: number, tableName: string,
+    page: number, pageSize: number, showPagination: boolean, primaryKeys: string[], tableColumns: {}
   };
   onRef?: Ref<any>;
   submitQueryTableChange: Function;
@@ -18,11 +18,11 @@ export type QueryResultProps = {
 const QueryResult: React.FC<QueryResultProps> = (props) => {
 
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(props.tableResult.columns);
-  const [dataSource, setDataSource] = useState<[]>(props.tableResult.dataSource);
+  const [dataSource, setDataSource] = useState<any[]>(props.tableResult.dataSource);
   const [delBtnStyle, setDelBtnStyle] = useState<{}>({});
   const [editBtnStyle, setEditBtnStyle] = useState<{}>({});
 
-  const tableRef = useRef(null);
+  const tableRef = useRef<any>(null);
 
   useEffect(() => {
     setDataSource(props.tableResult.dataSource)
@@ -50,7 +50,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       // @ts-ignore
       fieldMapObj = props.onRef?.current?.getDbTableFieldsMap(props.tableResult.tableName) || {}
     }
-    const columns: [{}] = props.tableResult.columns
+    const columns: any[] = props.tableResult.columns
       .map((columnName: any, index: number) => {
         let field
         let tmp = props.tableResult.tableColumns[columnName]
@@ -180,7 +180,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       columns={getColumns()}
       value={dataSource}
       bordered
-      onChange={setDataSource}
+      onChange={(it:any) => setDataSource(it)}
       editable={{
         type: 'multiple',
         editableKeys,

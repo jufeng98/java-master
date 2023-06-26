@@ -2,13 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import './index.less'
 import { Button, message, Select, Space, Spin, Drawer } from "antd";
 import { ProCard } from "@ant-design/pro-components";
-import { Data, HistoryQuery, Plan } from "@icon-park/react";
 import CodeEditor from "@/components/CodeEditor";
 import QueryResult from "@/pages/design/query/component/QueryResult";
 import { BarsOutlined, EyeOutlined, PlayCircleOutlined, SaveOutlined, SmileOutlined } from "@ant-design/icons";
 import useQueryStore from "@/store/query/useQueryStore";
 import shallow from "zustand/shallow";
-import useVersionStore from "@/store/version/useVersionStore";
 import _ from "lodash";
 import { useSearchParams } from "@@/exports";
 import * as cache from "@/utils/cache";
@@ -72,8 +70,8 @@ const Query: React.FC<QueryProps> = (props) => {
 
   const [queryInfo, setQueryInfo] = useState({ sqlInfo: '' });
 
-  const editorRef = useRef(null);
-  const btnRunRef = useRef(null);
+  const editorRef = useRef<any>(null);
+  const btnRunRef = useRef<any>(null);
 
   useEffect(() => {
     let dbNamesStr: any = sessionStorage.getItem("queryDbNamesSqlKey:" + props.id)
@@ -133,25 +131,21 @@ const Query: React.FC<QueryProps> = (props) => {
   }, [])
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.ctrlKey && e.code === 'KeyC' && e.target && e.target.classList && e.target.classList.contains('ace_text-input')) {
-      // @ts-ignore
+    let target = e.target as HTMLElement
+    if (e.ctrlKey && e.code === 'KeyC' && target && target.classList && target.classList.contains('ace_text-input')) {
       if (editorRef?.current?.getSelectValue()) {
         return
       }
-      // @ts-ignore
       editorRef?.current?.selectLine()
     }
     if (e.ctrlKey && e.code === 'Enter') {
-      // @ts-ignore
       if (!editorRef?.current?.getSelectValue()) {
-        // @ts-ignore
         editorRef?.current?.selectLine()
       }
       const event = new MouseEvent("click", {
         bubbles: true,
         cancelable: true
       });
-      // @ts-ignore
       btnRunRef?.current?.dispatchEvent(event)
     }
   }
@@ -212,13 +206,10 @@ const Query: React.FC<QueryProps> = (props) => {
   }
 
   const run = () => {
-    // @ts-ignore
     let selectValue = editorRef?.current?.getSelectValue();
     // console.log(267, selectValue);
     if (!selectValue) {
-      // @ts-ignore
       editorRef?.current?.selectLine()
-      // @ts-ignore
       selectValue = editorRef?.current?.getSelectValue();
     }
     if (!selectDB) {
@@ -230,10 +221,8 @@ const Query: React.FC<QueryProps> = (props) => {
 
   const closeDrawer = (sql: string) => {
     setOpen(false)
-    // @ts-ignore
     let editor = editorRef?.current?.getEditor();
     editor.navigateTo(editor.getCursorPosition().row, 99999)
-    // @ts-ignore
     editorRef?.current?.setSelectValue("\r\n" + sql);
     run()
   }
@@ -327,28 +316,20 @@ const Query: React.FC<QueryProps> = (props) => {
           运行(Ctrl+Enter)
         </Button>
         <Button icon={<BarsOutlined />} size={"small"} onClick={() => {
-          // @ts-ignore
           let selectValue = editorRef?.current?.getSelectValue();
           if (!selectValue) {
-            // @ts-ignore
             editorRef?.current?.selectLine()
-            // @ts-ignore
             selectValue = editorRef?.current?.getSelectValue();
           }
-          // @ts-ignore
           const formatSqlInfo = format(selectValue || '', { language: sqlMode });
           console.log(130, formatSqlInfo);
-          // @ts-ignore
           editorRef?.current?.setSelectValue(formatSqlInfo);
         }}>格式化</Button>
         <Button icon={<EyeOutlined />} size={"small"} onClick={() => {
-          // @ts-ignore
           let selectValue = editorRef?.current?.getSelectValue();
           console.log(267, selectValue);
           if (!selectValue) {
-            // @ts-ignore
             editorRef?.current?.selectLine()
-            // @ts-ignore
             selectValue = editorRef?.current?.getSelectValue();
           }
           if (!selectDB) {
