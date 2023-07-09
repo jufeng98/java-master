@@ -83,6 +83,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
     public static final String NULL_VALUE = "<null>";
     public static final String INDEX = "index";
+    public static final String KEY = "key";
     public static final String ROW_OPERATION_TYPE = "rowOperationType";
 
     @Override
@@ -291,6 +292,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
 
     private boolean filterUnRelateColumn(Map.Entry<String, Object> entry) {
         return !ROW_OPERATION_TYPE.equals(entry.getKey())
+                && !KEY.equals(entry.getKey())
                 && !INDEX.equals(entry.getKey());
     }
 
@@ -315,6 +317,16 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         return !columnValue.equals(dbColumnValue);
     }
 
+    private Pair<String, List<Object>> primaryKeyConditions(JSONObject row, List<String> primaryKeyColumns) {
+        List<Object> primaryKeyValues = primaryKeyColumns.stream()
+                .map(row::get)
+                .collect(Collectors.toList());
+        String key = primaryKeyColumns.stream()
+                .map(primaryKey -> primaryKey + "=?")
+                .collect(Collectors.joining(" and "));
+        return Pair.of(key, primaryKeyValues);
+    }
+
     @Override
     public List<JSONObject> execUpdate(JSONObject jsonObjectReq, TokenVo tokenVo) throws Exception {
         String projectId = jsonObjectReq.getString("projectId");
@@ -325,24 +337,23 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         return DbUtils.executeAndResetDefaultDb(jdbcTemplate, selectDB, () -> {
             Pair<String, List<String>> pair = DbUtils.getTableNameAndPrimaryKey(jdbcTemplate, sqlTmp);
             String tableName = pair.getLeft();
-            List<String> primaryKeyColumn = pair.getRight();
-            String primaryKey = primaryKeyColumn.get(0);
+            List<String> primaryKeyColumns = pair.getRight();
             JSONArray rows = jsonObjectReq.getJSONArray("rows");
             return rows.stream().map(row -> {
                 // 过滤掉值为null的列
                 JSONObject jsonObject = JsonUtils.parseObject(JsonUtils.objectToString(row), JSONObject.class);
-                Object primaryKeyValue = jsonObject.get(primaryKey);
+                Pair<String, List<Object>> pairPrimary = primaryKeyConditions(jsonObject, primaryKeyColumns);
                 String sql;
                 List<Object> fieldValues = Lists.newArrayList();
                 String rowOperationType = jsonObject.getString(ROW_OPERATION_TYPE);
                 if ("delete".equals(rowOperationType)) {
-                    sql = String.format("delete from %s where %s=?", tableName, primaryKey);
-                    fieldValues.add(primaryKeyValue);
+                    sql = String.format("delete from %s where %s", tableName, pairPrimary.getKey());
+                    fieldValues.addAll(pairPrimary.getValue());
                 } else if ("edit".equals(rowOperationType)) {
-                    String querySql = String.format("select * from %s where %s=?", tableName, primaryKey);
-                    Map<String, Object> queryMap = jdbcTemplate.queryForMap(querySql, primaryKeyValue);
+                    String querySql = String.format("select * from %s where %s", tableName, pairPrimary.getKey());
+                    Map<String, Object> queryMap = jdbcTemplate.queryForMap(querySql, pairPrimary.getValue().toArray());
                     String fields = jsonObject.entrySet().stream()
-                            .filter(entry -> filterUnRelateColumn(entry) && !primaryKey.equals(entry.getKey()))
+                            .filter(entry -> filterUnRelateColumn(entry) && !primaryKeyColumns.contains(entry.getKey()))
                             .filter(entry -> filterUnChangeColumn(entry, queryMap))
                             .map(entry -> {
                                 String columnName = entry.getKey();
@@ -358,8 +369,8 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
                     if (StringUtils.isBlank(fields)) {
                         throw new ErdException("数据无变化,未做任何更新操作");
                     }
-                    sql = String.format("update %s set %s where %s=?", tableName, fields, primaryKey);
-                    fieldValues.add(primaryKeyValue);
+                    sql = String.format("update %s set %s where %s", tableName, fields, pairPrimary.getKey());
+                    fieldValues.addAll(pairPrimary.getValue());
                 } else {
                     List<String> names = Lists.newArrayList();
                     jsonObject.entrySet().stream()
@@ -430,6 +441,9 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         jsonObject.put("columns", Lists.newArrayList("affect_num"));
         JSONObject tableData = new JSONObject();
         jsonObject.put("tableData", tableData);
+        jsonObject.put("tableColumns", Collections.emptyList());
+        jsonObject.put("primaryKeys", Collections.emptyList());
+        jsonObject.put("queryKey", atomicInteger.incrementAndGet());
         Map<String, Object> map = Maps.newHashMap();
         map.put("affect_num", num);
         tableData.put("records", Lists.newArrayList(map));
@@ -508,17 +522,18 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
                 columns.addAll(tableColumns.stream()
                         .map(Column::getName)
                         .collect(Collectors.toList()));
-                columns.add(INDEX);
+                columns.add(KEY);
             }
         } else {
             columns.addAll(list.get(0).keySet());
-            columns.add(INDEX);
+            columns.add(KEY);
+            int anInt = Integer.parseInt(RandomUtils.nextInt(1000000, 9999999) + "00");
             for (int i = 0; i < list.size(); i++) {
                 Map<String, Object> rowMap = list.get(i);
+                rowMap.put(KEY, anInt + i);
                 if (!isExport) {
                     modifyRowForSpecialColumnType(rowMap);
                 }
-                rowMap.put(INDEX, i);
             }
         }
         JSONObject jsonObject = new JSONObject();
@@ -576,7 +591,10 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
                 throw new RuntimeException(e);
             }
             List<Map<String, Object>> records = (List<Map<String, Object>>) jsonObject.getJSONObject("tableData").get("records");
-            records.forEach(record -> record.remove(INDEX));
+            records.forEach(record -> {
+                record.remove(KEY);
+                record.remove(INDEX);
+            });
 
             String fileName = "SQL导出-" + DateFormatUtils.format(new Date(), STANDARD_PATTERN) + "." + type;
             if ("json".equals(type)) {
@@ -696,9 +714,11 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
 
     private String generateUpdateSql(List<Map<String, Object>> records, String lowerSql, PlainSelect plainSelect,
                                      List<Column> primaryColumns) {
-        String primaryKeyName = primaryColumns.get(0).getName();
+        List<String> primaryNames = primaryColumns.stream().map(Column::getName).collect(Collectors.toList());
         Map<String, Object> primaryMap = Maps.newLinkedHashMap();
-        primaryMap.put(primaryKeyName, null);
+        for (String primaryName : primaryNames) {
+            primaryMap.put(primaryName, null);
+        }
         Set<String> columnNames = Sets.newHashSet(getColumnNames(records, lowerSql, plainSelect));
         return records.stream()
                 .map(record -> String.format("UPDATE %s SET %s WHERE %s;",
@@ -707,8 +727,8 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
                                         .map(entry -> {
                                             String key = entry.getKey();
                                             Object value = entry.getValue();
-                                            if (primaryKeyName.equals(key)) {
-                                                primaryMap.put(primaryKeyName, value);
+                                            if (primaryNames.contains(key)) {
+                                                primaryMap.put(key, value);
                                                 return null;
                                             }
                                             if (!columnNames.contains(key)) {
@@ -720,7 +740,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
                                         .collect(Collectors.joining(", ")),
                                 primaryMap.entrySet().stream()
                                         .map(this::entryToCondition)
-                                        .collect(Collectors.joining("AND"))
+                                        .collect(Collectors.joining(" AND "))
                         )
                 )
                 .collect(Collectors.joining("\r\n"));

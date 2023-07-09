@@ -17,8 +17,8 @@ export type QueryResultProps = {
 
 const QueryResult: React.FC<QueryResultProps> = (props) => {
 
-  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(props.tableResult.columns);
-  const [dataSource, setDataSource] = useState<any[]>(props.tableResult.dataSource);
+  const [editableKeys, setEditableRowKeys] = useState<React.Key[]>([]);
+  const [dataSource, setDataSource] = useState<any[]>([]);
   const [delBtnStyle, setDelBtnStyle] = useState<{}>({});
   const [editBtnStyle, setEditBtnStyle] = useState<{}>({});
 
@@ -69,7 +69,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
           field = fieldMapObj[columnName]
         }
         let title: string = "", tooltip: string = ""
-        if (columnName !== 'index') {
+        if (columnName !== 'key') {
           if (field?.pk) {
             title = "*" + columnName + "(主键)"
           } else if (field?.notNull) {
@@ -118,24 +118,24 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         render: (text: any, record: any, rowIndex: number, action: any) => [
           <a
             key="editable"
-            style={editBtnStyle[rowIndex]}
+            style={editBtnStyle[record.key]}
             onClick={(e) => {
               if (!record.rowOperationType) {
                 record.rowOperationType = 'preEdit'
               }
-              action?.startEditable?.(record.index);
+              action?.startEditable?.(record.key);
             }}
           >
             编辑
           </a>,
           <a
             key="delete"
-            style={delBtnStyle[rowIndex]}
+            style={delBtnStyle[record.key]}
             onClick={(e) => {
               message.info('行已打上删除标识')
               setDelBtnStyle((it: {}) => {
                 let obj = Object.assign({}, it)
-                obj[rowIndex] = { color: "red" }
+                obj[record.key] = { color: "red" }
                 return obj;
               })
               record.rowOperationType = 'delete'
@@ -154,7 +154,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
                   }
                 })
               newRecord.rowOperationType = 'preAdd'
-              newRecord.index = dataSource.length
+              newRecord.key = Math.floor(Math.random() * 100000000)
               tableRef?.current?.addEditRecord(newRecord)
             }}
           >
@@ -175,8 +175,8 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       actionRef={tableRef}
       size={'small'}
       scroll={{ x: 1300, y: 'calc(100vh - 500px)' }}
-      rowKey='index'
       headerTitle="可编辑表格(双击单元格复制其内容)"
+      rowKey="key"
       columns={getColumns()}
       value={dataSource}
       bordered
@@ -199,7 +199,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
           }
           setEditBtnStyle((it: {}) => {
             let obj = Object.assign({}, it)
-            obj[row.index] = style
+            obj[row.key] = style
             return obj;
           })
         },
@@ -214,7 +214,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       recordCreatorProps={{
         position: 'bottom',
         record: () => ({
-          index: dataSource.length,
+          key: Math.floor(Math.random() * 100000000),
           rowOperationType: 'preAdd',
         }),
         onClick: () => {

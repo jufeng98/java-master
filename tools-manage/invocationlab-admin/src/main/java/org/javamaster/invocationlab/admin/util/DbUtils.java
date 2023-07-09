@@ -214,7 +214,7 @@ public class DbUtils {
     static List<Column> getTableColumns(String tableName, DatabaseMetaData databaseMetaData) {
         List<String> primaryColumnNames = Lists.newArrayList();
         try (ResultSet result = databaseMetaData.getPrimaryKeys(null, null, tableName)) {
-            if (result.next()) {
+            while (result.next()) {
                 primaryColumnNames.add(result.getString("COLUMN_NAME"));
             }
         }

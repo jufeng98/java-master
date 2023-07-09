@@ -63,7 +63,7 @@ const errorHandler = error => {
   if (status >= 404 && status < 422) {
     message.error(errorText);
   }
-
+  message.error(error);
 };
 
 export const BASE_URL = window._env_.API_URL || API_URL;
@@ -74,6 +74,7 @@ export const BASE_URL = window._env_.API_URL || API_URL;
 const request = extend({
   prefix: BASE_URL,
   errorHandler, // 默认错误处理
+  timeout: 6000,
 });
 
 
