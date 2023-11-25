@@ -8,6 +8,7 @@ import Create from '@/views/pages/CreateService.vue'
 import Access from '@/views/pages/AccessService.vue'
 import Config from '@/views/pages/SystemConfig.vue'
 import RedisHelper from '@/views/pages/RedisHelper.vue'
+import ElImageTouchTest from '@/views/pages/ElImageTouchTest.vue'
 import CaseManage from '@/views/pages/CaseManage.vue'
 
 export const constantRouterMap = [
@@ -93,6 +94,18 @@ export const constantRouterMap = [
                 component: RedisHelper,
                 meta: { title: 'Redis工具', icon: 'table' },
                 name: 'redisHelper'
+            },
+        ]
+    },
+    {
+        path: '/elImageTouchTest',
+        component: Layout,
+        children: [
+            {
+                path: 'index',
+                component: ElImageTouchTest,
+                meta: { title: 'elementUI图片组件触控测试', icon: 'table' },
+                name: 'elImageTouchTest'
             },
         ]
     },
