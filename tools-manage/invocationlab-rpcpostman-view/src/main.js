@@ -45,7 +45,7 @@ import 'element-ui/lib/theme-chalk/base.css'; // fade/zoom 等
 // 重新注册Image组件的名字,原来的ElImage名称留给我们改造过的支持触控的图片组件,这样我们的改造就能全局起作用
 import { Image } from 'element-ui';
 Vue.component('RealElImage', Image);
-import ElImageTouch from './src/component/ElImageTouch';
+import ElImageTouch from './components/ElImageTouch';
 Vue.component('ElImage', ElImageTouch);
 
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition'

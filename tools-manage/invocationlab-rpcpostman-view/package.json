@@ -2,9 +2,9 @@
   "name": "invocationlab-rpc-postman",
   "description": "invocationlab-rpc-postman static resources",
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "SET NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "build": "node build/build.js && node copyDistToPublic.js",
+    "build": "SET NODE_OPTIONS=--openssl-legacy-provider && node build/build.js && node copyDistToPublic.js",
     "build:report": "npm_config_report=true npm run build",
     "lint": "eslint --ext .js,.vue src",
     "test": "npm run lint",
@@ -32,7 +32,10 @@
     "vue-select": "2.0",
     "vue-table-with-tree-grid": "0.2.4",
     "vuex": "3.0.1",
-    "hammerjs": "^2.0.8"
+    "hammerjs": "^2.0.8",
+    "svg-baker-runtime": "^1.4.7",
+    "hash-sum": "^2.0.0",
+    "regenerator-runtime":"^0.14.0"
   },
   "devDependencies": {
     "autoprefixer": "8.5.0",
@@ -59,7 +62,7 @@
     "html-webpack-plugin": "4.0.0-alpha",
     "mini-css-extract-plugin": "0.4.1",
     "node-notifier": "5.2.1",
-    "node-sass": "^4.14.1",
+    "node-sass": "^8.0.0",
     "optimize-css-assets-webpack-plugin": "5.0.0",
     "ora": "3.0.0",
     "path-to-regexp": "2.4.0",

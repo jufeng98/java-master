@@ -31,7 +31,7 @@
         }
     }
 </script>
-<style scoped lang="less">
+<style scoped>
     body {
         width: 300px;
         margin: 0 auto;
