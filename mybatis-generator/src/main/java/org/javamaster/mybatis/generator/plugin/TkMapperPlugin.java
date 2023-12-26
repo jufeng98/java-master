@@ -1,6 +1,8 @@
 package org.javamaster.mybatis.generator.plugin;
 
+import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
+import org.mybatis.generator.api.dom.java.Field;
 import org.mybatis.generator.api.dom.java.Interface;
 import org.mybatis.generator.api.dom.java.TopLevelClass;
 import org.mybatis.generator.api.dom.xml.Document;
@@ -8,6 +10,7 @@ import tk.mybatis.mapper.generator.MapperPlugin;
 
 import static org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin.appendComment;
 import static org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin.appendMethod;
+import static org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin.createConstField;
 
 /**
  * @author yudong
@@ -38,6 +41,15 @@ public class TkMapperPlugin extends MapperPlugin {
     public boolean sqlMapDocumentGenerated(Document document, IntrospectedTable introspectedTable) {
         appendComment(document);
         return super.sqlMapDocumentGenerated(document, introspectedTable);
+    }
+
+    @Override
+    public boolean modelFieldGenerated(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn
+            , IntrospectedTable introspectedTable, ModelClassType modelClassType) {
+
+        topLevelClass.addField(createConstField(field));
+
+        return super.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable, modelClassType);
     }
 
 }

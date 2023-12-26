@@ -1,5 +1,6 @@
 package org.javamaster.mybatis.generator.plugin;
 
+import org.javamaster.mybatis.generator.utils.StringUtils;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
@@ -53,30 +54,12 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
         topLevelClass.addImportedType("org.apache.commons.lang3.builder.ToStringStyle");
 
         List<Method> newMethods = new ArrayList<>();
-        Method toStringMethod = new Method();
-        toStringMethod.addAnnotation("@Override");
-        toStringMethod.setVisibility(JavaVisibility.PUBLIC);
-        toStringMethod.setReturnType(FullyQualifiedJavaType.getStringInstance());
-        toStringMethod.setName("toString");
-        toStringMethod.addBodyLine("return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);");
-        newMethods.add(toStringMethod);
 
-        Method equalsMethod = new Method();
-        equalsMethod.addAnnotation("@Override");
-        equalsMethod.setVisibility(JavaVisibility.PUBLIC);
-        equalsMethod.setReturnType(FullyQualifiedJavaType.getBooleanPrimitiveInstance());
-        equalsMethod.setName("equals");
-        equalsMethod.addParameter(0, new Parameter(FullyQualifiedJavaType.getObjectInstance(), "obj"));
-        equalsMethod.addBodyLine("return EqualsBuilder.reflectionEquals(this, obj);");
-        newMethods.add(equalsMethod);
+        newMethods.add(toStringMethod());
 
-        Method hashMethod = new Method();
-        hashMethod.addAnnotation("@Override");
-        hashMethod.setVisibility(JavaVisibility.PUBLIC);
-        hashMethod.setReturnType(FullyQualifiedJavaType.getIntInstance());
-        hashMethod.setName("hashCode");
-        hashMethod.addBodyLine("return HashCodeBuilder.reflectionHashCode(this);");
-        newMethods.add(hashMethod);
+        newMethods.add(equalsMethod());
+
+        newMethods.add(hashMethod());
 
         newMethods.addAll(topLevelClass.getMethods());
 
@@ -90,6 +73,37 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
         }
     }
 
+    public static Method toStringMethod() {
+        Method toStringMethod = new Method();
+        toStringMethod.addAnnotation("@Override");
+        toStringMethod.setVisibility(JavaVisibility.PUBLIC);
+        toStringMethod.setReturnType(FullyQualifiedJavaType.getStringInstance());
+        toStringMethod.setName("toString");
+        toStringMethod.addBodyLine("return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);");
+        return toStringMethod;
+    }
+
+    public static Method equalsMethod() {
+        Method equalsMethod = new Method();
+        equalsMethod.addAnnotation("@Override");
+        equalsMethod.setVisibility(JavaVisibility.PUBLIC);
+        equalsMethod.setReturnType(FullyQualifiedJavaType.getBooleanPrimitiveInstance());
+        equalsMethod.setName("equals");
+        equalsMethod.addParameter(0, new Parameter(FullyQualifiedJavaType.getObjectInstance(), "obj"));
+        equalsMethod.addBodyLine("return EqualsBuilder.reflectionEquals(this, obj);");
+        return equalsMethod;
+    }
+
+    public static Method hashMethod() {
+        Method hashMethod = new Method();
+        hashMethod.addAnnotation("@Override");
+        hashMethod.setVisibility(JavaVisibility.PUBLIC);
+        hashMethod.setReturnType(FullyQualifiedJavaType.getIntInstance());
+        hashMethod.setName("hashCode");
+        hashMethod.addBodyLine("return HashCodeBuilder.reflectionHashCode(this);");
+        return hashMethod;
+    }
+
     @Override
     public boolean modelFieldGenerated(Field field, TopLevelClass topLevelClass, IntrospectedColumn introspectedColumn
             , IntrospectedTable introspectedTable, ModelClassType modelClassType) {
@@ -98,7 +112,23 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
                 "     * %s\n" +
                 "     */";
         field.addJavaDocLine(String.format(docLine, introspectedColumn.getRemarks()));
+
+        topLevelClass.addField(createConstField(field));
+
         return super.modelFieldGenerated(field, topLevelClass, introspectedColumn, introspectedTable, modelClassType);
+    }
+
+    public static Field createConstField(Field field) {
+        Field constField = new Field();
+        constField.setName(StringUtils.wordsAndHyphenAndCamelToConstantCase(field.getName()));
+        constField.setType(FullyQualifiedJavaType.getStringInstance());
+        constField.setInitializationString("\"" + field.getName() + "\"");
+        constField.setTransient(false);
+        constField.setVolatile(false);
+        constField.setVisibility(JavaVisibility.PUBLIC);
+        constField.setFinal(true);
+        constField.setStatic(true);
+        return constField;
     }
 
     @Override
