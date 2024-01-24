@@ -1,3 +1,3 @@
 window._env_ = {
-  API_URL: "http://localhost:8001",
+  API_URL: "http://www.javamaster.org",
 }

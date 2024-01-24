@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkInvocationlab_ERD_Online=self.webpackChunkInvocationlab_ERD_Online||[]).push([[6064],{6064:function(O,n,t){t.r(n),t.d(n,{default:function(){return o}});var a=t(98404),u=t(4302),E=t(36422);function o(){var l=(0,u.useOutletContext)();return(0,E.jsx)(u.Outlet,{context:l})}}}]);
