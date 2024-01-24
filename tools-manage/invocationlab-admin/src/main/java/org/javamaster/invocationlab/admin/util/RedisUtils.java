@@ -1,18 +1,14 @@
 package org.javamaster.invocationlab.admin.util;
 
-import org.javamaster.invocationlab.admin.config.ErdException;
-import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,20 +18,13 @@ import static org.javamaster.invocationlab.admin.service.impl.RedisServiceImpl.H
 /**
  * @author yudong
  */
+@SuppressWarnings({"unchecked"})
 public class RedisUtils {
 
     public static ConnectionVo getConnectionVo(String connectId) {
-        StringRedisTemplate stringRedisTemplate = SpringUtils.getContext().getBean(StringRedisTemplate.class);
-        ObjectMapper objectMapper = SpringUtils.getContext().getBean(ObjectMapper.class);
-        String jsonStr = (String) stringRedisTemplate.opsForHash().get(HASH_KEY_DBS, connectId);
-        if (StringUtils.isBlank(jsonStr)) {
-            throw new ErdException("连接" + connectId + "不存在");
-        }
-        try {
-            return objectMapper.readValue(jsonStr, ConnectionVo.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            RedisTemplate<String, Object> redisTemplateJackson = (RedisTemplate<String, Object>) SpringUtils.getContext()
+                    .getBean("redisTemplateJackson");
+        return (ConnectionVo) redisTemplateJackson.opsForHash().get(HASH_KEY_DBS, connectId);
     }
 
     public static RedisTemplate<Object, Object> getRedisTemplate(String connectId, Integer db) {

@@ -49,7 +49,7 @@ import static org.javamaster.invocationlab.admin.util.RedisUtils.getConnectionVo
 @Slf4j
 @Service
 public class RedisServiceImpl implements RedisService {
-    public static final String HASH_KEY_DBS = "mh-wash:erd:redis:dbs";
+    public static final String HASH_KEY_DBS = "admin:erd:redis:dbs";
     @Autowired
     private RedisHelper redisHelper;
     @Autowired

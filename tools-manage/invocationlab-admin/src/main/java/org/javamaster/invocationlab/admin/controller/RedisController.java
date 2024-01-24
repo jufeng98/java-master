@@ -33,7 +33,7 @@ public class RedisController {
         return WebApiRspDto.success(redisService.pingConnect(connectionVoReq));
     }
 
-    @RequestMapping(value = "/saveConnect", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/saveConnect", method =  RequestMethod.POST)
     public WebApiRspDto<String> saveConnect(@RequestBody ConnectionVo connectionVoReq) throws Exception {
         return WebApiRspDto.success(redisService.saveConnect(connectionVoReq));
     }

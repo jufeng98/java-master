@@ -1,5 +1,7 @@
 package org.javamaster.invocationlab.admin.util;
 
+import org.javamaster.invocationlab.admin.consts.Constant;
+
 /**
  * @author yudong
  */
