@@ -226,7 +226,7 @@ const DesignLayout: React.FC<DesignLayoutLayoutProps> = props => {
               }}
             >
               <div>{project.projectName}</div>
-              <div>© 2023 Made with bm</div>
+              <div>© 2023 Made with erd</div>
               <div>ERD Online</div>
             </div>
           );

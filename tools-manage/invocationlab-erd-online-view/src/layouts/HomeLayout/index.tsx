@@ -86,7 +86,7 @@ const HomeLayout: React.FC<HomeLayoutLayoutProps> = props => {
                 paddingBlockStart: 12,
               }}
             >
-              <div>© 2023 Made with bm</div>
+              <div>© 2023 Made with erd</div>
               <div>ERD Online</div>
             </div>
           );
