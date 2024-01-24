@@ -35,11 +35,11 @@ public class InvocationlabAdminApplication {
     private static final Logger logger = LoggerFactory.getLogger(InvocationlabAdminApplication.class);
 
     public static void main(String[] args) {
-        logger.info("开始启动 MhWashInvocationlabAdminApplication");
+        logger.info("开始启动" + InvocationlabAdminApplication.class.getSimpleName());
         TimeZone.setDefault(TimeZone.getTimeZone("GMT+8"));
         SpringApplication app = new SpringApplication(InvocationlabAdminApplication.class);
         app.setBannerMode(Banner.Mode.CONSOLE);
-        String env = System.getenv("ENV");
+        String env = StringUtils.defaultString(System.getenv("ENV"));
         if (StringUtils.equals(env, "PRO")) {
             app.setAdditionalProfiles(env.toLowerCase());
             SpringUtils.setProEnv(true);
@@ -47,6 +47,6 @@ public class InvocationlabAdminApplication {
             SpringUtils.setDevEnv(true);
         }
         app.run(args);
-        logger.info("MhWashInvocationlabAdminApplication 启动成功,当前环境:{}!", env);
+        logger.info(InvocationlabAdminApplication.class.getSimpleName() + "启动成功,当前环境:{}!", env);
     }
 }
