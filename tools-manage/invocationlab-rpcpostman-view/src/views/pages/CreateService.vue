@@ -39,14 +39,9 @@
 
             <el-row>
                 <el-col :span="14">
-
                     <el-form-item label="API MAVEN依赖：">
-                        <el-input type="textarea" :autosize="{ minRows: 7, maxRows: 7}" placeholder="推荐直接从nexus复制过来比较准确
-    <dependency>
-    <groupId>com.xx.yy</groupId>
-    <artifactId>cc-service-api</artifactId>
-    <version>1.1.3-SNAPSHOT</version>
-    </dependency>" v-model="dependency">
+                        <label>推荐直接从nexus复制过来比较准确。version元素可选，此时version将会从私服解析，优先级 SNAPSHOT > Release</label>
+                        <el-input type="textarea" :autosize="{ minRows: 7, maxRows: 7}" v-model="dependency">
                         </el-input>
                     </el-form-item>
                 </el-col>
@@ -76,7 +71,10 @@
         name: 'createService',
         data() {
             return {
-                dependency: '',
+                dependency: `<dependency>
+    <groupId>org.javamaster</groupId>
+    <artifactId>service-api</artifactId>
+</dependency>`,
                 isCreating: false,
                 zk: '',
                 zkServiceName: '',
@@ -152,6 +150,9 @@
                 getAllZk(para).then((res) => {
                     let ms = res.data.data;
                     this.zkList = ms;
+                    if (this.zkList[0]) {
+                        this.zk = this.zkList[0].addr
+                    }
                 });
             },
             getSelectedServices() {

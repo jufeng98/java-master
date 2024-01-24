@@ -69,7 +69,7 @@ export default {
   methods: {
       clearPageCache(){
           AppUtils.clearItems()
-          window.location.reload(true);
+          window.location.reload()
       },
       getSysEnv(){
           let param = {};

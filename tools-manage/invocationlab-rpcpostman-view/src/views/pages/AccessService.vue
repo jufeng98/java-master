@@ -3,7 +3,7 @@
         <el-form label-width="90px" @submit.prevent="onSubmit" v-loading="loadings.length"
             style="margin:0px;width:100%;min-width:600px;">
             <el-row v-show=pageArray[pageIndex].zkServiceShow>
-                <el-col :span="14">
+                <el-col :span="6">
                     <el-form-item label="注册中心：">
                         <el-select v-model="pageArray[pageIndex].zk" placeholder="必填，访问的ZK地址" filterable
                             @change="changeZk">
@@ -31,13 +31,27 @@
                 <el-col :span="2">
                     <el-form-item label-width="0px">
                         <el-button class="my-button" type="info" plain icon="el-icon-refresh" style="width: 100%"
-                            v-on:click="refreshService">刷新服务</el-button>
+                            v-on:click="refreshService(false)">刷新服务</el-button>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="5">
+                    <el-form-item label="测试用例：">
+                        <el-cascader placeholder="可选，使用保存的用例名称" v-model="pageArray[pageIndex].groupNames"
+                            expand-trigger="hover" filterable :options="pageArray[pageIndex].groupWithCase"
+                            @change="changeTestCase">
+                        </el-cascader>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="2" v-if="showRefreshBtn()">
+                    <el-form-item label-width="0px">
+                        <el-button class="my-button" type="info" plain icon="el-icon-refresh" style="width: 100%"
+                            v-on:click="refreshService(true)">刷新Dubbo</el-button>
                     </el-form-item>
                 </el-col>
             </el-row>
 
             <el-row>
-                <el-col :span="5">
+                <el-col :span="6">
                     <el-form-item label="接口名称：">
                         <el-select v-model="pageArray[pageIndex].provider" placeholder="必填，请选择接口名称" filterable
                             @change="changeProvider">
@@ -61,20 +75,13 @@
                     </el-form-item>
                 </el-col>
 
-                <el-col :span="7">
-                    <el-form-item label="测试用例：">
-                        <el-cascader placeholder="可选，使用保存的用例名称" v-model="pageArray[pageIndex].groupNames"
-                            expand-trigger="hover" filterable :options="pageArray[pageIndex].groupWithCase"
-                            @change="changeTestCase">
-                        </el-cascader>
-                    </el-form-item>
-                </el-col>
-
                 <el-col :span="1">
-                    <el-form-item label-width="0px">
+                    <el-form-item label-width="10px">
                         <el-button class="cpLink my-button" plain type="info" v-clipboard:error="onError"
-                            v-clipboard:copy="pageArray[pageIndex].caseName" v-clipboard:success="onCopy">
-                            复制
+                            style="width: 130px;"
+                            v-clipboard:copy="pageArray[pageIndex].provider+'#'+pageArray[pageIndex].methodName" 
+                            v-clipboard:success="onCopy">
+                            复制(接口和方法名)
                         </el-button>
                     </el-form-item>
                 </el-col>
@@ -196,6 +203,7 @@
         doRequest, saveHisTemplate
     } from '@/api/access';
     import { saveCase, getGroupAndCaseName, getAllGroupName, queryCaseDetail } from '@/api/testCase';
+    import { delService } from '@/api/create';
     import BackToTop from '@/components/BackToTop'
 
     export default {
@@ -356,6 +364,9 @@
             }
         },
         methods: {
+            showRefreshBtn() {
+                return AppUtils.isProEnv()
+            },
             handleCommand(command) {
                 if (command == 'saveAs') {
                     this.pageArray[this.pageIndex].dialogFormVisible = true;
@@ -370,7 +381,7 @@
                 }
                 return false;
             },
-            refreshService() {
+            refreshService(dubbo = false) {
                 if (!this.pageArray[this.pageIndex].zk ||
                     !this.pageArray[this.pageIndex].serviceName) {
                     this.$message.error('必须选择:zk和serviceName');
@@ -380,7 +391,8 @@
 
                 let params = {
                     "zk": encodedZk,
-                    "zkServiceName": this.pageArray[this.pageIndex].serviceName
+                    "zkServiceName": this.pageArray[this.pageIndex].serviceName,
+                    dubbo
                 };
 
                 const loading = this.$loading({
@@ -910,6 +922,23 @@
             console.log("页面数组:", this.pageArray);
         },
         async mounted() {
+            window.addEventListener("dblclick", (e) => {
+                if (e.ctrlKey && e.clientX < 600 && e.clientY < 30) {
+                    this.$prompt('请输入要删除服务名', '提示', {
+                        confirmButtonText: '确定',
+                    }).then(({ value }) => {
+                        delService({zkServiceName: value})
+                            .then(res => {
+                                if (res.data.code === 0) {
+                                    this.$message.success(res.data.data);
+                                } else {
+                                    this.$message.error(res.data.msg);
+                                }   
+                            })
+                    }).catch(() => {
+                    });
+                }
+            });
         },
         destroyed: function () {
             AppUtils.setItem(this.cachePageName, JSON.stringify(this.pageArray));

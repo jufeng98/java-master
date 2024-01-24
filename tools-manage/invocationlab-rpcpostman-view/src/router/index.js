@@ -5,9 +5,10 @@ Vue.use(Router)
 
 import Layout from '@/views/layout/Layout'
 import Create from '@/views/pages/CreateService.vue'
+import CreateJdk from '@/views/pages/CreateServiceJdk.vue'
 import Access from '@/views/pages/AccessService.vue'
 import Config from '@/views/pages/SystemConfig.vue'
-import RedisHelper from '@/views/pages/RedisHelper.vue'
+import RedisManage from '@/views/pages/RedisManage.vue'
 import ElImageTouchTest from '@/views/pages/ElImageTouchTest.vue'
 import CaseManage from '@/views/pages/CaseManage.vue'
 
@@ -86,14 +87,15 @@ export const constantRouterMap = [
         ]
     },
     {
-        path: '/redisHelper',
+        path: '/redis',
         component: Layout,
+        redirect: '/redis/index',
         children: [
             {
                 path: 'index',
-                component: RedisHelper,
+                component: RedisManage,
                 meta: { title: 'Redis工具', icon: 'table' },
-                name: 'redisHelper'
+                name: 'redisManage'
             },
         ]
     },
@@ -106,6 +108,18 @@ export const constantRouterMap = [
                 component: ElImageTouchTest,
                 meta: { title: 'elementUI图片组件触控测试', icon: 'table' },
                 name: 'elImageTouchTest'
+            },
+        ]
+    },
+    {
+        path: '/createJdk',
+        component: Layout,
+        children: [
+            {
+                path: 'index',
+                component: CreateJdk,
+                meta: { title: '解析Redis JDK序列化依赖', icon: 'tab' },
+                name: 'createServiceJdk'
             },
         ]
     },

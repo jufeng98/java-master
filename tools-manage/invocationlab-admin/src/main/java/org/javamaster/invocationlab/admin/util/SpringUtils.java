@@ -1,6 +1,7 @@
 package org.javamaster.invocationlab.admin.util;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -14,8 +15,10 @@ public class SpringUtils implements ApplicationContextAware {
 
     @Getter
     private static ApplicationContext context;
+    @Setter
     @Getter
     private static boolean proEnv;
+    @Setter
     @Getter
     private static boolean devEnv;
 
@@ -24,11 +27,4 @@ public class SpringUtils implements ApplicationContextAware {
         SpringUtils.context = ac;
     }
 
-    public static void setProEnv(boolean b) {
-        proEnv = b;
-    }
-
-    public static void setDevEnv(boolean b) {
-        devEnv = b;
-    }
 }

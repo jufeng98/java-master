@@ -8,6 +8,14 @@ export function getRegisterService(params) {
     })
 }
 
+export function getDependencyList(params) {
+    return request({
+        url:'/dubbo-postman/result/serviceNamesJdk',
+        method:'get',
+        params
+    })
+}
+
 export function getAllMethods(params) {
     return request({
         url:'/dubbo-postman/result/interface',

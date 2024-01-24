@@ -40,6 +40,7 @@ import static org.javamaster.invocationlab.admin.consts.ErdConst.COOKIE_TOKEN;
 /**
  * @author yudong
  */
+@SuppressWarnings("VulnerableCodeUsages")
 @Service
 @Slf4j
 public class ErdOnlineUserServiceImpl implements ErdOnlineUserService {
@@ -116,7 +117,7 @@ public class ErdOnlineUserServiceImpl implements ErdOnlineUserService {
         tokenVo.setExpiresIn(ssoTokenTimeout);
         tokenVo.setScope("select");
         tokenVo.setTenantId("0");
-        tokenVo.setLicense("made by bm");
+        tokenVo.setLicense("made by erd");
         tokenVo.setDeptId("");
         tokenVo.setDeptName("");
         tokenVo.setUserId(userId);

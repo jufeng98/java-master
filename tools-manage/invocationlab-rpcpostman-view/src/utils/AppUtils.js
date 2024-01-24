@@ -15,4 +15,7 @@ export default {
     getItem:(key) => {
         localStorage.getItem(prefix + key)
     },
+    isProEnv() {
+        return window.location.origin.startsWith('http://10')
+    },
 }
