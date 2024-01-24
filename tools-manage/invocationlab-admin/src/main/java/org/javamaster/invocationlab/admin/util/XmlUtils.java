@@ -1,5 +1,7 @@
 package org.javamaster.invocationlab.admin.util;
 
+import org.javamaster.invocationlab.admin.config.BizException;
+import org.javamaster.invocationlab.admin.service.GAV;
 import com.google.common.collect.Maps;
 import lombok.SneakyThrows;
 import org.w3c.dom.Document;
@@ -42,4 +44,21 @@ public class XmlUtils {
         dependencyMap.put("version", content.trim());
         return dependencyMap;
     }
+
+    public static GAV parseGav(String dependency) {
+        Map<String, String> dm = XmlUtils.parseDependencyXml(dependency);
+        if (dm.size() < 2) {
+            throw new BizException("dependency格式不对,请指定正确的maven dependency,区分大小写");
+        }
+        String g = dm.get("groupId");
+        String a = dm.get("artifactId");
+        String v = dm.get("version");
+
+        GAV gav = new GAV();
+        gav.setGroupID(g);
+        gav.setArtifactID(a);
+        gav.setVersion(v);
+        return gav;
+    }
+
 }

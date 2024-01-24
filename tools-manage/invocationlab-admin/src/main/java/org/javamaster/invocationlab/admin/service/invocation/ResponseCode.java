@@ -1,8 +1,11 @@
 package org.javamaster.invocationlab.admin.service.invocation;
 
+import lombok.Getter;
+
 /**
  * @author yudong
  */
+@Getter
 public enum ResponseCode {
     SYSTEM_ERROR(-1, "系统错误"),
     APP_ERROR(-2, "访问应用错误");
@@ -14,11 +17,4 @@ public enum ResponseCode {
         this.desc = desc;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
 }

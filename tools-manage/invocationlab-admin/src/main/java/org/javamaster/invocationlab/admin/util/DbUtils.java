@@ -8,25 +8,29 @@ import org.javamaster.invocationlab.admin.model.erd.IndexsBean;
 import org.javamaster.invocationlab.admin.model.erd.PropertiesBean;
 import org.javamaster.invocationlab.admin.model.erd.Table;
 import com.google.common.collect.Lists;
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.SneakyThrows;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import javax.sql.DataSource;
+import java.net.URI;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -34,32 +38,66 @@ import java.util.stream.Collectors;
  * @date 2023/2/15
  */
 public class DbUtils {
-    static BasicDataSource basicDataSource(PropertiesBean properties) {
-        BasicDataSource dataSource = new BasicDataSource();
+    public static String resolveUrlDbName(String url) {
+        URI uri = URI.create(url.substring(5));
+        return uri.getPath().substring(1);
+    }
+
+    private static HikariDataSource newBasicDataSource(PropertiesBean properties, String dbName) {
+        HikariDataSource dataSource = new HikariDataSource();
         dataSource.setDriverClassName(properties.getDriver_class_name());
-        dataSource.setUrl(properties.getUrl());
+
+        String urlDbName = resolveUrlDbName(properties.getUrl());
+        String url = properties.getUrl().replace(urlDbName, dbName);
+
+        dataSource.setJdbcUrl(url);
         dataSource.setUsername(properties.getUsername());
         dataSource.setPassword(properties.getPassword());
-        dataSource.setInitialSize(1);
-        dataSource.setMinIdle(1);
-        dataSource.setDefaultAutoCommit(true);
-        dataSource.setTestOnBorrow(true);
+        dataSource.setConnectionTestQuery("select 1");
+        dataSource.setConnectionInitSql("select 1");
+        dataSource.setConnectionTimeout(20000);
+        dataSource.setValidationTimeout(3000);
+        dataSource.setMaximumPoolSize(6);
         return dataSource;
     }
 
-    public static JdbcTemplate jdbcTemplate(PropertiesBean properties) {
-        BasicDataSource dataSource = basicDataSource(properties);
+    public static DataSource dataSourceSingleton(PropertiesBean properties, String dbName) {
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getContext().getAutowireCapableBeanFactory();
-        String unique = properties.unique();
-        if (beanFactory.containsBean(unique)) {
-            return (JdbcTemplate) beanFactory.getBean(unique);
+        String uniqueKey = properties.unique() + ":" + dbName + ":dataSource";
+        if (beanFactory.containsBean(uniqueKey)) {
+            return (DataSource) beanFactory.getBean(uniqueKey);
         }
+        HikariDataSource dataSource = newBasicDataSource(properties, dbName);
+        beanFactory.registerSingleton(uniqueKey, dataSource);
+        return dataSource;
+    }
+
+    public static JdbcTemplate jdbcTemplateSingleton(PropertiesBean properties, String dbName) {
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getContext().getAutowireCapableBeanFactory();
+        String uniqueKey = properties.unique() + ":" + dbName + ":jdbcTemplate";
+        if (beanFactory.containsBean(uniqueKey)) {
+            return (JdbcTemplate) beanFactory.getBean(uniqueKey);
+        }
+        DataSource dataSource = dataSourceSingleton(properties, dbName);
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        beanFactory.registerSingleton(unique, jdbcTemplate);
+        beanFactory.registerSingleton(uniqueKey, jdbcTemplate);
         return jdbcTemplate;
     }
 
-    public static DbsBean getDefaultDb(ErdOnlineModel erdOnlineModel) {
+    public static TransactionTemplate transactionTemplateSingleton(PropertiesBean properties, String dbName) {
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getContext().getAutowireCapableBeanFactory();
+        String uniqueKey = properties.unique() + ":" + dbName + ":transactionTemplate";
+        if (beanFactory.containsBean(uniqueKey)) {
+            return (TransactionTemplate) beanFactory.getBean(uniqueKey);
+        }
+        DataSource dataSource = dataSourceSingleton(properties, dbName);
+        PlatformTransactionManager manager = new DataSourceTransactionManager(dataSource);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(manager);
+        beanFactory.registerSingleton(uniqueKey, transactionTemplate);
+        return transactionTemplate;
+    }
+
+    public static @NotNull DbsBean getDefaultDb(ErdOnlineModel erdOnlineModel) {
         List<DbsBean> dbs = erdOnlineModel.getProjectJSON().getProfile().getDbs();
         if (dbs == null) {
             throw new ErdException("请先保存并设置默认数据源");
@@ -70,32 +108,7 @@ public class DbUtils {
                 dbsBean = db;
             }
         }
-        return dbsBean;
-    }
-
-    @SneakyThrows
-    public static void checkDb(DbsBean dbsBean) {
-        if (!"MYSQL".equals(dbsBean.getSelect())) {
-            throw new ErdException("目前只支持MySQL");
-        }
-        try {
-            JdbcTemplate jdbcTemplate = jdbcTemplate(dbsBean.getProperties());
-            jdbcTemplate.execute("select now()");
-        } catch (Exception e) {
-            throw new ErdException(e.getMessage());
-        }
-    }
-
-    public static List<Table> getTables(String dbName, JdbcTemplate jdbcTemplate) {
-        String sql = "select table_name,table_comment from information_schema.tables where table_schema = '" + dbName + "'";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
-        return list.stream()
-                .map(map -> {
-                    String tableName = (String) map.get("table_name");
-                    String remarks = (String) map.get("table_comment");
-                    return new Table(tableName, remarks);
-                })
-                .collect(Collectors.toList());
+        return Objects.requireNonNull(dbsBean);
     }
 
     public static String getTableName(PlainSelect plainSelect) {
@@ -103,22 +116,14 @@ public class DbUtils {
         return table.getName();
     }
 
-    public static Pair<String, List<String>> getTableNameAndPrimaryKey(JdbcTemplate jdbcTemplate, String sql) {
-        PlainSelect plainSelect;
-        try {
-            plainSelect = parseSql(sql);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        net.sf.jsqlparser.schema.Table table = (net.sf.jsqlparser.schema.Table) plainSelect.getFromItem();
-        String tableName = table.getName();
-        List<String> tablePrimaryKeys = DbUtils.getTablePrimaryColumns1(jdbcTemplate, tableName).stream()
-                .map(Column::getName)
-                .collect(Collectors.toList());
-        return Pair.of(tableName, tablePrimaryKeys);
+    @SneakyThrows
+    public static String getTableName(String sql) {
+        PlainSelect plainSelect = parseSql(sql);
+        return getTableName(plainSelect);
     }
 
-    public static PlainSelect parseSql(String sql) throws Exception {
+    @SneakyThrows
+    public static PlainSelect parseSql(String sql) {
         Statement statement = CCJSqlParserUtil.parse(sql);
         Select select = (Select) statement;
         return (PlainSelect) select.getSelectBody();
@@ -161,46 +166,6 @@ public class DbUtils {
             indexsBeans = indexsBeans.stream().distinct().collect(Collectors.toList());
         }
         return indexsBeans;
-    }
-
-    public static <T> T executeAndResetDefaultDb(JdbcTemplate jdbcTemplate, String selectDB, Supplier<T> supplier) {
-        String dbName = (String) jdbcTemplate.queryForMap("select database()").get("database()");
-        try {
-            jdbcTemplate.execute("use " + selectDB);
-            return supplier.get();
-        } finally {
-            jdbcTemplate.execute("use " + dbName);
-        }
-    }
-
-    public static List<Column> getTablePrimaryColumns1(JdbcTemplate jdbcTemplate, String tableName) {
-        List<Column> tableColumns = getTableColumns1(jdbcTemplate, tableName);
-        return tableColumns.stream().filter(Column::isPrimaryKey).collect(Collectors.toList());
-    }
-
-    public static List<Column> getTableColumns1(JdbcTemplate jdbcTemplate, String tableName) {
-        List<Map<String, Object>> list = jdbcTemplate.queryForList("show full columns from " + tableName);
-        return list.stream()
-                .map(map -> {
-                    Column column = new Column();
-                    column.setName(map.get("Field").toString());
-                    column.setTypeName(map.get("Type").toString());
-                    column.setRemarks(map.get("Comment").toString());
-                    column.setIsNullable(map.get("Null").toString());
-                    column.setPrimaryKey("PRI".equals(map.get("Key")));
-                    column.setDef(map.get("Default") != null ? map.get("Default").toString() : "");
-                    Object extra = map.get("Extra");
-                    if (extra != null && extra.equals("auto_increment")) {
-                        column.setIsAutoincrement("YES");
-                    }
-                    return column;
-                })
-                .collect(Collectors.toList());
-    }
-
-    public static List<Column> getTablePrimaryColumns(JdbcTemplate jdbcTemplate, String tableName) {
-        List<Column> tableColumns = getTableColumns(jdbcTemplate, tableName);
-        return tableColumns.stream().filter(Column::isPrimaryKey).collect(Collectors.toList());
     }
 
     public static List<Column> getTableColumns(JdbcTemplate jdbcTemplate, String tableName) {

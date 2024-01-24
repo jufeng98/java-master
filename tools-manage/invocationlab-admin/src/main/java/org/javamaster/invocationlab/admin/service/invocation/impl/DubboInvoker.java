@@ -1,13 +1,13 @@
 package org.javamaster.invocationlab.admin.service.invocation.impl;
 
-import org.javamaster.invocationlab.admin.dto.WebApiRspDto;
+import org.javamaster.invocationlab.admin.consts.Constant;
+import org.javamaster.invocationlab.admin.model.dto.WebApiRspDto;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.invocation.AbstractInvoker;
 import org.javamaster.invocationlab.admin.service.invocation.Invocation;
 import org.javamaster.invocationlab.admin.service.invocation.Invoker;
 import org.javamaster.invocationlab.admin.service.invocation.entity.DubboParamValue;
 import org.javamaster.invocationlab.admin.service.invocation.entity.PostmanDubboRequest;
-import org.javamaster.invocationlab.admin.util.Constant;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import static org.javamaster.invocationlab.admin.util.Constant.GROUP_DEFAULT;
+import static org.javamaster.invocationlab.admin.consts.Constant.GROUP_DEFAULT;
 
 /**
  * @author yudong
@@ -41,6 +41,7 @@ class DubboInvoker extends AbstractInvoker implements Invoker<Object, PostmanDub
                 .toArray(new String[]{}), rpcParamValue.getParamValues().toArray());
         long end = System.currentTimeMillis();
         long elapse = end - start;
+        logger.info("请求dubbo耗时:" + elapse);
         return WebApiRspDto.success(obj, elapse);
     }
 

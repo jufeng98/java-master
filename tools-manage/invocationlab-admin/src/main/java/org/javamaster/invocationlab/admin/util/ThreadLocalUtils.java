@@ -10,6 +10,7 @@ import java.util.HashMap;
  */
 public class ThreadLocalUtils {
     private static final ThreadLocal<HashMap<String, Object>> THREAD_LOCAL = new NamedThreadLocal<>("ThreadLocalUtil");
+    public static final String OLD_GAV_VERSION = "oldGavVersion";
 
     public static <T> T get(String key) {
         return getOrDefault(key, null);
@@ -37,7 +38,7 @@ public class ThreadLocalUtils {
         map.put(key, obj);
     }
 
-    public static void reset(String key) {
+    public static void remove(String key) {
         HashMap<String, Object> map = THREAD_LOCAL.get();
         if (map == null) {
             return;

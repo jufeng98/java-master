@@ -3,6 +3,8 @@ package org.javamaster.invocationlab.admin.service.registry.impl;
 import org.javamaster.invocationlab.admin.service.registry.Register;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author yudong
  */
@@ -14,4 +16,9 @@ public class DubboRegisterFactory extends AbstractRegisterFactory {
         return new ZkRegister(cluster);
     }
 
+    @Override
+    public void refreshService(List<String> interfaceNames, String cluster) {
+        Register register = get(cluster);
+        register.tryPullDataAgain(interfaceNames);
+    }
 }

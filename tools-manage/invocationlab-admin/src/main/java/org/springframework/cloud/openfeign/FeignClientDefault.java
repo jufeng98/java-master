@@ -17,7 +17,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.util.List;
 
-import static org.javamaster.invocationlab.admin.util.Constant.FEIGN_PARAM;
+import static org.javamaster.invocationlab.admin.consts.Constant.FEIGN_PARAM;
 
 /**
  * @author yudong

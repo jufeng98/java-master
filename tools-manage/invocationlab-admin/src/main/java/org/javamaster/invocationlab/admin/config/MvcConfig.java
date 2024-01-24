@@ -1,8 +1,11 @@
 package org.javamaster.invocationlab.admin.config;
 
 import org.javamaster.invocationlab.admin.inteceptor.AppInterceptor;
-import org.javamaster.invocationlab.admin.serializer.BigDecimalJsonSerializer;
-import org.javamaster.invocationlab.admin.serializer.LongJsonSerializer;
+import org.javamaster.invocationlab.admin.serializer.BigDecimalToJsonSerializer;
+import org.javamaster.invocationlab.admin.serializer.BigIntegerToJsonSerializer;
+import org.javamaster.invocationlab.admin.serializer.ByteArrayToJsonSerializer;
+import org.javamaster.invocationlab.admin.serializer.LongToJsonSerializer;
+import org.javamaster.invocationlab.admin.service.ErdOnlineUserService;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +15,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -24,6 +28,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -41,9 +46,12 @@ import static org.javamaster.invocationlab.admin.util.JsonUtils.STANDARD_PATTERN
  */
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
+    @Autowired
+    private ErdOnlineUserService erdOnlineUserService;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
+        registry.addMapping("/**/*")
                 .allowedOrigins("*")
                 .allowedHeaders("*")
                 .allowedMethods("*")
@@ -53,7 +61,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AppInterceptor());
+        registry.addInterceptor(new AppInterceptor(erdOnlineUserService));
     }
 
     @Override
@@ -71,12 +79,17 @@ public class MvcConfig implements WebMvcConfigurer {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        objectMapper.setDateFormat(new SimpleDateFormat(STANDARD_PATTERN));
+
         SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(BigDecimal.class, BigDecimalJsonSerializer.INSTANCE);
-        simpleModule.addSerializer(Long.class, new LongJsonSerializer());
+        simpleModule.addSerializer(BigDecimal.class, BigDecimalToJsonSerializer.INSTANCE);
+        simpleModule.addSerializer(BigInteger.class, BigIntegerToJsonSerializer.INSTANCE);
+        simpleModule.addSerializer(Long.class, new LongToJsonSerializer());
+        simpleModule.addSerializer(byte[].class, new ByteArrayToJsonSerializer());
         objectMapper.registerModule(simpleModule);
+
         objectMapper.setTimeZone(TimeZone.getDefault());
+        objectMapper.setDateFormat(new SimpleDateFormat(STANDARD_PATTERN));
+
         JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(STANDARD_PATTERN)));

@@ -20,4 +20,5 @@ public class ConnectionVo {
     private Integer port;
     private String user;
     private String password;
+    private Long createTime;
 }

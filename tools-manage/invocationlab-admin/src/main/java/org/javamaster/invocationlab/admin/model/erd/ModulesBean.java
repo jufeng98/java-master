@@ -14,6 +14,7 @@ import java.util.List;
 public class ModulesBean {
     private String name;
     private String chnname;
+    private Integer sort;
     private List<EntitiesBean> entities;
     private GraphCanvasBean graphCanvas;
     private List<AssociationsBean> associations;

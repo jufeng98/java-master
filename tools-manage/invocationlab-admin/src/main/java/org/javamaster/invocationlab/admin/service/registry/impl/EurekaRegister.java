@@ -39,7 +39,7 @@ public class EurekaRegister implements Register {
     public Map<String, Map<String, InterfaceMetaInfo>> getAllService() {
         Map<String, Map<String, InterfaceMetaInfo>> map = Maps.newHashMap();
         JsonNode jsonNode = restTemplate.getForObject("http://" + cluster + "/eureka/apps/", JsonNode.class);
-        @SuppressWarnings("DataFlowIssue")
+        @SuppressWarnings({"DataFlowIssue", "ConstantConditions"})
         ArrayNode arrayNode = (ArrayNode) jsonNode.get("applications").get("application");
         for (JsonNode node : arrayNode) {
             map.put(node.get("name").asText(), Collections.emptyMap());
@@ -55,7 +55,7 @@ public class EurekaRegister implements Register {
         }
         instances = Lists.newArrayList();
         JsonNode jsonNode = restTemplate.getForObject("http://" + cluster + "/eureka/apps/" + serviceName, JsonNode.class);
-        @SuppressWarnings("DataFlowIssue")
+        @SuppressWarnings({"DataFlowIssue", "ConstantConditions"})
         ArrayNode arrayNode = (ArrayNode) jsonNode.get("application").get("instance");
         for (JsonNode node : arrayNode) {
             instances.add(node.get("ipAddr").asText() + ":" + node.get("port").get("$").asText());

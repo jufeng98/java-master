@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.util;
 
+import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,9 @@ public class RedisUtils {
         StringRedisTemplate stringRedisTemplate = SpringUtils.getContext().getBean(StringRedisTemplate.class);
         ObjectMapper objectMapper = SpringUtils.getContext().getBean(ObjectMapper.class);
         String jsonStr = (String) stringRedisTemplate.opsForHash().get(HASH_KEY_DBS, connectId);
+        if (StringUtils.isBlank(jsonStr)) {
+            throw new ErdException("连接" + connectId + "不存在");
+        }
         try {
             return objectMapper.readValue(jsonStr, ConnectionVo.class);
         } catch (IOException e) {

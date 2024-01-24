@@ -1,7 +1,7 @@
 package org.javamaster.invocationlab.admin.controller;
 
-import org.javamaster.invocationlab.admin.dto.WebApiRspDto;
 import org.javamaster.invocationlab.admin.enums.RegisterCenterType;
+import org.javamaster.invocationlab.admin.model.dto.WebApiRspDto;
 import org.javamaster.invocationlab.admin.service.context.InvokeContext;
 import org.javamaster.invocationlab.admin.service.creation.entity.InterfaceEntity;
 import org.javamaster.invocationlab.admin.service.creation.entity.MethodEntity;
@@ -29,9 +29,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -49,14 +52,13 @@ import static org.javamaster.invocationlab.admin.service.AppFactory.getRegisterF
  *
  * @author yudong
  */
+@SuppressWarnings("VulnerableCodeUsages")
 @Controller
 @RequestMapping("/dubbo-postman/")
 public class RpcPostmanServiceQueryController extends AbstractController {
     private static final Logger logger = LoggerFactory.getLogger(RpcPostmanServiceQueryController.class);
     @Autowired
-    RedisRepository redisRepository;
-    @Autowired
-    private RedisRepository cacheService;
+    private RedisRepository redisRepository;
 
     @SneakyThrows
     private static Object newObj(Parameter parameter, ClassLoader classLoader) {
@@ -81,15 +83,36 @@ public class RpcPostmanServiceQueryController extends AbstractController {
         }
     }
 
+    private static Object createClassInstance(Class<?> clazz) throws Exception {
+        Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+        AccessibleObject.setAccessible(constructors, true);
+
+        Map<Boolean, List<Constructor<?>>> map = Arrays.stream(constructors)
+                .collect(Collectors.groupingBy(it -> it.getParameterCount() == 0));
+
+        List<Constructor<?>> defConstructors = map.get(true);
+        if (defConstructors != null) {
+            return defConstructors.get(0).newInstance();
+        }
+
+        List<Constructor<?>> otherConstructors = map.get(false).stream()
+                .sorted(Comparator.comparingInt(Constructor::getParameterCount))
+                .collect(Collectors.toList());
+
+        Constructor<?> constructor = otherConstructors.get(0);
+        int parameterCount = constructor.getParameterCount();
+        Object[] objects = new Object[parameterCount];
+        return constructor.newInstance(objects);
+    }
+
     @SneakyThrows
     private static Object newObj(Class<?> clazz, ClassLoader classLoader, int deep) {
+        if (clazz.isEnum()) {
+            return null;
+        }
         Object object;
         try {
-            if (clazz.isEnum()) {
-                return null;
-            } else {
-                object = clazz.newInstance();
-            }
+            object = createClassInstance(clazz);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return null;
@@ -137,8 +160,15 @@ public class RpcPostmanServiceQueryController extends AbstractController {
      */
     @RequestMapping(value = "result/serviceNames", method = {RequestMethod.GET})
     @ResponseBody
-    public WebApiRspDto<Set<Object>> getCreatedServiceName(@RequestParam(value = "zk") String zk) {
-        Set<Object> serviceNameSet = cacheService.members(zk);
+    public WebApiRspDto<Set<Object>> serviceNames(@RequestParam(value = "zk") String zk) {
+        Set<Object> serviceNameSet = redisRepository.members(zk);
+        return WebApiRspDto.success(serviceNameSet.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    @RequestMapping(value = "result/serviceNamesJdk", method = {RequestMethod.GET})
+    @ResponseBody
+    public WebApiRspDto<Set<Object>> serviceNamesJdk() {
+        Set<Object> serviceNameSet = redisRepository.members(RedisKeys.RPC_MODEL_JDK_KEY);
         return WebApiRspDto.success(serviceNameSet.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
@@ -157,9 +187,11 @@ public class RpcPostmanServiceQueryController extends AbstractController {
         if (service == null) {
             return WebApiRspDto.error("服务不存在,请先创建或刷新服务!");
         }
-        InvokeContext.checkExistAndLoad(service);
+
         Integer type = redisRepository.mapGet(RedisKeys.CLUSTER_REDIS_KEY_TYPE, zk);
         RegisterCenterType registrationCenterType = RegisterCenterType.getByType(type);
+        InvokeContext.tryLoadRuntimeInfo(service, registrationCenterType, serviceKey);
+
         RegisterFactory registerFactory = getRegisterFactory(type);
         Register register = registerFactory.get(zk);
         Map<String, InterfaceMetaInfo> serviceMap;
@@ -211,7 +243,11 @@ public class RpcPostmanServiceQueryController extends AbstractController {
         if (service == null) {
             return WebApiRspDto.error("服务不存在,请先创建或刷新服务!");
         }
-        InvokeContext.checkExistAndLoad(service);
+
+        Integer type = redisRepository.mapGet(RedisKeys.CLUSTER_REDIS_KEY_TYPE, zk);
+        RegisterCenterType registrationCenterType = RegisterCenterType.getByType(type);
+        InvokeContext.tryLoadRuntimeInfo(service, registrationCenterType, serviceKey);
+
         Map<String, Object> param = Maps.newLinkedHashMap();
         //重启之后在访问的时候重新load
         ApiJarClassLoader classLoader = JarLocalFileLoader.getAllClassLoader().get(serviceKey);

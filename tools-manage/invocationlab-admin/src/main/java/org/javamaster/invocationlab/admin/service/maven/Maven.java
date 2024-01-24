@@ -77,14 +77,18 @@ public class Maven {
             file.delete();
         }
         libfile.mkdirs();
+
         resultPrintStream.println("api.jar下载路径:" + jarPath);
         resultPrintStream.println("pom.xml的下载路径:" + basePath);
         resultPrintStream.println("开始下载:" + artifactId + ".jar文件");
         doDownLoadFile(jarUrl, jarPath, artifactId + ".jar");
+
         resultPrintStream.println("下载:" + artifactId + ".jar文件成功");
         resultPrintStream.println("开始下载:" + artifactId + "的pom.xml文件");
         doDownLoadFile(pomUrl, basePath, "pom.xml");
+
         resultPrintStream.println("下载:" + artifactId + "的pom.xml文件成功");
+
         return basePath;
     }
 

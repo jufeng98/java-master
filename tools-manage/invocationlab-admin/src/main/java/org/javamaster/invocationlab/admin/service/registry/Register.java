@@ -11,6 +11,9 @@ import java.util.Map;
  */
 public interface Register {
 
+    default void tryPullDataAgain(List<String> interfaceNames) {
+    }
+
     void pullData();
 
     Map<String, Map<String, InterfaceMetaInfo>> getAllService();

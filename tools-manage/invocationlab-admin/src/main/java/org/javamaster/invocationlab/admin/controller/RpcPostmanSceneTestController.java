@@ -1,9 +1,9 @@
 package org.javamaster.invocationlab.admin.controller;
 
-import org.javamaster.invocationlab.admin.dto.AbstractCaseDto;
-import org.javamaster.invocationlab.admin.dto.SceneCaseDto;
-import org.javamaster.invocationlab.admin.dto.UserCaseDto;
-import org.javamaster.invocationlab.admin.dto.WebApiRspDto;
+import org.javamaster.invocationlab.admin.model.dto.AbstractCaseDto;
+import org.javamaster.invocationlab.admin.model.dto.SceneCaseDto;
+import org.javamaster.invocationlab.admin.model.dto.UserCaseDto;
+import org.javamaster.invocationlab.admin.model.dto.WebApiRspDto;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisKeys;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisRepository;
 import org.javamaster.invocationlab.admin.util.JsonUtils;

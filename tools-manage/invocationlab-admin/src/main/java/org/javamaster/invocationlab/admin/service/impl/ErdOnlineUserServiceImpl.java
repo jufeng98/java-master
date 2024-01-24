@@ -1,28 +1,41 @@
 package org.javamaster.invocationlab.admin.service.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.javamaster.invocationlab.admin.config.ErdException;
+import org.javamaster.invocationlab.admin.consts.ErdConst;
+import org.javamaster.invocationlab.admin.feign.SsoFeignService;
+import org.javamaster.invocationlab.admin.model.Result;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
-import org.javamaster.invocationlab.admin.model.erd.UsersVo;
+import org.javamaster.invocationlab.admin.model.sso.GetUserInfoReqVo;
+import org.javamaster.invocationlab.admin.model.sso.GetUserInfoResVo;
+import org.javamaster.invocationlab.admin.model.sso.LoginLdapReqVo;
+import org.javamaster.invocationlab.admin.model.sso.LoginLdapResVo;
 import org.javamaster.invocationlab.admin.service.ErdOnlineUserService;
 import org.javamaster.invocationlab.admin.util.CookieUtils;
+import org.javamaster.invocationlab.admin.util.SpringUtils;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static org.javamaster.invocationlab.admin.consts.ErdConst.ADMIN_CODE;
 import static org.javamaster.invocationlab.admin.consts.ErdConst.COOKIE_TOKEN;
-import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
 
 /**
  * @author yudong
@@ -31,11 +44,33 @@ import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
 @Slf4j
 public class ErdOnlineUserServiceImpl implements ErdOnlineUserService {
     @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
     private RedisTemplate<String, Object> redisTemplateJackson;
+    @Autowired
+    private SsoFeignService ssoFeignService;
+    @Value("${sso.token.expire.timeout}")
+    private int ssoTokenTimeout;
 
     @Override
     public String findUserName(String code) {
-        throw new UnsupportedOperationException();
+        GetUserInfoResVo getUserInfoResVo = findUserInfo(code);
+        if (StringUtils.isBlank(getUserInfoResVo.getAccount())) {
+            throw new ErdException("不存在:" + code);
+        }
+        return getUserInfoResVo.getRealName();
+    }
+
+    public GetUserInfoResVo findUserInfo(String code) {
+        GetUserInfoReqVo reqVo = new GetUserInfoReqVo();
+        reqVo.setAccount(code);
+        reqVo.setAppType("portal");
+        reqVo.setAccountType("0");
+        Result<GetUserInfoResVo> result = ssoFeignService.getUserInfo(reqVo);
+        if (!result.getIsSuccess()) {
+            throw new ErdException(result.getResponseMsg());
+        }
+        return result.getData();
     }
 
     @Override
@@ -43,57 +78,71 @@ public class ErdOnlineUserServiceImpl implements ErdOnlineUserService {
         throw new UnsupportedOperationException();
     }
 
-    private UsersVo saveUserToRedis(String userId, String empName, String orgId, String orgName) {
-        UsersVo usersVo = new UsersVo();
-        usersVo.setId(userId);
-        usersVo.setUsername(empName);
-        byte[] pwdBytes = ("admin").getBytes(StandardCharsets.UTF_8);
-        usersVo.setPwd(DigestUtils.md5DigestAsHex(pwdBytes));
-        usersVo.setDeptId(orgId);
-        usersVo.setDeptName(orgName);
-        usersVo.setCreateTime(new Date());
-        redisTemplateJackson.opsForHash().put(ERD_PREFIX + ":user", userId, usersVo);
-        return usersVo;
-    }
-
-    @SuppressWarnings("DataFlowIssue")
     @Override
     public TokenVo login(String userId, String password) {
-        if (!userId.equals("admin")) {
-            throw new ErdException("用户名错误");
+        if (SpringUtils.isProEnv()) {
+            Set<String> members = stringRedisTemplate.opsForSet().members(ErdConst.ANGEL_PRO_ALLOW);
+            if (CollectionUtils.isEmpty(members)) {
+                members = Sets.newHashSet(ADMIN_CODE);
+                stringRedisTemplate.opsForSet().add(ErdConst.ANGEL_PRO_ALLOW, ADMIN_CODE);
+            }
+            if (!members.contains(userId)) {
+                throw new ErdException("无权登录");
+            }
         }
-        String orgName = "develop apartment one";
-        String orgId = "10000001";
-        UsersVo usersVo = (UsersVo) redisTemplateJackson.opsForHash().get(ERD_PREFIX + ":user", userId);
-        if (usersVo == null) {
-            usersVo = saveUserToRedis(userId, userId, orgId, orgName);
+        LoginLdapReqVo loginLdapReqVo = new LoginLdapReqVo();
+        loginLdapReqVo.setAccount(userId);
+        loginLdapReqVo.setPassword(DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8)).toLowerCase());
+        loginLdapReqVo.setAppType("moonAngel");
+        loginLdapReqVo.setClientType("pc");
+        loginLdapReqVo.setAccountType(0);
+        Result<LoginLdapResVo> result = ssoFeignService.loginApp(loginLdapReqVo);
+        if (!result.getIsSuccess()) {
+            log.error("login error:{},{}", userId, JSONObject.toJSONString(result));
+            throw new ErdException(result.getResponseMsg());
         }
-        if (!usersVo.getPwd().equals(DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8)))) {
-            throw new ErdException("密码错误");
+        LoginLdapResVo ldapResVo = result.getData();
+        if (StringUtils.isBlank(ldapResVo.getRealName())) {
+            GetUserInfoResVo userInfo = findUserInfo(userId);
+            ldapResVo.setRealName(userInfo.getRealName());
+            ldapResVo.setEmail(userInfo.getEmail());
+            ldapResVo.setMobileNo(userInfo.getMobileNo());
         }
         TokenVo tokenVo = new TokenVo();
         String token = COOKIE_TOKEN + "-" + userId + "-" + RandomStringUtils.randomAlphanumeric(16);
         tokenVo.setTokenType("Bearer");
         tokenVo.setAccessToken(token);
-        tokenVo.setRefreshToken(token);
-        tokenVo.setExpiresIn(999999999);
+        tokenVo.setRefreshToken(ldapResVo.getRefreshToken());
+        tokenVo.setExpiresIn(ssoTokenTimeout);
         tokenVo.setScope("select");
         tokenVo.setTenantId("0");
-        tokenVo.setLicense("made by martin");
-        tokenVo.setDeptId(orgId);
-        tokenVo.setDeptName(orgName);
+        tokenVo.setLicense("made by bm");
+        tokenVo.setDeptId("");
+        tokenVo.setDeptName("");
         tokenVo.setUserId(userId);
-        tokenVo.setUsername(userId);
+        tokenVo.setUsername(ldapResVo.getRealName());
+        tokenVo.setEmail(ldapResVo.getEmail());
+        tokenVo.setMobileNo(ldapResVo.getMobileNo());
+        if (SpringUtils.isProEnv()) {
+            tokenVo.setEnv("pro");
+        } else {
+            tokenVo.setEnv("test");
+        }
         redisTemplateJackson.opsForValue().set(token, tokenVo);
-        redisTemplateJackson.expire(token, 864000, TimeUnit.SECONDS);
+        refreshToken(token);
+        return tokenVo;
+    }
+
+    @Override
+    public void refreshToken(String token) {
+        redisTemplateJackson.expire(token, ssoTokenTimeout, TimeUnit.SECONDS);
         Cookie cookie = new Cookie(COOKIE_TOKEN, token);
-        cookie.setMaxAge(864000);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+        cookie.setMaxAge(ssoTokenTimeout);
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         //noinspection ConstantConditions
         requestAttributes.getResponse().addCookie(cookie);
-        return tokenVo;
     }
 
     @Override
@@ -103,14 +152,8 @@ public class ErdOnlineUserServiceImpl implements ErdOnlineUserService {
         return "登出成功";
     }
 
-    @SuppressWarnings("DataFlowIssue")
     @Override
     public String changePwd(String newPwd, TokenVo tokenVo) {
-        UsersVo usersVo = (UsersVo) redisTemplateJackson.opsForHash().get(ERD_PREFIX + ":user", tokenVo.getUserId());
-        //noinspection ConstantConditions
-        usersVo.setPwd(DigestUtils.md5DigestAsHex(newPwd.getBytes(StandardCharsets.UTF_8)));
-        usersVo.setUpdateTime(new Date());
-        redisTemplateJackson.opsForHash().put(ERD_PREFIX + ":user", tokenVo.getUserId(), usersVo);
-        return "修改成功";
+        throw new UnsupportedOperationException();
     }
 }

@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.service.impl;
 
+import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.enums.MenuEnum;
 import org.javamaster.invocationlab.admin.enums.RoleEnum;
 import org.javamaster.invocationlab.admin.enums.RoleGroupEnum;
@@ -42,6 +43,7 @@ import static org.javamaster.invocationlab.admin.consts.ErdConst.USER_PROJECT_RO
 /**
  * @author yudong
  */
+@SuppressWarnings("VulnerableCodeUsages")
 @Service
 public class ErdOnlineRoleServiceImpl implements ErdOnlineRoleService {
     @Autowired
@@ -109,6 +111,14 @@ public class ErdOnlineRoleServiceImpl implements ErdOnlineRoleService {
         String roleId = jsonObjectReq.getString("roleId");
         JSONArray userIds = jsonObjectReq.getJSONArray("userIds");
         List<UsersVo> reqUsersVos = convertUserIds(userIds);
+
+        reqUsersVos.forEach(it -> {
+            RoleGroupEnum roleGroupEnum = getUserRoleGroup(it.getId(), projectId);
+            if (roleGroupEnum != null) {
+                throw new ErdException("添加失败,用户" + it.getId() + "已经拥有" + roleGroupEnum.roleName + "角色!");
+            }
+        });
+
         RoleGroupEnum roleGroupEnum = RoleGroupEnum.getRoleGroupEnum(roleId);
         List<UsersVo> usersVos = (List<UsersVo>) redisTemplateJackson.opsForHash().get(PROJECT_ROLE_GROUP_USERS + projectId,
                 roleGroupEnum.name());
@@ -126,8 +136,12 @@ public class ErdOnlineRoleServiceImpl implements ErdOnlineRoleService {
             String userId = obj.toString();
             UsersVo usersVo = new UsersVo();
             usersVo.setId(userId);
-            String userName = erdOnlineUserService.findUserName(userId);
-            usersVo.setUsername(userName);
+            try {
+                String userName = erdOnlineUserService.findUserName(userId);
+                usersVo.setUsername(userName);
+            } catch (ErdException e) {
+                usersVo.setUsername("");
+            }
             return usersVo;
         }).collect(Collectors.toList());
     }

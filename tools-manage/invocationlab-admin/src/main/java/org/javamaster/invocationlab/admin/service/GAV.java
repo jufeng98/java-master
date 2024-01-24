@@ -10,4 +10,9 @@ public class GAV {
     String groupID;
     String artifactID;
     String version;
+
+    @Override
+    public String toString() {
+        return this.getGroupID() + ":" + this.getArtifactID() + ":" + this.getVersion();
+    }
 }

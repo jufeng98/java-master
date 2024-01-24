@@ -4,6 +4,7 @@ import org.javamaster.invocationlab.admin.service.registry.Register;
 import org.javamaster.invocationlab.admin.service.registry.entity.InterfaceMetaInfo;
 import org.javamaster.invocationlab.admin.util.BuildUtils;
 import org.javamaster.invocationlab.admin.util.ExecutorUtils;
+import org.javamaster.invocationlab.admin.util.SpringUtils;
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import lombok.SneakyThrows;
@@ -38,6 +39,18 @@ public class ZkRegister implements Register {
         this.pullData();
     }
 
+    public void tryPullDataAgain(List<String> interfaceNames) {
+        interfaceNames.forEach(name -> {
+            try {
+                String path = DUBBO_ROOT + "/" + name + "/providers";
+                List<String> children = client.getChildren(path);
+                processChildNodes(children);
+            } catch (Exception e) {
+                logger.error("{}", name, e);
+            }
+        });
+    }
+
     @Override
     public void pullData() {
         //第一次获取所有的子节点
@@ -48,9 +61,10 @@ public class ZkRegister implements Register {
             client.subscribeChildChanges(DUBBO_ROOT,
                     (parentPath, currentChildes) -> {
                         if (CollectionUtils.isEmpty(currentChildes)) {
+//                            logger.info("dubbo no children");
                             return;
                         }
-                        logger.debug("dubbo目录下变更节点数量:" + currentChildes.size());
+//                        logger.info("dubbo目录下变更节点数量:" + currentChildes.size());
                         processDubboNodes(currentChildes);
                     });
         });
@@ -70,38 +84,34 @@ public class ZkRegister implements Register {
         dubboNodes.parallelStream()
                 .map(child -> DUBBO_ROOT + "/" + child + "/providers")
                 .forEach(childPath -> {
-                    if (!listeners.containsKey(childPath)) {
-                        ExecutorUtils.startAsyncTask(() -> {
-                            //添加变更监听
-                            listeners.put(childPath,
-                                    (parentPath, currentChildes) -> {
-                                        if (CollectionUtils.isEmpty(currentChildes)) {
-                                            return;
-                                        }
-                                        logger.debug("providers目录下变更节点数量:" + currentChildes.size());
-                                        processChildNodes(currentChildes);
-                                    });
-                        });
-                    }
-                    List<String> children1 = client.getChildren(childPath);
-                    processChildNodes(children1);
+                    //添加变更监听
+                    listeners.putIfAbsent(childPath, (parentPath, currentChildes) -> {
+                        if (CollectionUtils.isEmpty(currentChildes)) {
+//                            logger.info("providers no children");
+                            return;
+                        }
+//                        logger.info("providers目录下变更节点数量:" + parentPath + " " + currentChildes.size());
+                        processChildNodes(currentChildes);
+                    });
+                    List<String> children = client.getChildren(childPath);
+                    processChildNodes(children);
                 });
-
-        ExecutorUtils.startAsyncTask(() -> listeners.forEach(client::subscribeChildChanges));
+        if (!SpringUtils.isProEnv()) {
+            ExecutorUtils.startAsyncTask(() -> listeners.forEach(client::subscribeChildChanges));
+        }
     }
 
     @SneakyThrows
-    private void processChildNodes(List<String> children1) {
+    private void processChildNodes(List<String> children) {
         //serviceName,serviceKey,provider的其他属性信息
         Map<String, Map<String, InterfaceMetaInfo>> applicationNameMap = new HashMap<>();
-
-        children1.forEach(child1 -> {
+        children.forEach(child -> {
             try {
-                child1 = URLDecoder.decode(child1, "utf-8");
+                child = URLDecoder.decode(child, "utf-8");
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-            URL dubboUrl = URL.valueOf(child1);
+            URL dubboUrl = URL.valueOf(child);
             String serviceName = dubboUrl.getParameter("application");
             String host = dubboUrl.getHost();
             int port = dubboUrl.getPort();
@@ -114,6 +124,7 @@ public class ZkRegister implements Register {
             Collections.addAll(methodSets, methodArray);
             String providerName = dubboUrl.getParameter("interface", "");
             if (providerName.isEmpty()) {
+                logger.info("providerName empty");
                 return;
             }
             String interfaceKey = BuildUtils.buildInterfaceKey(group, providerName, version);
@@ -123,7 +134,7 @@ public class ZkRegister implements Register {
             metaItem.setApplicationName(serviceName);
             metaItem.setMethodNames(methodSets);
             metaItem.setVersion(version);
-            metaItem.setServiceAddr(child1);
+            metaItem.setServiceAddr(child);
             metaItem.getServerIps().add(addr);
 
             //替换策略

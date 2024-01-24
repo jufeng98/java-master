@@ -1,6 +1,6 @@
 package org.javamaster.invocationlab.admin.service.scenetest;
 
-import org.javamaster.invocationlab.admin.dto.UserCaseDto;
+import org.javamaster.invocationlab.admin.model.dto.UserCaseDto;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.context.InvokeContext;
 import org.javamaster.invocationlab.admin.service.invocation.Invocation;

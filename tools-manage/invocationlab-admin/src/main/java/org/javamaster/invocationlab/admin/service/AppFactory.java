@@ -57,6 +57,11 @@ public class AppFactory {
         }
     }
 
+    public RegisterCenterType getType(String cluster) {
+        Integer type = redisRepository.mapGet(RedisKeys.CLUSTER_REDIS_KEY_TYPE, cluster);
+        return RegisterCenterType.getByType(type);
+    }
+
     public Creator getCreator(String zk) {
         Integer type = redisRepository.mapGet(RedisKeys.CLUSTER_REDIS_KEY_TYPE, zk);
         RegisterCenterType registrationCenterType = RegisterCenterType.getByType(type);

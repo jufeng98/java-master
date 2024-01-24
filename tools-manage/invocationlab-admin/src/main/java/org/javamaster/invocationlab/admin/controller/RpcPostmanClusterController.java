@@ -1,6 +1,6 @@
 package org.javamaster.invocationlab.admin.controller;
 
-import org.javamaster.invocationlab.admin.dto.WebApiRspDto;
+import org.javamaster.invocationlab.admin.model.dto.WebApiRspDto;
 import org.javamaster.invocationlab.admin.service.AppFactory;
 import org.javamaster.invocationlab.admin.service.registry.RegisterFactory;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisKeys;

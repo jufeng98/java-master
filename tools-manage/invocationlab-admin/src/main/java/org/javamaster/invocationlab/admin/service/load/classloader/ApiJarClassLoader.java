@@ -33,16 +33,11 @@ public class ApiJarClassLoader extends URLClassLoader {
     }
 
     public Class<?> loadClassWithResolve(String name) throws ClassNotFoundException {
-
         return loadClass(name, true);
     }
 
-    public void appendURL(URL url) {
-        addURL(url);
-    }
-
     @Override
-    protected void addURL(URL url) {
+    public void addURL(URL url) {
         super.addURL(url);
     }
 

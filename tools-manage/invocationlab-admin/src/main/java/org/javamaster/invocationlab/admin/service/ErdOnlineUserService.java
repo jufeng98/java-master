@@ -15,6 +15,8 @@ public interface ErdOnlineUserService {
 
     TokenVo login(String userId, String password);
 
+    void refreshToken(String token);
+
     String logout();
 
     String changePwd(String newPwd, TokenVo tokenVo);

@@ -29,32 +29,36 @@ public class DubboCreator extends AbstractCreator {
 
     @Override
     public Pair<Boolean, String> create(String cluster, GAV gav, String serviceName) {
-        Map<String, InterfaceMetaInfo> providers = dubboRegisterFactory.get(cluster)
-                .getAllService().get(serviceName);
+        Map<String, InterfaceMetaInfo> providers = dubboRegisterFactory.get(cluster).getAllService().get(serviceName);
         if (providers == null) {
-            throw new ErdException("服务名已不存在");
+            throw new ErdException("服务名已不存在:" + serviceName);
         }
         DubboPostmanService dubboPostmanService = new DubboPostmanService();
         dubboPostmanService.setCluster(cluster);
         dubboPostmanService.setServiceName(serviceName);
 
         for (Map.Entry<String, InterfaceMetaInfo> entry : providers.entrySet()) {
-            InterfaceEntity dubboInterfaceModel = new InterfaceEntity();
-            String providerName = entry.getValue().getInterfaceName();
-            String version = entry.getValue().getVersion();
-            Set<String> serverIps = entry.getValue().getServerIps();
-            Set<String> methodNames = entry.getValue().getMethodNames();
-            dubboInterfaceModel.setKey(entry.getKey());
-            dubboInterfaceModel.setInterfaceName(providerName);
-            dubboInterfaceModel.setMethodNames(methodNames);
-            dubboInterfaceModel.setServerIps(serverIps);
-            dubboInterfaceModel.setVersion(version);
-            dubboInterfaceModel.setGroup(entry.getValue().getGroup());
+            InterfaceEntity dubboInterfaceModel = createInterfaceEntity(entry);
             dubboPostmanService.getInterfaceModels().add(dubboInterfaceModel);
         }
         dubboPostmanService.setGav(gav);
         dubboPostmanService.setGenerateTime(System.currentTimeMillis());
         return doCreateService(serviceName, dubboPostmanService);
+    }
+
+    private static InterfaceEntity createInterfaceEntity(Map.Entry<String, InterfaceMetaInfo> entry) {
+        InterfaceEntity dubboInterfaceModel = new InterfaceEntity();
+        String providerName = entry.getValue().getInterfaceName();
+        String version = entry.getValue().getVersion();
+        Set<String> serverIps = entry.getValue().getServerIps();
+        Set<String> methodNames = entry.getValue().getMethodNames();
+        dubboInterfaceModel.setKey(entry.getKey());
+        dubboInterfaceModel.setInterfaceName(providerName);
+        dubboInterfaceModel.setMethodNames(methodNames);
+        dubboInterfaceModel.setServerIps(serverIps);
+        dubboInterfaceModel.setVersion(version);
+        dubboInterfaceModel.setGroup(entry.getValue().getGroup());
+        return dubboInterfaceModel;
     }
 
     @Override
@@ -63,9 +67,11 @@ public class DubboCreator extends AbstractCreator {
         Object serviceObj = redisRepository.mapGet(RedisKeys.RPC_MODEL_KEY, serviceKey);
         PostmanService postmanService = JsonUtils.parseObject((String) serviceObj, DubboPostmanService.class);
         GAV gav = postmanService.getGav();
+
         String oldInfo = gav.getGroupID() + ":" + gav.getArtifactID() + ":" + gav.getVersion();
         upgradeGavVersionToLatest(gav);
         String newInfo = gav.getGroupID() + ":" + gav.getArtifactID() + ":" + gav.getVersion();
+
         Pair<Boolean, String> pair = create(cluster, gav, serviceName);
         return new Pair<>(pair.getLeft(), "刷新服务 " + oldInfo + " => " + newInfo + " 成功!");
     }
@@ -74,7 +80,9 @@ public class DubboCreator extends AbstractCreator {
                                                   PostmanService postmanService) {
         GAV gav = postmanService.getGav();
         resolveMavenDependencies(serviceName, gav);
-        saveRedisAndLoad(postmanService);
+
+        saveToRedisAndInitLoader(postmanService);
+
         return new Pair<>(true, gav.toString());
     }
 

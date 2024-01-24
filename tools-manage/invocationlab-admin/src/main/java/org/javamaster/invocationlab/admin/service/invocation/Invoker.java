@@ -1,6 +1,6 @@
 package org.javamaster.invocationlab.admin.service.invocation;
 
-import org.javamaster.invocationlab.admin.dto.WebApiRspDto;
+import org.javamaster.invocationlab.admin.model.dto.WebApiRspDto;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.invocation.entity.PostmanRequest;
 

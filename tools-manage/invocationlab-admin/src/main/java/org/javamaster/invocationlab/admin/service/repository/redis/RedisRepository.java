@@ -12,22 +12,19 @@ import java.util.Set;
  *
  * @author yudong
  */
+@SuppressWarnings("unchecked")
 @Repository
 public class RedisRepository implements org.javamaster.invocationlab.admin.service.repository.Repository {
 
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
 
-    public Object get(String key) {
-        return redisTemplate.opsForValue().get(key);
-    }
-
     public void setAdd(String key, Object value) {
         redisTemplate.opsForSet().add(key, value);
     }
 
-    public Set<Object> members(String key) {
-        return redisTemplate.opsForSet().members(key);
+    public <T> Set<T> members(String key) {
+        return (Set<T>) redisTemplate.opsForSet().members(key);
     }
 
     public void setRemove(String key, Object value) {
@@ -45,12 +42,16 @@ public class RedisRepository implements org.javamaster.invocationlab.admin.servi
         return (T) redisTemplate.opsForHash().get(key, hashKey);
     }
 
-    public Set<Object> mapGetKeys(String key) {
-        return redisTemplate.opsForHash().keys(key);
+    public <T> Set<T> mapGetKeys(String key) {
+        return (Set<T>) redisTemplate.opsForHash().keys(key);
     }
 
-    public List<Object> mapGetValues(String key) {
-        return redisTemplate.opsForHash().values(key);
+    public Boolean delete(String key) {
+        return redisTemplate.delete(key);
+    }
+
+    public <T> List<T> mapGetValues(String key) {
+        return (List<T>) redisTemplate.opsForHash().values(key);
     }
 
     public void removeMap(String key, String hashKey) {

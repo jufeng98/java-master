@@ -1,23 +1,29 @@
 package org.javamaster.invocationlab.admin.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.javamaster.invocationlab.admin.annos.ErdRolesAllowed;
 import org.javamaster.invocationlab.admin.enums.ProjectType;
 import org.javamaster.invocationlab.admin.enums.RoleEnum;
-import org.javamaster.invocationlab.admin.model.PageVo;
-import org.javamaster.invocationlab.admin.model.RecordsVo;
 import org.javamaster.invocationlab.admin.model.ResultVo;
-import org.javamaster.invocationlab.admin.model.StatisticVo;
 import org.javamaster.invocationlab.admin.model.erd.ErdOnlineModel;
 import org.javamaster.invocationlab.admin.model.erd.GroupGetVo;
 import org.javamaster.invocationlab.admin.model.erd.ModulesBean;
+import org.javamaster.invocationlab.admin.model.erd.PageVo;
+import org.javamaster.invocationlab.admin.model.erd.RecordsVo;
+import org.javamaster.invocationlab.admin.model.erd.SaveProjectVo;
+import org.javamaster.invocationlab.admin.model.erd.SortModuleReqVo;
+import org.javamaster.invocationlab.admin.model.erd.StatisticVo;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.service.ErdOnlineProjectService;
-import org.javamaster.invocationlab.admin.util.ResponseUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author yudong
@@ -46,11 +54,11 @@ public class ErdOnlineProjectController {
     @RequestMapping(value = {"/recent"}, method = {RequestMethod.GET, RequestMethod.POST})
     public ResultVo<PageVo> getAllProjectList(@RequestParam(required = false) String projectName,
                                               @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
-        PageVo personalPage = erdOnlineProjectService.getProjectList(tokenVo, ProjectType.PERSONAL, projectName);
         PageVo groupPage = erdOnlineProjectService.getProjectList(tokenVo, ProjectType.GROUP, projectName);
-        personalPage.getRecords().addAll(groupPage.getRecords());
-        personalPage.setTotal(personalPage.getTotal() + groupPage.getTotal());
-        return ResultVo.success(personalPage);
+        PageVo personalPage = erdOnlineProjectService.getProjectList(tokenVo, ProjectType.PERSONAL, projectName);
+        groupPage.getRecords().addAll(personalPage.getRecords());
+        groupPage.setTotal(groupPage.getTotal() + personalPage.getTotal());
+        return ResultVo.success(groupPage);
     }
 
     @RequestMapping(value = {"/page"}, method = {RequestMethod.GET, RequestMethod.POST})
@@ -63,11 +71,9 @@ public class ErdOnlineProjectController {
 
     @ErdRolesAllowed(RoleEnum.ERD_PROJECT_VIEW)
     @RequestMapping(value = "/info/{id}", method = {RequestMethod.GET, RequestMethod.POST})
-    public void getProjectDetail(@PathVariable String id, HttpServletResponse response,
+    public ResultVo<ErdOnlineModel> getProjectDetail(@PathVariable String id, HttpServletResponse response,
                                  @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
-        ResultVo<ErdOnlineModel> resultVo = ResultVo.success(erdOnlineProjectService.getProjectDetail(id, tokenVo));
-        String jsonStr = objectMapper.writeValueAsString(resultVo);
-        ResponseUtils.jsonGzipResponse(response, jsonStr);
+        return ResultVo.success(erdOnlineProjectService.getProjectDetail(id, tokenVo));
     }
 
     @RequestMapping(value = "/add", method = {RequestMethod.GET, RequestMethod.POST})
@@ -92,9 +98,16 @@ public class ErdOnlineProjectController {
 
     @ErdRolesAllowed(RoleEnum.ERD_PROJECT_SAVE)
     @RequestMapping(value = "/save", method = {RequestMethod.POST})
-    public ResultVo<Boolean> saveProject(@RequestBody ErdOnlineModel erdOnlineModelReq,
+    public ResultVo<Boolean> saveProject(@RequestBody SaveProjectVo saveProjectVo,
                                          @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
-        return ResultVo.success(erdOnlineProjectService.saveProject(erdOnlineModelReq, tokenVo));
+        return ResultVo.success(erdOnlineProjectService.saveProject(saveProjectVo, tokenVo));
+    }
+
+    @ErdRolesAllowed(RoleEnum.ERD_PROJECT_SAVE)
+    @RequestMapping(value = "/sortModule", method = {RequestMethod.POST})
+    public ResultVo<String> sortModule(@RequestBody SortModuleReqVo reqVo,
+                                         @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
+        return ResultVo.success(erdOnlineProjectService.sortModule(reqVo, tokenVo));
     }
 
     @ErdRolesAllowed(RoleEnum.ERD_PROJECT_SAVE)
@@ -110,4 +123,24 @@ public class ErdOnlineProjectController {
         return ResultVo.success(erdOnlineProjectService.getProjectBasicInfo(projectId, tokenVo));
     }
 
+    @PostMapping("/exportErd")
+    public ResponseEntity<byte[]> exportErd(@RequestBody JSONObject jsonObjectReq,
+                                               HttpServletResponse response,
+                                               @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
+        Pair<String, byte[]> pair = erdOnlineProjectService.exportErd(jsonObjectReq, tokenVo);
+        HttpHeaders headers = new HttpHeaders();
+        String name = pair.getLeft();
+        String type = jsonObjectReq.getString("type");
+        String fileName = "";
+        if (type.equals("Word")) {
+            fileName = name + ".docx";
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            headers.setContentType(new MediaType("application", "vnd.ms-word"));
+        } else if (type.equals("PDF")) {
+            fileName = name + ".pdf";
+            headers.setContentType(MediaType.APPLICATION_PDF);
+        }
+        headers.setContentDispositionFormData("attachment", URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()));
+        return new ResponseEntity<>(pair.getRight(), headers, HttpStatus.OK);
+    }
 }

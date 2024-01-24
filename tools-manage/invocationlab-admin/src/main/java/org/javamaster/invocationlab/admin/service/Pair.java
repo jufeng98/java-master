@@ -1,8 +1,13 @@
 package org.javamaster.invocationlab.admin.service;
 
+import lombok.Getter;
+
+import java.util.StringJoiner;
+
 /**
  * @author yudong
  */
+@Getter
 public class Pair<L, R> {
 
     private final L left;
@@ -13,11 +18,16 @@ public class Pair<L, R> {
         this.right = right;
     }
 
-    public L getLeft() {
-        return left;
+    public static <L, R> Pair<L, R> of(L left, R right) {
+        return new Pair<>(left, right);
     }
 
-    public R getRight() {
-        return right;
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Pair.class.getSimpleName() + "[", "]")
+                .add("left=" + left)
+                .add("right=" + right)
+                .toString();
     }
+
 }

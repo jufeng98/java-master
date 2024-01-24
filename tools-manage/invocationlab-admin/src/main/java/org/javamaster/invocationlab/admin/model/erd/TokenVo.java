@@ -26,4 +26,7 @@ public class TokenVo implements Serializable {
     @JsonProperty("user_id")
     private String userId;
     private String username;
+    private String email;
+    private String mobileNo;
+    private String env;
 }

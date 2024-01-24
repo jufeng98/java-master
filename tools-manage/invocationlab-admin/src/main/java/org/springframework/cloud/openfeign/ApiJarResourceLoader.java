@@ -1,6 +1,7 @@
 package org.springframework.cloud.openfeign;
 
 import org.javamaster.invocationlab.admin.service.load.classloader.ApiJarClassLoader;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
@@ -8,7 +9,6 @@ import org.springframework.core.io.ResourceLoader;
  * @author yudong
  * @date 2022/11/9
  */
-@SuppressWarnings("NullableProblems")
 public class ApiJarResourceLoader implements ResourceLoader {
     private final ApiJarClassLoader apiJarClassLoader;
 
@@ -17,7 +17,7 @@ public class ApiJarResourceLoader implements ResourceLoader {
     }
 
     @Override
-    public Resource getResource(String location) {
+    public @NotNull Resource getResource(@NotNull String location) {
         throw new UnsupportedOperationException();
     }
 

@@ -1,6 +1,6 @@
 package org.javamaster.invocationlab.admin.service;
 
-import org.javamaster.invocationlab.admin.model.redis.CommonVo;
+import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import org.javamaster.invocationlab.admin.model.redis.Tree;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
@@ -21,19 +21,19 @@ public interface RedisService {
 
     List<Tree> listKeys(String connectId, Integer redisDbIndex, String pattern) throws Exception;
 
-    ValueVo getValue(CommonVo commonVo) throws Exception;
+    ValueVo getValue(CommonRedisVo commonRedisVo) throws Exception;
 
-    ValueVo renameKey(CommonVo commonVo) throws Exception;
+    ValueVo renameKey(CommonRedisVo commonRedisVo) throws Exception;
 
-    String delKey(CommonVo commonVo) throws Exception;
+    String delKey(CommonRedisVo commonRedisVo) throws Exception;
 
-    ValueVo saveValue(CommonVo commonVo) throws Exception;
+    ValueVo saveValue(CommonRedisVo commonRedisVo) throws Exception;
 
-    String setNewTtl(CommonVo commonVo) throws Exception;
+    String setNewTtl(CommonRedisVo commonRedisVo) throws Exception;
 
-    ValueVo addKey(CommonVo commonVo) throws Exception;
+    ValueVo addKey(CommonRedisVo commonRedisVo) throws Exception;
 
-    String delField(CommonVo commonVo) throws Exception;
+    String delField(CommonRedisVo commonRedisVo) throws Exception;
 
-    String addField(CommonVo commonVo) throws Exception;
+    String addField(CommonRedisVo commonRedisVo) throws Exception;
 }

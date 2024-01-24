@@ -1,13 +1,16 @@
 package org.javamaster.invocationlab.admin.service.context;
 
+import org.javamaster.invocationlab.admin.enums.RegisterCenterType;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.creation.entity.PostmanService;
 import org.javamaster.invocationlab.admin.service.creation.entity.RequestParam;
+import org.javamaster.invocationlab.admin.service.creation.impl.EurekaCreator;
 import org.javamaster.invocationlab.admin.service.invocation.Invocation;
 import org.javamaster.invocationlab.admin.service.invocation.entity.DubboInvocation;
 import org.javamaster.invocationlab.admin.service.invocation.entity.PostmanDubboRequest;
 import org.javamaster.invocationlab.admin.service.load.impl.JarLocalFileLoader;
 import org.javamaster.invocationlab.admin.util.BuildUtils;
+import org.javamaster.invocationlab.admin.util.SpringUtils;
 import org.springframework.context.support.GenericApplicationContext;
 
 import java.util.List;
@@ -37,11 +40,15 @@ public class InvokeContext {
         POSTMAN_SERVICE_MAP.put(serviceKey, service);
     }
 
-    public static void putContext(String serviceKey, GenericApplicationContext context) {
+    public static void removeService(String serviceKey) {
+        POSTMAN_SERVICE_MAP.remove(serviceKey);
+    }
+
+    public static void putFeignContext(String serviceKey, GenericApplicationContext context) {
         CONTEXT_MAP.put(serviceKey, context);
     }
 
-    public static GenericApplicationContext getContext(String serviceKey) {
+    public static GenericApplicationContext getFeignContext(String serviceKey) {
         return CONTEXT_MAP.get(serviceKey);
     }
 
@@ -49,19 +56,21 @@ public class InvokeContext {
         REQUESTPARAM_MAP.put(methodKey, requestParamList);
     }
 
-    public static void checkExistAndLoad(String cluster, String serviceName) {
-        String serviceKey = BuildUtils.buildServiceKey(cluster, serviceName);
-        PostmanService postmanService = InvokeContext.getService(serviceKey);
-        checkExistAndLoad(postmanService);
-    }
-
-    public static void checkExistAndLoad(PostmanService postmanService) {
+    public static void tryLoadRuntimeInfo(PostmanService postmanService, RegisterCenterType type, String serviceKey) {
         if (postmanService == null) {
             return;
         }
+
+        if (postmanService.getLoadedToClassLoader()) {
+            return;
+        }
+
         //服务重启的时候需要重新构建运行时信息
-        if (!postmanService.getLoadedToClassLoader()) {
-            JarLocalFileLoader.loadRuntimeInfo(postmanService);
+        JarLocalFileLoader.loadInterfaceInfoAndInitLoader(postmanService);
+
+        if (type == RegisterCenterType.EUREKA) {
+            EurekaCreator creator = SpringUtils.getContext().getBean(EurekaCreator.class);
+            creator.initFeignInfoAndPutContext(postmanService, serviceKey);
         }
     }
 
@@ -71,8 +80,6 @@ public class InvokeContext {
                                                                         String methodName,
                                                                         String dubboParam,
                                                                         String dubboIp) {
-        checkExistAndLoad(cluster, serviceName);
-
         PostmanDubboRequest request = new PostmanDubboRequest();
         request.setCluster(cluster);
         request.setServiceName(serviceName);

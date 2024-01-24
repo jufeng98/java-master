@@ -1,5 +1,7 @@
 package org.javamaster.invocationlab.admin.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -48,7 +50,7 @@ public class ExecutorUtils {
         private final AtomicInteger threadNumber = new AtomicInteger(1);
 
         @Override
-        public Thread newThread(Runnable r) {
+        public Thread newThread(@NotNull Runnable r) {
             Thread t = new Thread(Thread.currentThread().getThreadGroup(), r,
                     "pool-rpc-postman-" + threadNumber.getAndIncrement(),
                     0);

@@ -10,6 +10,8 @@ public interface Creator {
 
     Pair<Boolean, String> create(String cluster, GAV gav, String serviceName);
 
+    void remove(String cluster, String serviceName);
+
     Pair<Boolean, String> refresh(String cluster, String serviceName);
 
     String getLatestVersion(GAV gav);

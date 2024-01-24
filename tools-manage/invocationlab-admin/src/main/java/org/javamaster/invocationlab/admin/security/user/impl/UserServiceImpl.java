@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
         for (Object str : userStrs) {
             User user = JsonUtils.parseObject(str.toString(), User.class);
             //只返回有权限的用户
-            if (user.getRoles().size() > 0) {
+            if (!user.getRoles().isEmpty()) {
                 userList.add(user);
             }
         }

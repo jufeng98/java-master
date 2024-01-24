@@ -31,6 +31,11 @@ public class ErdOnlineUserController {
         return ResultVo.success(erdOnlineUserService.logout());
     }
 
+    @RequestMapping(value = "/getUserInfo", method = {RequestMethod.GET})
+    public ResultVo<String> getUserInfo(String account) {
+        return ResultVo.success(erdOnlineUserService.findUserName(account));
+    }
+
     @RequestMapping(value = "/changePwd", method = {RequestMethod.POST})
     public ResultVo<String> changePwd(@RequestBody JSONObject jsonObject, @SessionAttribute("tokenVo") TokenVo tokenVo) {
         String newPwd = jsonObject.getString("newPwd");

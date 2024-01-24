@@ -1,11 +1,12 @@
 package org.javamaster.invocationlab.admin.controller;
 
-import org.javamaster.invocationlab.admin.dto.WebApiRspDto;
-import org.javamaster.invocationlab.admin.model.redis.CommonVo;
+import org.javamaster.invocationlab.admin.model.dto.WebApiRspDto;
+import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import org.javamaster.invocationlab.admin.model.redis.Tree;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
 import org.javamaster.invocationlab.admin.service.RedisService;
+import org.javamaster.invocationlab.admin.util.SpringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -53,42 +55,47 @@ public class RedisController {
     }
 
     @RequestMapping(value = "/getValue", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<ValueVo> getValue(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.getValue(commonVo));
+    public WebApiRspDto<ValueVo> getValue(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.getValue(commonRedisVo));
     }
 
     @RequestMapping(value = "/saveValue", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<ValueVo> saveValue(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.saveValue(commonVo));
+    public WebApiRspDto<ValueVo> saveValue(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.saveValue(commonRedisVo));
     }
 
     @RequestMapping(value = "/setNewTtl", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<String> setNewTtl(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.setNewTtl(commonVo));
+    public WebApiRspDto<String> setNewTtl(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.setNewTtl(commonRedisVo));
     }
 
     @RequestMapping(value = "/addKey", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<ValueVo> addKey(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.addKey(commonVo));
+    public WebApiRspDto<ValueVo> addKey(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.addKey(commonRedisVo));
     }
 
     @RequestMapping(value = "/delKey", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<String> delKey(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.delKey(commonVo));
-    }
-
-    @RequestMapping(value = "/delField", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<String> delField(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.delField(commonVo));
-    }
-
-    @RequestMapping(value = "/addField", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<String> addField(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.addField(commonVo));
+    public WebApiRspDto<String> delKey(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.delKey(commonRedisVo));
     }
 
     @RequestMapping(value = "/renameKey", method = {RequestMethod.GET, RequestMethod.POST})
-    public WebApiRspDto<ValueVo> renameKey(@RequestBody CommonVo commonVo) throws Exception {
-        return WebApiRspDto.success(redisService.renameKey(commonVo));
+    public WebApiRspDto<ValueVo> renameKey(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.renameKey(commonRedisVo));
+    }
+
+    @RequestMapping(value = "/delField", method = {RequestMethod.GET, RequestMethod.POST})
+    public WebApiRspDto<String> delField(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.delField(commonRedisVo));
+    }
+
+    @RequestMapping(value = "/addField", method = {RequestMethod.GET, RequestMethod.POST})
+    public WebApiRspDto<String> addField(@RequestBody CommonRedisVo commonRedisVo) throws Exception {
+        return WebApiRspDto.success(redisService.addField(commonRedisVo));
+    }
+
+    @RequestMapping(value = "/actuator/health", method = {RequestMethod.GET})
+    public String health() {
+        return Arrays.toString(SpringUtils.getContext().getEnvironment().getActiveProfiles());
     }
 }

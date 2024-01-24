@@ -15,7 +15,12 @@ import lombok.NoArgsConstructor;
 public class FieldVo {
     private Integer fieldIndex;
     private String fieldKey;
+    private Class<?> fieldKeyClazz;
+    private Boolean fieldKeyJdkSerialize;
+
     private String fieldValue;
+    private Boolean fieldValueJdkSerialize;
+    private Class<?> fieldValueClazz;
     private Double fieldScore;
     private Integer fieldValueSize;
 }

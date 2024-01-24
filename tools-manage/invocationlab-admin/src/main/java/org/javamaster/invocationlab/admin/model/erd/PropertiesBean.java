@@ -14,8 +14,10 @@ public class PropertiesBean {
     private String url;
     private String password;
     private String username;
+    private String cipherType;
+    private String cipherKey;
 
     public String unique() {
-        return url + ":" + username + ":" + password;
+        return url + ":" + username + ":" + password + ":" + driver_class_name;
     }
 }

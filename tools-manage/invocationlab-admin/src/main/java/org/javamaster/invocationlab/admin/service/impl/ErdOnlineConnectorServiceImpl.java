@@ -3,6 +3,7 @@ package org.javamaster.invocationlab.admin.service.impl;
 import org.javamaster.invocationlab.admin.model.erd.DbsBean;
 import org.javamaster.invocationlab.admin.model.erd.ErdOnlineModel;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
+import org.javamaster.invocationlab.admin.service.DbService;
 import org.javamaster.invocationlab.admin.service.ErdOnlineConnectorService;
 import org.javamaster.invocationlab.admin.service.ErdOnlineProjectService;
 import org.javamaster.invocationlab.admin.util.DbUtils;
@@ -23,7 +24,8 @@ public class ErdOnlineConnectorServiceImpl implements ErdOnlineConnectorService 
         String projectId = jsonObjectReq.getString("projectId");
         ErdOnlineModel erdOnlineModel = erdOnlineProjectService.getProjectDetail(projectId, tokenVo);
         DbsBean dbsBean = DbUtils.getDefaultDb(erdOnlineModel);
-        DbUtils.checkDb(dbsBean);
+        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        dbService.checkDb(dbsBean);
         return "连接成功:" + dbsBean.getProperties().getUrl();
     }
 }

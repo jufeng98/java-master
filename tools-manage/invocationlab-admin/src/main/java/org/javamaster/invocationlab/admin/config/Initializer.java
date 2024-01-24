@@ -3,11 +3,13 @@ package org.javamaster.invocationlab.admin.config;
 import org.javamaster.invocationlab.admin.service.context.InvokeContext;
 import org.javamaster.invocationlab.admin.service.creation.entity.DubboPostmanService;
 import org.javamaster.invocationlab.admin.service.creation.entity.PostmanService;
+import org.javamaster.invocationlab.admin.service.creation.impl.JdkCreator;
 import org.javamaster.invocationlab.admin.service.registry.RegisterFactory;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisKeys;
 import org.javamaster.invocationlab.admin.service.repository.redis.RedisRepository;
 import org.javamaster.invocationlab.admin.util.FileUtils;
 import org.javamaster.invocationlab.admin.util.JsonUtils;
+import lombok.Cleanup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -68,14 +70,17 @@ public class Initializer {
     void changLocalRepository(String newPath) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        byte[] bytes;
+
         URL url = this.getClass().getClassLoader().getResource("config/setting.xml");
         String content = FileUtils.readStringFromUrl(url);
-        bytes = Objects.requireNonNull(content).getBytes();
+        byte[] bytes = Objects.requireNonNull(content).getBytes();
+
+        @Cleanup
         ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
         Document doc = dBuilder.parse(bi);
         doc.getDocumentElement().normalize();
         logger.info("Root element :" + doc.getDocumentElement().getNodeName());
+
         NodeList nList = doc.getElementsByTagName("localRepository");
         String oldText = nList.item(0).getTextContent();
         logger.info("setting.xml的localRepository旧值:" + oldText);
@@ -86,6 +91,7 @@ public class Initializer {
         DOMSource source = new DOMSource(doc);
         newPath = newPath + "/settings.xml";
         logger.info("setting.xml路径:" + newPath);
+
         StreamResult result = new StreamResult(new File(newPath));
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.transform(source, result);
@@ -99,6 +105,7 @@ public class Initializer {
             logger.warn("没有配置任何集群地址,请通过web页面添加集群地址");
             return;
         }
+
         logger.info("系统当前已经添加的集群地址:" + zkList);
         zkList.forEach(cluster -> {
             Integer type = redisRepository.mapGet(RedisKeys.CLUSTER_REDIS_KEY_TYPE, cluster);
@@ -107,5 +114,9 @@ public class Initializer {
             registerFactory.get((String) cluster);
         });
         logger.info("完成初始化集群地址:" + zkList);
+    }
+
+    void initGlobalJdkClassLoader() {
+        JdkCreator.initGlobalJdkClassLoader();
     }
 }
