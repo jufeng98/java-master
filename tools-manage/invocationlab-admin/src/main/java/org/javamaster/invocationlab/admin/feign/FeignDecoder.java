@@ -22,7 +22,7 @@ public class FeignDecoder implements Decoder {
         ldapResVo.setRefreshToken(RandomStringUtils.randomAlphanumeric(10));
         ldapResVo.setEmail("123456@qq.com");
         ldapResVo.setAccount(ADMIN_CODE);
-        ldapResVo.setRealName("测试");
+        ldapResVo.setRealName("admin");
         ldapResVo.setToken(RandomStringUtils.randomAlphanumeric(10));
         ldapResVo.setMobileNo("13800138000");
 

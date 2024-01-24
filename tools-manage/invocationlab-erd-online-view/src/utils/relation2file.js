@@ -3,8 +3,6 @@ import _ from 'lodash';
 //import G6 from '@antv/g6/dist/index';
 import { uuid } from './uuid';
 
-let dom = {};
-
 const addCountTableName = (name, title) => {
   const titleNumber = title.split(':')[1];
   if (name.includes(':')) {
@@ -138,19 +136,21 @@ const getData = (dataSource, moduleName, columnOrder) => {
       const dataTable = getAllTableData(dataSource)
         .filter(entity => entity.title === (node.copy || node.title.split(':')[0]))[0];
       let tmpFields = _.get(dataTable, 'fields', [])
-      tmpFields.forEach(tmpField => {
-        if (tmpField.chnname && tmpField.chnname.length > 12) {
-          tmpField.chnname = tmpField.chnname.substring(0, 12) + "..."
-        }
-      })
+        .map(tmpField => {
+          if (tmpField.chnname && tmpField.chnname.length > 12) {
+            let obj = Object.assign({}, tmpField)
+            obj.chnname = obj.chnname.substring(0, 12) + "..."
+            return obj
+          }
+          return tmpField
+        })
       return {
         ...node,
         realName: getTableNameByNameTemplate(dataTable, node.title),
         datatype,
         associations: getAssociations(data, module),
         headers: initColumnOrder(dataTable, columnOrder),
-        fields: tmpFields
-          .filter(field => !field.relationNoShow),
+        fields: tmpFields.filter(field => !field.relationNoShow),
         edges: [...(data.edges || [])],
       };
     }),
@@ -554,49 +554,48 @@ const createNotRelationDom = () => {
   return dom;
 };
 
-export const saveImage = (dataSource, columnOrder, callBack, errorCallback) => {
+const convertToImage = async graphContainer => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      html2canvas(graphContainer)
+        .then(canvas => {
+          // 生成base64的图片
+          resolve(canvas.toDataURL('png'))
+        })
+    }, 0)
+  })
+}
+
+export const saveImage = async (dataSource, columnOrder, callBack, errorCallback) => {
   // 循环渲染每个模块的关系图
   const modules = _.get(dataSource, 'modules', []);
   const images = {};
-  Promise.all(modules.map((module) => {
-    return new Promise((res, rej) => {
-      // 创建容器
-      const id = uuid();
-      const tempDom = document.createElement('div');
-      tempDom.setAttribute('id', id);
-      tempDom.style.width = '2000px';
-      tempDom.style.height = '2000px';
-      document.body.appendChild(tempDom);
-      dom[id] = tempDom;
-      const data = getData(dataSource, module.name, columnOrder);
-      let graphContainer = null;
-      if (data.nodes && data.nodes.length === 0) {
-        graphContainer = createNotRelationDom();
-        dom[id].appendChild(graphContainer);
-      } else {
-        // 渲染关系图
-        const net = renderRelation(data, id);
-        graphContainer = net.get('graphContainer');
-      }
-      // 将关系图转成canvas
-      setTimeout(() => {
-        html2canvas(graphContainer).then(canvas => {
-          // 生成base64的图片
-          images[module.name] = canvas.toDataURL('png');
-
-          // 删除所有的DOM
-          dom[id] && dom[id].parentNode.removeChild(dom[id]);
-          res();
-        }).catch(err => {
-          rej(err);
-        });
-      })
-    })
-  })).then(() => {
-    console.log(590, 'callBack');
-    callBack && callBack(images);
-  }).catch(err => {
-    console.log(593, 'errorCallback', err);
-    errorCallback && errorCallback(err);
-  });
+  const graphContainers = []
+  for (let i = 0; i < modules.length; i++) {
+    const module = modules[i];
+    // 创建容器
+    const id = uuid();
+    const tempDom = document.createElement('div');
+    tempDom.setAttribute('id', id);
+    tempDom.style.position = "absolute";
+    tempDom.style.left = "-3000px";
+    tempDom.style.top = "-3000px";
+    tempDom.style.width = '2000px';
+    tempDom.style.height = '2000px';
+    document.body.appendChild(tempDom);
+    const data = getData(dataSource, module.name, columnOrder);
+    let graphContainer = null;
+    if (data.nodes && data.nodes.length === 0) {
+      graphContainer = createNotRelationDom();
+      tempDom.appendChild(graphContainer);
+    } else {
+      // 渲染关系图
+      const net = renderRelation(data, id);
+      graphContainer = net.get('graphContainer');
+    }
+    let base64 = await convertToImage(graphContainer)
+    images[module.name] = base64
+    tempDom.parentNode.removeChild(tempDom);
+  }
+  callBack(images)
 };

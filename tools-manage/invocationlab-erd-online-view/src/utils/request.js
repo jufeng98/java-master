@@ -63,10 +63,11 @@ const errorHandler = error => {
   if (status >= 404 && status < 422) {
     message.error(errorText);
   }
-  message.error(error);
+  message.error("" + error);
+  Promise.resolve("" + error)
 };
 
-export const BASE_URL = window._env_.API_URL || API_URL;
+export const BASE_URL = window.location.origin.startsWith("http://10") ? window.location.origin : (window._env_.API_URL || API_URL);
 
 /**
  * 配置request请求时的默认参数
@@ -74,7 +75,7 @@ export const BASE_URL = window._env_.API_URL || API_URL;
 const request = extend({
   prefix: BASE_URL,
   errorHandler, // 默认错误处理
-  timeout: 6000,
+  timeout: 30000,
 });
 
 
@@ -159,7 +160,6 @@ export const exportSql = (reqDataObj, setLoading, url) => {
     responseType: 'blob',
   })
     .then(resData => {
-      setLoading(false)
       let type;
       if (reqDataObj.type.includes("sql")) {
         type = "sql"
@@ -183,6 +183,7 @@ export const exportSql = (reqDataObj, setLoading, url) => {
       // 释放blob对象
       window.URL.revokeObjectURL(href);
     })
+    .finally(() => setLoading(false))
 }
 
 export const logout = () => {
@@ -190,6 +191,7 @@ export const logout = () => {
   request.post('/auth/oauth/logout')
     .then(res => {
       message.success(res.data);
+      cache.clear()
       history.push("/login");
     })
 }

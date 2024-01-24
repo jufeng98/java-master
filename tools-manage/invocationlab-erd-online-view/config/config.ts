@@ -37,6 +37,6 @@ export default defineConfig({
     '/invocationlab-erd-online-view/js/html2canvas.min.js',
     '/invocationlab-erd-online-view/env-config.js?date='+ Date.now(),
   ],
-
+  esbuildMinifyIIFE: true,
 
 });

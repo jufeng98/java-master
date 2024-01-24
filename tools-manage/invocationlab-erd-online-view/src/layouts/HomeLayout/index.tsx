@@ -47,12 +47,12 @@ const HomeLayout: React.FC<HomeLayoutLayoutProps> = props => {
         logout();
       }}>退出登录</Button>),
     },
-    {
-      key: '2',
-      label: (<Button onClick={() => {
-        changePwdRef?.current?.showModal()
-      }}>修改密码</Button>),
-    },
+    // {
+    //   key: '2',
+    //   label: (<Button onClick={() => {
+    //     changePwdRef?.current?.showModal()
+    //   }}>修改密码</Button>),
+    // },
   ];
 
   return (

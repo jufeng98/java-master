@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 import "./index.less";
 import DataTable from "@/components/LeftContent/DesignLeftContent/component/DataTable";
 import DataDomain from "@/components/LeftContent/DesignLeftContent/component/DataDomain";
+import MetaDataSearch from "@/components/LeftContent/DesignLeftContent/component/MetaDataSearch";
 import { Input, Tabs } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import useGlobalStore from "@/store/global/globalStore";
 import shallow from "zustand/shallow";
-
-const { TabPane } = Tabs;
 
 
 export type DesignLeftContentProps = {
@@ -16,13 +15,14 @@ export type DesignLeftContentProps = {
 };
 
 const DesignLeftContent: React.FC<DesignLeftContentProps> = (props) => {
-  const { globalDispatch } = useGlobalStore(state => ({
-    globalDispatch: state.dispatch
-  }), shallow);
+  const { globalDispatch } = useGlobalStore(state => ({ globalDispatch: state.dispatch }), shallow);
+
+  const metaDataSearchRef = useRef<any>(null);
 
   return (
     props.collapsed ? <></> :
       <>
+        <MetaDataSearch onRef={metaDataSearchRef} />
         <Input
           style={{
             borderRadius: 4,
@@ -31,7 +31,11 @@ const DesignLeftContent: React.FC<DesignLeftContentProps> = (props) => {
           allowClear
           size={"small"}
           prefix={<SearchOutlined />}
-          placeholder="搜索元数据"
+          placeholder="搜索元数据(右键使用完整功能)"
+          onContextMenu={(e) => {
+            metaDataSearchRef?.current?.showSearchForm()
+            e.preventDefault()
+          }}
           onPressEnter={(e) => {
             // @ts-ignore
             globalDispatch.setSearchKey(e.target?.value)

@@ -45,24 +45,28 @@ const TableIndexEdit: React.FC<TableIndexEditProps> = (props) => {
     projectDispatch.updateEntityIndex(payload);
   }
 
+  const getWindowWidth = () => {
+    return (window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) - 416
+  }
+
   const data = JSON.parse(s);
   const columns = [{
     title: '索引名*',
     name: 'name',
     type: 'text',
-    width: document.body.clientWidth * 0.2,
+    width: getWindowWidth() * 0.35,
   }, {
     title: '字段*',
     name: 'fields',
     type: 'dropdown',
-    width: document.body.clientWidth * 0.35,
+    width: getWindowWidth() * 0.55,
     multiple: true,
     source: fields
   }, {
     title: '是否唯一',
     name: 'isUnique',
     type: 'checkbox',
-    width: document.body.clientWidth * 0.1,
+    width: getWindowWidth() * 0.1,
   }];
   return (
     /*    <HotTable

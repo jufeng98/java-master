@@ -36,15 +36,18 @@ export const pageProject = (params) => {
 };
 
 // 保存项目
-export const saveProject = (data) => {
+export const saveProject = (data, delta) => {
   const id = cache.getItem(CONSTANT.PROJECT_ID);
   return request.post('/ncnb/project/save', {
     data: {
-      ...data,
-      id
-    }
+      erdOnlineModel: {
+        ...data,
+        id
+      },
+      delta
+    },
   }).then(resJson => {
-    if (resJson.code === 405) {
+    if (resJson && resJson.code === 405) {
       useProjectStore.setState((state) => ({ ...state, showErrorTipFloatButton: true }))
     }
   });

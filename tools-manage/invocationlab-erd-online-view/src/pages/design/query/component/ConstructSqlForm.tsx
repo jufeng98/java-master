@@ -1,10 +1,10 @@
 import { Button, Form, Input, Select, Space, Spin, Tag } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as cache from "@/utils/cache";
 import { CONSTANT } from "@/utils/constant";
 import request from "../../../../utils/request";
 import moment from "moment";
-import { ArrowDownOutlined, ArrowUpOutlined, MinusCircleOutlined, PlayCircleOutlined, PlusOutlined, SmileOutlined } from '@ant-design/icons';
+import { ArrowDownOutlined, ArrowUpOutlined, ConsoleSqlOutlined, MinusCircleOutlined, PlayCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Option, OptGroup } = Select;
 const { TextArea } = Input;
@@ -16,52 +16,78 @@ const layout = {
 export type ConstructSqlFormProps = {
   selectDB: string;
   closeDrawer: Function;
+  open: Boolean;
 };
 
 const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
   const [codeLoading, setCodeLoading] = useState(false);
-  const [tables, setTables] = useState([]);
+  const [tables, setTables] = useState<any[]>([]);
   const [sql, setSql] = useState('');
-  const [tableColumns, setTableColumns] = useState<any>([]);
+  const [tableColumns, setTableColumns] = useState<any[]>([]);
   const [form] = Form.useForm();
+  const tableNameSelectRef = useRef<any>()
+  const addConditionBtnRef = useRef<any>()
+
+  const conditions = [
+    { id: "equals", label: "等于(=)", value: "=" },
+    { id: "inList", label: "在列表中(in)", value: "In" },
+    { id: "contains", label: "包含(like)", value: "Like" },
+    { id: "between", label: "在两者之间(between)", value: "Between" },
+    { id: "isNull", label: "为null(is null)", value: "IsNull" },
+    { id: "moreThenOrEquals", label: "大于或等于(>=)", value: ">=" },
+    { id: "lessThenOrEquals", label: "小于或等于(<=)", value: "<=" },
+    { id: "moreThen", label: "大于(>)", value: ">" },
+    { id: "lessThen", label: "小于(<)", value: "<" },
+    { id: "notEquals", label: "不等于(!=)", value: "!=" },
+    { id: "startsWith", label: "以...开始(like xxx%)", value: "LikeLeft" },
+    { id: "endsWith", label: "以...结束(like %xxx)", value: "LikeRight" },
+    { id: "isNotNull", label: "不为null(is not null)", value: "IsNotNull" },
+    { id: "notInList", label: "不在列表中(not in)", value: "NotIn" },
+    { id: "notContains", label: "不包含(not like)", value: "NotLike" },
+    { id: "notBetween", label: "不在两者之间(not between)", value: "NotBetween" },
+  ]
+
+  const conditionJoins = [
+    { id: "or", label: "或者", value: "or" },
+    { id: "and", label: "并且", value: "and" },
+    { id: "orNot", label: "or not", value: "or not" },
+    { id: "andNot", label: "and not", value: "and not" },
+  ]
+
+  const columnSorts = [
+    { id: "desc", label: "降序", value: "desc" },
+    { id: "asc", label: "升序", value: "asc" },
+  ]
 
   useEffect(() => {
+    getTables()
+  }, [props.selectDB])
+
+  const getTables = () => {
     setCodeLoading(true)
     request.post('/ncnb/getTables', { data: { projectId: cache.getItem(CONSTANT.PROJECT_ID), selectDB: props.selectDB } })
       .then(res => {
         setCodeLoading(false)
+        if (!res || !res.data) {
+          return;
+        }
         form.setFieldValue('conditionsChoose', [])
         form.setFieldValue('tableColumnNamesChoose', [])
         form.setFieldValue('tableNameChoose', '')
         setTableColumns([])
         setSql('')
-        if (!res.data) {
-          return;
-        }
         setTables(res.data)
-      })
-  }, [props.selectDB])
-
-  const onTableNameChange = (value: string) => {
-    setCodeLoading(true)
-    request.post('/ncnb/getTableColumns', {
-      data: {
-        projectId: cache.getItem(CONSTANT.PROJECT_ID),
-        selectDB: props.selectDB,
-        tableName: value
-      }
-    })
-      .then(res => {
-        form.setFieldValue('conditionsChoose', [])
-        setCodeLoading(false)
-        if (!res.data) {
-          return;
-        }
-        setTableColumns(res.data)
-        form.setFieldValue("tableColumnNamesChoose", res.data.map((it: any) => it.name))
-        tryConstructSqlWhenChooseTable()
+        tableNameSelectRef.current?.focus()
       })
   }
+
+  useEffect(() => {
+    if (tables.length > 0 && props.open) {
+      setTimeout(() => {
+        tableNameSelectRef.current?.focus()
+      }, 0)
+    }
+  }, [props.open])
 
   const constructSql = (conditionsChoose: any, tableColumnNamesChoose: any, tableNameChoose: any): string => {
     if (!tableNameChoose || !tableColumnNamesChoose) {
@@ -84,21 +110,17 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
         if (!conditionChoose.querySymbol) {
           return tmpStr
         }
-        if (conditionChoose.querySymbol === '=' || conditionChoose.querySymbol === '!=' || conditionChoose.querySymbol === '>'
-          || conditionChoose.querySymbol === '>=' || conditionChoose.querySymbol === '<' || conditionChoose.querySymbol === '<=') {
-          tmpStr = `${conditionChoose.columnName} ${conditionChoose.querySymbol} ${conditionChoose.columnValue}`
-        } else if (conditionChoose.querySymbol.includes('like')) {
-          tmpStr = `${conditionChoose.columnName} ${conditionChoose.querySymbol}`.replace('${value}', conditionChoose.columnValue)
-        } else if (conditionChoose.querySymbol.startsWith('is')) {
-          tmpStr = `${conditionChoose.columnName} ${conditionChoose.querySymbol}`
-        } else if (conditionChoose.querySymbol.includes('in')) {
-          tmpStr = `${conditionChoose.columnName} ${conditionChoose.querySymbol}`.replace('${values}', conditionChoose.columnValue)
-        } else if (conditionChoose.querySymbol.includes('between')) {
-          let split = conditionChoose.columnValue.split(",")
-          tmpStr = `${conditionChoose.columnName} ${conditionChoose.querySymbol}`.replace('${start}', split[0] || '')
-            .replace('${end}', split[1] || '')
+        const value = getModifiedConditionValue(conditionChoose)
+        if (conditionChoose.querySymbol.includes("Like")) {
+          tmpStr = `${conditionChoose.columnName} ${value}`
+        } else if (conditionChoose.querySymbol.includes("In")) {
+          tmpStr = `${conditionChoose.columnName} ${value}`
+        } else if (conditionChoose.querySymbol.includes("Between")) {
+          tmpStr = `${conditionChoose.columnName} ${value}`
+        } else if (conditionChoose.querySymbol.includes("Null")) {
+          tmpStr = `${conditionChoose.columnName} ${value}`
         } else {
-          throw new Error("wrong " + conditionChoose.querySymbol)
+          tmpStr = `${conditionChoose.columnName} ${conditionChoose.querySymbol} ${value}`
         }
 
         if (index !== (conditionsChoose.length - 1)) {
@@ -111,7 +133,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
     let sortStr = ''
     let columnSortsChoose = conditionsChoose
       .filter((conditionChoose: any) => conditionChoose && conditionChoose.columnSort)
-      .map((conditionChoose: any, index: number) => {
+      .map((conditionChoose: any) => {
         return `${conditionChoose.columnName} ${conditionChoose.columnSort}`
       })
     if (columnSortsChoose.length > 0) {
@@ -121,11 +143,61 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
     return sql
   }
 
-  const tryConstructSqlWhenChooseTable = () => {
-    let conditionsChoose = form.getFieldValue('conditionsChoose')
-    let tableNameChoose = form.getFieldValue('tableNameChoose')
-    let sql = constructSql(conditionsChoose, [], tableNameChoose)
-    setSql(sql)
+  const getModifiedConditionValue = (conditionChoose: any) => {
+    let column = tableColumns.filter((column: any) => column.name === conditionChoose.columnName)[0]
+    return getColumnValueOfType(column.typeName, conditionChoose.querySymbol, conditionChoose.columnValue)
+  }
+
+  const getColumnValueOfType = (type: string, querySymbol: string = '=', currentValue: any) => {
+    if (querySymbol === 'Like') {
+      return currentValue ? `like '%${currentValue}%'` : "like"
+    } else if (querySymbol === 'NotLike') {
+      return currentValue ? `not like '%${currentValue}%'` : "not like"
+    } else if (querySymbol === 'LikeLeft') {
+      return currentValue ? `like '${currentValue}%'` : "like"
+    } else if (querySymbol === 'LikeRight') {
+      return currentValue ? `like '%${currentValue}'` : "like"
+    } else if (querySymbol === 'In' || querySymbol === 'NotIn') {
+      let tmp = querySymbol === 'In' ? "in" : "not in"
+      if (!currentValue) {
+        return tmp
+      } else {
+        let array = currentValue.split(",")
+        for (let i = 0; i < array.length; i++) {
+          const str = array[i];
+          array[i] = getColumnValueOfType(type, "", str)
+        }
+        return `${tmp} (${array.join(',')})`
+      }
+    } else if (querySymbol === 'IsNull' || querySymbol === 'IsNotNull') {
+      return querySymbol === 'IsNull' ? "is null" : "is not null"
+    } else if (querySymbol === 'Between' || querySymbol === 'NotBetween') {
+      let tmp = querySymbol === 'Between' ? "between" : "not between"
+      if (!currentValue) {
+        return tmp
+      } else {
+        let array = currentValue.split(",")
+        for (let i = 0; i < array.length; i++) {
+          const str = array[i];
+          array[i] = getColumnValueOfType(type, "", str)
+        }
+        return `${tmp} ${array[0] || ''} and ${array[1] || ''}`
+      }
+    }
+
+    if (type.includes("char")) {
+      return currentValue ? `'${currentValue}'` : ""
+    } else if (type.includes("int")) {
+      return currentValue ? `${currentValue}` : "0"
+    } else if (type.includes("datetime") || type.includes('timestamp')) {
+      return currentValue ? `'${currentValue}'` : moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+    } else if (type.includes("date")) {
+      return currentValue ? `'${currentValue}'` : moment(new Date()).format("YYYY-MM-DD")
+    } else if (type.includes("time")) {
+      return currentValue ? `'${currentValue}'` : moment(new Date()).format("HH:mm:ss")
+    } else {
+      return ""
+    }
   }
 
   const tryConstructSql = () => {
@@ -136,36 +208,34 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
     setSql(sql)
   }
 
-  const getDefaultValueOfType = (type: string, querySymbol: string = '=') => {
-    if (querySymbol.includes('like')) {
-      return ""
-    }
-    if (type.includes("char")) {
-      return "''"
-    }
-    if (type.includes("int")) {
-      return "0"
-    }
-    if (type.includes("datetime") || type.includes('timestamp')) {
-      return "'" + moment(new Date()).format("YYYY-MM-DD HH:mm:ss") + "'"
-    }
-    if (type.includes("date")) {
-      return "'" + moment(new Date()).format("YYYY-MM-DD") + "'"
-    }
-    if (type.includes("time")) {
-      return "'" + moment(new Date()).format("HH:mm:ss") + "'"
-    }
-    return ""
+  const onTableNameChange = (value: string) => {
+    setCodeLoading(true)
+    request.post('/ncnb/getTableColumns', {
+      data: {
+        projectId: cache.getItem(CONSTANT.PROJECT_ID),
+        selectDB: props.selectDB,
+        tableName: value
+      }
+    })
+      .then(res => {
+        form.setFieldValue('conditionsChoose', [])
+        setCodeLoading(false)
+        if (!res || !res.data) {
+          return;
+        }
+        form.setFieldValue("tableColumnNamesChoose", res.data.map((it: any) => it.name))
+        setTableColumns(res.data)
+        addConditionBtnRef?.current?.click()
+      })
   }
 
   const onConditionColumnChange = (columnName: string) => {
     let column = tableColumns.filter((column: any) => column.name === columnName)[0]
-
     let tmpList = form.getFieldValue('conditionsChoose')
     tmpList
       .filter((conditionChoose: any) => conditionChoose.columnName === columnName)
       .forEach((conditionChoose: any) => {
-        let val = getDefaultValueOfType(column.typeName, conditionChoose.querySymbol)
+        let val = getColumnValueOfType(column.typeName, conditionChoose.querySymbol, null)
         conditionChoose.columnValue = val
       })
   }
@@ -173,47 +243,16 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
   const onQuerySymbolChange = (querySymbol: string, index: number) => {
     let conditionsChoose = form.getFieldValue('conditionsChoose')
     let conditionChoose = conditionsChoose[index]
-    if (querySymbol.includes('in')) {
-      conditionChoose.columnValue = 'a,b,c'
-    } else if (querySymbol.includes('between')) {
-      conditionChoose.columnValue = 'a,b'
+    if (querySymbol.includes('In')) {
+      conditionChoose.columnValue = '1,2,3'
+    } else if (querySymbol.includes('Between')) {
+      conditionChoose.columnValue = '1,2'
     }
   }
 
-  const onFinish = (values: any) => {
+  const onFinish = (_: any) => {
     props.closeDrawer(sql)
   };
-
-  const conditions = [
-    { id: "equals", label: "等于", value: "=" },
-    { id: "notEquals", label: "不等于", value: "!=" },
-    { id: "moreThen", label: "大于", value: ">" },
-    { id: "moreThenOrEquals", label: "大于或等于", value: ">=" },
-    { id: "lessThen", label: "小于", value: "<" },
-    { id: "lessThenOrEquals", label: "小于或等于", value: "<=" },
-    { id: "contains", label: "包含", value: "like '%${value}%'" },
-    { id: "notContains", label: "不包含", value: "not like '%${value}%'" },
-    { id: "startsWith", label: "以...开始", value: "like '${value}%'" },
-    { id: "endsWith", label: "以...结束", value: "like '%${value}'" },
-    { id: "isNull", label: "为null", value: "is null" },
-    { id: "isNotNull", label: "不为null", value: "is not null" },
-    { id: "inList", label: "在列表中", value: "in (${values})" },
-    { id: "notInList", label: "不在列表中", value: "not in (${values})" },
-    { id: "between", label: "在两者之间", value: "between ${start} and ${end}" },
-    { id: "notBetween", label: "不在两者之间", value: "not between ${start} and ${end}" },
-  ]
-
-  const conditionJoins = [
-    { id: "or", label: "或者", value: "or" },
-    { id: "and", label: "并且", value: "and" },
-    { id: "orNot", label: "or not", value: "or not" },
-    { id: "andNot", label: "and not", value: "and not" },
-  ]
-
-  const columnSorts = [
-    { id: "asc", label: "升序", value: "asc" },
-    { id: "desc", label: "降序", value: "desc" },
-  ]
 
   return (
     <Spin spinning={codeLoading}>
@@ -234,6 +273,9 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
             showSearch
             size='middle'
             placeholder="请选择"
+            ref={tableNameSelectRef}
+            autoFocus={true}
+            defaultOpen={true}
             onChange={onTableNameChange}
           >
             <OptGroup>
@@ -247,7 +289,6 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
         </Form.Item>
         <Form.Item name="tableColumnNamesChoose" label="选择要查询的列" rules={[{ required: true }]} >
           <Select
-            showSearch
             style={{ width: 630 }}
             size='middle'
             mode="multiple"
@@ -312,7 +353,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
                     name={[name, 'columnValue']}
                     rules={[{ required: true, message: '请输入值' }]}
                   >
-                    <Input size='small' style={{ width: 190 }} />
+                    <Input size='small' autoFocus={true} style={{ width: 190 }} />
                   </Form.Item>
                   <Form.Item
                     noStyle
@@ -369,7 +410,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
                 </Space>
               ))}
               <Form.Item>
-                <Button size="small" type="dashed" onClick={() => {
+                <Button size="small" ref={addConditionBtnRef} type="dashed" onClick={() => {
                   add()
                   let tmpList = form.getFieldValue('conditionsChoose')
                   if (tableColumns.length == 0) {
@@ -395,7 +436,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
                     list[index] = {
                       columnName: tableColumns[currentIndex].name,
                       querySymbol: conditions[0].value,
-                      columnValue: getDefaultValueOfType(tableColumns[currentIndex].typeName),
+                      columnValue: getColumnValueOfType(tableColumns[currentIndex].typeName, "=", null),
                       conditionJoin: conditionJoins[0].value
                     }
                   })
@@ -412,9 +453,12 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
           <Button icon={<PlayCircleOutlined />} type="primary" size='small' htmlType="submit">
             执行查询
           </Button>
+          <Button ref={el => el && el.style.setProperty('margin-left', '200px', 'important')} size='small' onClick={getTables}>
+            重置并刷新
+          </Button>
         </Form.Item>
       </Form>
-      <Tag icon={<SmileOutlined />} style={{ fontSize: 14 }}>
+      <Tag icon={<ConsoleSqlOutlined />} style={{ fontSize: 14 }}>
         实时预览SQL
       </Tag>
       <TextArea rows={6} value={sql} />

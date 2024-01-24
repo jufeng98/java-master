@@ -179,7 +179,7 @@ const Home: React.FC<HomeProps> = (props) => {
                 </a>
               </Col>
               <Col span={12}>
-                <a href="https://doc.erdonline.comthread/101" target="_blank">
+                <a href="https://www.zerocode.net.cn/thread/101" target="_blank">
                   ERD Online ERD Online适用场景分析
                 </a>
               </Col>
@@ -201,7 +201,7 @@ const Home: React.FC<HomeProps> = (props) => {
                 </a>
               </Col>
               <Col span={12}>
-                <a href="https://doc.erdonline.comthread/57" target="_blank">
+                <a href="https://www.zerocode.net.cn/thread/57" target="_blank">
                   ERDOnline 一键部署异常问题处理
                 </a>
               </Col>

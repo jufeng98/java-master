@@ -5,6 +5,7 @@ import RelationEdit from './RelationEdit';
 import './style/index.less';
 import { uuid } from '../../../utils/uuid';
 import * as File from '../../../utils/file';
+import { copyValue } from '../query/component/QueryResultUtils';
 import Context from "@/pages/design/relation/Contex";
 import { message, Space } from 'antd';
 import openModal from "@/pages/design/relation/ModalWrapper";
@@ -41,6 +42,8 @@ export default class G6Relation extends React.Component {
     this._checkEmpty(data);
     this._renderRelation(height, width, data, dataSource);
     this.pointerDom = ReactDom.findDOMNode(this.pointer);
+    // 打开缩略图
+    this._keyDown({ key: 'm' }, false);
   }
 
   componentDidUpdate(nextProps) {
@@ -724,6 +727,7 @@ export default class G6Relation extends React.Component {
 
         title = group.addShape('text', {
           attrs: {
+            name: model.title,
             x: 0,
             y: 0,
             text: model.moduleName ? `<<${model.moduleName}>> ${model.realName}` : model.realName,
@@ -1518,7 +1522,7 @@ export default class G6Relation extends React.Component {
       const navigation = paint && paint.querySelector('.g6-plugins-navigation');
       if (getComputedStyle(navigation).display === 'none' && !close) {
         navigation.style.display = 'block';
-        navigation.style.marginRight = '20%';
+        navigation.style.marginRight = '0';
       } else {
         navigation.style.display = 'none';
       }
@@ -1557,18 +1561,19 @@ export default class G6Relation extends React.Component {
         { }
       </div>
       <div
-        style={{ position: 'fixed', bottom: '0%', right: '33%', color: '#f50808' }}
+        style={{ position: 'fixed', bottom: '0%', right: '10%', color: '#f50808', fontSize: 20 }}
       >
-        按住 shift 拖动关系图，滑动鼠标放大缩小关系图，按 N 打开或关闭全屏，按 M 打开或关闭缩略图
+        按 M 打开或关闭缩略图， 按住 shift 拖动关系图， 滑动鼠标放大缩小关系图， 按 N 打开或关闭全屏
       </div>
       <div
-        style={{ position: 'fixed', top: '20%', right: '20%', color: 'green' }}
+        style={{ position: 'fixed', top: '6%', right: '1%', color: 'green', fontSize: 20, zIndex: 9999 }}
       >
         放大倍数：{count}X
       </div>
       {
         this.state.tooltip.show &&
-        <span className='g6-tooltip' style={{ top: this.state.tooltip.top, left: this.state.tooltip.left }}>
+        <span className='g6-tooltip' onDoubleClick={() => copyValue(this.state.tooltip.text)}
+          style={{ top: this.state.tooltip.top, left: this.state.tooltip.left }}>
           {this.state.tooltip.text}
         </span>
       }

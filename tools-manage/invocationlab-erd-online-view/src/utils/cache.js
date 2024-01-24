@@ -55,8 +55,12 @@ export const getItem2object = (key) => {
 export const clear = () => {
   Object.keys(lStorage)
     .forEach(k => {
-      if(k.startsWith(CONSTANT.PREFIX)) {
+      if (k.startsWith(CONSTANT.PREFIX)) {
         lStorage.removeItem(k)
       }
     })
 };
+
+export const isProEnv = () => {
+  return getItem('env') === 'pro'
+}

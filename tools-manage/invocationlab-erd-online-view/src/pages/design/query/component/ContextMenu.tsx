@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, Ref, useImperativeHandle } from 'react';
-import { Menu, MenuProps, message } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import { ContainerOutlined } from '@ant-design/icons';
 import moment from "moment";
 
@@ -74,10 +74,10 @@ const QueryTableContextMenu: React.FC<QueryTableContextMenuProps> = (props) => {
     }
 
     return (visible &&
-        (<div ref={contextRef} style={{ width: "320px", position: "fixed", zIndex: 10000, top: top + 'px', left: left + 'px' }}>
+        (<div ref={contextRef} style={{ width: "320px", position: "fixed", zIndex: 10000, top: top + 'px', left: left + 'px', border: '1px solid lightgray' }}>
             <Menu
                 mode="inline"
-                theme="dark"
+                theme="light"
                 items={items}
                 onClick={menuItemClick}
             />

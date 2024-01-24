@@ -44,6 +44,7 @@ export interface IModulesDispatchSlice {
   updateRelation: (payload: any) => void;
   setCurrentModule: (payload: any) => void,
   updateAllModules: (payload: any) => void,
+  getOriginalModules: () => any,
   getModuleEntityTree: (searchKey: string) => any,
   getModuleEntityFieldTree: () => any,
   setExpandedKey: (expandedKey: string) => any,
@@ -153,6 +154,10 @@ const ModulesSlice = (set: SetState<ProjectState>, get: GetState<ProjectState>) 
         const moduleName = payload.name;
         Save.refreshProjectModule(moduleName)
           .then(r => {
+            if (!r) {
+              reject('超时')
+              return
+            }
             if (r.code !== 200) {
               console.error(r);
               reject(r.msg)
@@ -183,6 +188,9 @@ const ModulesSlice = (set: SetState<ProjectState>, get: GetState<ProjectState>) 
       state.project.projectJSON.modules = modules;
     }
   })),
+  getOriginalModules: () => {
+    return get().project.projectJSON?.modules
+  },
   getModuleEntityTree: (searchKey: string) => {
     const tempExpandedKeys: any = [];
     // console.log(70, get().project)

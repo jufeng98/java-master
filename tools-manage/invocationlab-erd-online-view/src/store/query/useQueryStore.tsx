@@ -18,6 +18,7 @@ type actions = {
   queryHistory(params: any): Promise<COMMON.R>;
   explain(params: any): Promise<COMMON.R>;
   exec(selectValue: any): Promise<COMMON.R>;
+  getTableRecordTotal(selectValue: any): Promise<COMMON.R>;
   exportSql(selectValue: any, setLoading: Function): void;
   updateSqlInfo(model: any): void;
   renameQuery(model: any): void;
@@ -25,7 +26,7 @@ type actions = {
   addQuery(model: any): void;
   fetchQueryInfo: (id: string | number) => Promise<COMMON.R>;
   onSelectNode(selectedKeys: import("rc-tree/lib/interface").Key[], info: { event: "select"; selected: boolean; node: import("rc-tree/lib/interface").EventDataNode<DataNode>; selectedNodes: DataNode[]; nativeEvent: MouseEvent; }): void;
-  fetchTreeData: (params: any) => void,
+  fetchTreeData: (params: any) => Promise<any>,
   setQuerySearchKey: (searchKey: string) => void
 
 }
@@ -50,6 +51,9 @@ const useQueryStore = create<QueryState>(
       },
       exec: (model) => {
         return POST('/ncnb/queryInfo/exec', model);
+      },
+      getTableRecordTotal: (model) => {
+        return POST('/ncnb/queryInfo/getTableRecordTotal', model);
       },
       exportSql: (model, setLoading) => {
         exportSql(model, setLoading, "/ncnb/queryInfo/exportSql")
@@ -102,19 +106,24 @@ const useQueryStore = create<QueryState>(
         if (title) {
           _.set(params, 'title', title);
         }
-        TREE('/ncnb/queryInfo/tree', params).then(r => {
-          if (r?.code === 200) {
-            set({
-              treeData: r?.data || []
-            })
-          }
-        });
+        return new Promise((resolve, reject) => {
+          TREE('/ncnb/queryInfo/tree', params).then(r => {
+            if (r?.code === 200) {
+              set({
+                treeData: r?.data || []
+              })
+              resolve(r?.data || [])
+            } else {
+              reject(r?.code)
+            }
+          });
+        })
       },
       setQuerySearchKey: (querySearchKey: string) => set(produce(state => {
         state.querySearchKey = querySearchKey;
       })),
       onSelectNode: (selectedKeys, info) => set(produce(state => {
-        console.log(49, selectedKeys, info);
+        // console.log(49, selectedKeys, info);
         const tabDispatch = useTabStore.getState().dispatch;
         if (info.node.isLeaf) {
           tabDispatch.addTab({ group: TabGroup.QUERY, module: info.node.key + '', entity: info.node.title + '' });

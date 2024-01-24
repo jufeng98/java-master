@@ -108,7 +108,7 @@ const useProjectStore = create<ProjectState, SetState<ProjectState>, GetState<Pr
         timestamp: Date.now(),
         fetch: async () => {
           const projectId = cache.getItem(CONSTANT.PROJECT_ID);
-          if(!projectId){
+          if (!projectId) {
             location = '/invocationlab-erd-online-view/project/recent'
             return
           }
@@ -138,30 +138,23 @@ const useProjectStore = create<ProjectState, SetState<ProjectState>, GetState<Pr
           let socket = get().socket;
           // console.log(165, socket);
           if (socket) return;
-          socket = io(`http://localhost:3000?roomId=${projectId}`);
-          // client-side
-          socket.on("connect", () => {
-            // console.log(socket?.id); // x8WIv7-mJelg7on_ALbx
-          });
-          const username = cache.getItem('username');
+          set({
+            socket: {}
+          })
+          const username = cache.getItem('username') || "";
+          socket = await connectWs(projectId, username)
           message.success(`当前您的身份为${username}`);
-          // socket.on('historyRecord', (value: any) => message.success(`init ${value}`));
           // 发送加入消息
-          socket.emit('join', username);
+          socket.send("hello");
           // 监听消息
-          socket.on('msg', (r: any) => {
-            // console.log(149, r);
-            if (username != r.username) {
-              message.success(`${r.msg}`);
-            }
-          });
-          // 监听消息
-          socket.on('sync', (r: any) => {
-            // console.log(148, 'sync', r);
-            if (username != r.username && r.delta && r.timestamp != get().timestamp && JSON.stringify(r.delta) !== '{}') {
+          socket.onmessage = (r: any) => {
+            r = JSON.parse(r.data)
+            //console.log(148, 'sync', r);
+            if (username != r.username && r.delta && JSON.stringify(r.delta) !== '{}') {
+              //console.log(149, 'patch', r);
               get().dispatch.patch(r);
             }
-          });
+          };
           set({
             socket
           })
@@ -217,7 +210,10 @@ function startProjectSubscribe() {
     // console.log(109, project);
     // console.log(110, previousProject);
     // console.log(110, globalState.needSave);
-    // const delta = jsondiffpatch.diff(previousProject, project);
+    const delta = jsondiffpatch.diff(previousProject, project);
+    if (!delta) {
+      return
+    }
     //
     // console.log(172, 'delta', delta);
     // if (delta && delta.projectJSON
@@ -230,10 +226,33 @@ function startProjectSubscribe() {
     //   console.log(172, '开启保存', delta);
 
     // }
-    Save.saveProject(project);
+    Save.saveProject(project, delta);
   });
 }
 
+function connectWs(projectId: string, username: string) {
+  return new Promise((resolve, reject) => {
+    let tmp
+    if (window._env_.API_URL.includes("localhost")) {
+      tmp = "localhost:8083"
+    } else {
+      tmp = window._env_.API_URL.replace("http://", "")
+    }
+    let url = `ws://${tmp}/erdSyncProject?projectId=${projectId}&username=${username}`
+    let socket = new WebSocket(url);
+    socket.onopen = () => {
+      console.log("WebSocket Connection established.");
+      resolve(socket);
+    };
+    socket.onerror = (e) => {
+      console.log("WebSocket Connection error.", e);
+      reject();
+    };
+    socket.onclose = event => {
+      console.log("Was clean? " + event.wasClean + " Code=" + event.code + " Reason=" + event.reason);
+    };
+  })
+}
 
 
 export default useProjectStore;

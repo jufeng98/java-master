@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { PageContainer, ProCard, ProLayout, ProSettings, WaterMark } from "@ant-design/pro-components";
 import { history, Outlet, useSearchParams } from "@@/exports";
 import { Me, TwoDimensionalCodeOne, TwoDimensionalCodeTwo, WeixinMiniApp } from "@icon-park/react";
-import { Button, Dropdown, Image, message, Popover } from "antd";
+import { Button, Dropdown, FloatButton, Image, message, Popover } from "antd";
 import { logout } from "@/utils/request";
 import * as cache from "@/utils/cache";
 import { useAccess } from "@@/plugin-access";
@@ -120,7 +120,7 @@ const DesignLayout: React.FC<DesignLayoutLayoutProps> = props => {
   useEffect(() => {
     // console.log(69, access, project.type)
     if (project && project.type === '2') {
-      initSocket(projectId);
+      // initSocket(projectId);
       GET("/ncnb/project/group/currentRolePermission", {
         projectId
       }).then(r => {
@@ -139,7 +139,7 @@ const DesignLayout: React.FC<DesignLayoutLayoutProps> = props => {
     } else {
       setInitialState((s: any) => ({ ...s, access: { person: true } }));
     }
-  }, [project, access.initialized, defaultProps.route.routes])
+  }, [access.initialized, defaultProps.route.routes])
 
 
   // 页面卸载
@@ -275,6 +275,10 @@ const DesignLayout: React.FC<DesignLayoutLayoutProps> = props => {
           </ProCard>
         </PageContainer>
       </ProLayout>
+      {
+        cache.isProEnv() && <FloatButton description="WARNING:当前处于生产环境！！！" shape="square"
+        style={{ fontSize: 20, width: 260, height: 10, right: 230, top: 10, zIndex: 99999, transform: "scale(1.5)" }} />
+      }
     </WaterMark>
   );
 }

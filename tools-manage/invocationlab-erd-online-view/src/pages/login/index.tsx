@@ -20,14 +20,18 @@ export async function login(username: string, password: string) {
   await request.get(
     '/auth/oauth/token?username=' + username + '&password=' + password + '&grant_type=password&scope=select'
   ).then(res => {
-    if (res) {
-      if (res.data.access_token) {
-        cache.setItem('Authorization', res.data.access_token);
-        cache.setItem('username', username);
-        history.push({
-          pathname: "/project/recent"
-        });
-      }
+    if (!res) {
+      return
+    }
+    if (res.data.access_token) {
+      cache.setItem('Authorization', res.data.access_token);
+      cache.setItem('username', username);
+      cache.setItem('env', res.data.env);
+      history.push({
+        pathname: "/project/recent"
+      });
+    } else {
+      message.error(res.data.msg);
     }
   });
 }
@@ -124,7 +128,7 @@ export default () => {
           activeKey={loginType}
           onChange={(activeKey) => setLoginType(activeKey as LoginType)}
           items={[
-            { label: '账户密码登录', key: 'account', },
+            { label: 'LDAP登录', key: 'account', },
           ]}
         >
         </Tabs>
@@ -223,6 +227,7 @@ export default () => {
           <a
             style={{
               float: 'right',
+              display: 'none'
             }}
             onClick={() => {
               message.warning("请联系管理员修改密码");

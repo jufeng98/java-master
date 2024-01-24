@@ -84,6 +84,9 @@ const DatabaseSetUp: React.FC<DatabaseSetUpProps> = (props) => {
       Save.ping({
         ...properties
       }).then((res: any) => {
+        if (!res) {
+          return
+        }
         if (res.code !== 200) {
           message.error('连接失败:' + res.msg);
         } else {
@@ -148,7 +151,9 @@ const DatabaseSetUp: React.FC<DatabaseSetUpProps> = (props) => {
                     driver_class_name: defaultDBData.driver_class_name,
                     url: defaultDBData.url,
                     password: '',
-                    username: ''
+                    username: '',
+                    cipherType: '',
+                    cipherKey: ''
                   }
                 });
               }}>新增</Button>,
@@ -340,6 +345,34 @@ const DatabaseSetUp: React.FC<DatabaseSetUpProps> = (props) => {
                     message: '不能大于 100 个字符',
                   },
                 ],
+              }}
+            />
+            <ProFormText
+              width="lg"
+              name="cipherType"
+              label="cipherType"
+              placeholder="数据库加解密类型"
+              fieldProps={{
+                onBlur: (e) => {
+                  projectDispatch.updateDbs('properties', {
+                    ...defaultDbs?.properties,
+                    cipherType: e.target.value
+                  });
+                }
+              }}
+            />
+            <ProFormText.Password
+              width="lg"
+              name="cipherKey"
+              label="cipherKey"     
+              placeholder="数据库加解密密码"         
+              fieldProps={{
+                onBlur: (e) => {
+                  projectDispatch.updateDbs('properties', {
+                    ...defaultDbs.properties,
+                    cipherKey: e.target.value
+                  });
+                }
               }}
             />
           </ProCard>

@@ -26,7 +26,7 @@ export default () => {
 
   const [state, setState] = useState<ProjectListProps>({
     page: 1,
-    limit: 6,
+    limit: 20,
     total: 0,
     type: 2,
     projects: [],

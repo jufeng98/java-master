@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import 'handsontable/dist/handsontable.full.css';
 import "handsontable/languages/zh-CN";
 import useProjectStore from "@/store/project/useProjectStore";
@@ -30,7 +30,7 @@ const TableInfoEdit: React.FC<TableInfoEditProps> = (props) => {
   })
 
 
-  console.log('entity:useEffect', 148, entity)
+  //console.log('entity:useEffect', 148, entity)
 
 
 

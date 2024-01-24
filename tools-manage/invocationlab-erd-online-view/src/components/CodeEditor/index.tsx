@@ -197,7 +197,7 @@ const CodeEditor: React.FC<CodeEditorProps> = (props) => {
     <AceEditor
       ref={editorRef}
       width={width || '100%'}
-      height={height || '180px'}
+      height={height || '250px'}
       mode={mode || 'sql'}
       theme={theme || 'xcode'}
       placeholder={placeholder || ''}

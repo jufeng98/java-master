@@ -1,8 +1,10 @@
-import React from "react";
-import {PlusOutlined} from '@ant-design/icons';
-import {ModalForm, ProForm, ProFormSelect,} from '@ant-design/pro-components';
-import {Button, message} from 'antd';
-import {GET, POST} from "@/services/crud";
+import React, { useState } from "react";
+import { PlusOutlined } from '@ant-design/icons';
+import { ModalForm, ProForm, } from '@ant-design/pro-components';
+import { Button, message, Input } from 'antd';
+import { GET, POST } from "@/services/crud";
+
+const { Search } = Input;
 
 export type AddUserProps = {
   projectId: string;
@@ -10,23 +12,55 @@ export type AddUserProps = {
   actionRef: any;
 };
 const AddUser: React.FC<AddUserProps> = (props) => {
+  const [account, setAccount] = useState("")
+  const [username, setUsername] = useState("")
+  const [okDisabled, setOkDisabled] = useState(true)
+
+  const getUserInfo = async (account: string) => {
+    if (!account) {
+      return
+    }
+    const result = await GET('/auth/oauth/getUserInfo', { account });
+    if (result.code === 200) {
+      setAccount(account)
+      setUsername(result.data)
+      setOkDisabled(false)
+    } else {
+      setAccount('')
+      setOkDisabled(true)
+      message.error(result.msg)
+    }
+  }
+
   return (<>
     <ModalForm
       title="添加成员"
       trigger={
         <Button key="add-user" type="primary">
-          <PlusOutlined/>
+          <PlusOutlined />
           添加成员
         </Button>
       }
       autoFocusFirstInput
       modalProps={{
         destroyOnClose: true,
-        onCancel: () => console.log('run'),
+        onCancel: () => {
+          setAccount('')
+          setOkDisabled(true)
+          setUsername('')
+        },
       }}
       submitter={{
         resetButtonProps: {
           type: 'dashed',
+        },
+        render: (props, doms) => {
+          console.log(props);
+          return [
+            <Button disabled={okDisabled} key="submit" onClick={() => props.form?.submit?.()}>
+              提交
+            </Button>
+          ];
         },
       }}
       submitTimeout={2000}
@@ -35,44 +69,24 @@ const AddUser: React.FC<AddUserProps> = (props) => {
         await POST('/ncnb/project/group/role/users', {
           projectId: props.projectId,
           roleId: props.roleId,
-          userIds: values.user,
+          userIds: [account],
         }).then((resp) => {
           console.log(34, props.actionRef);
           if (resp?.code === 200) {
             message.success("保存成功");
-            props.actionRef.current?.reload();
           }
+          props.actionRef.current?.reload();
+          setAccount('')
+          setOkDisabled(true)
+          setUsername('')
         });
         return true;
       }}
     >
       <ProForm.Group>
-        <ProFormSelect
-          width="md"
-          name="user"
-          label="选择用户"
-          mode="multiple"
-          showSearch
-          request={
-            async (param) => {
-              const result = await GET('/ncnb/project/group/users', {
-                pageSize: 6,
-                current: 1,
-                username: param.keyWords,
-                roleId: props.roleId
-              });
-              return result?.data?.records.map((m: { id: any; username: any; email: any; }) => {
-                return {
-                  value: m.id,
-                  label: `${m.id} - ${m.username} - ${m.email}`
-                }
-              })
-
-            }
-          }
-          placeholder="输入姓名模糊搜索"
-          rules={[{required: true, message: '请选择用户'}]}
-        />
+        <Search placeholder="请输入" onInput={(it: any) => setAccount(it.target.value)} onSearch={getUserInfo} style={{ width: 200 }}
+          onBlur={() => getUserInfo(account)} />
+        <Input placeholder="用户名" disabled value={username} />
       </ProForm.Group>
     </ModalForm></>);
 };

@@ -1,10 +1,10 @@
-import {ProList} from '@ant-design/pro-components';
-import {message, Space, Tag} from 'antd';
-import {useEffect, useState} from "react";
-import {TeamOutlined, UserOutlined} from "@ant-design/icons";
+import { ProList } from '@ant-design/pro-components';
+import { message, Space, Tag } from 'antd';
+import { useEffect, useState } from "react";
+import { TeamOutlined, UserOutlined } from "@ant-design/icons";
 import OpenProject from "@/components/dialog/project/OpenProject";
-import {ProjectListProps} from "@/pages/project/person";
-import {recentProject} from "@/services/project";
+import { ProjectListProps } from "@/pages/project/person";
+import { recentProject } from "@/services/project";
 
 type ProjectItem = {
   id: number;
@@ -29,7 +29,7 @@ export default () => {
 
   const [state, setState] = useState<ProjectListProps>({
     page: 1,
-    limit: 6,
+    limit: 20,
     total: 0,
     projects: [],
     order: "updateTime"
@@ -39,28 +39,29 @@ export default () => {
 
   const fetchProjects = (params: any) => {
     setLoading(true)
-    recentProject(params || state).then(res => {
-      setLoading(false)
-      if (res) {
-        if (res.data) {
-          console.log(44, 'projects', res);
-          setState({
+    recentProject(params || state)
+      .then(res => {
+        setLoading(false)
+        if (res) {
+          if (res.data) {
+            console.log(44, 'projects', res);
+            setState({
               ...state,
               total: res.data.total,
               projects: res.data.records?.map((m: any) => {
-                  return {
-                    ...m,
+                return {
+                  ...m,
                     avatar: '/invocationlab-erd-online-view/logo.svg'
-                  }
                 }
+              }
               )
             }
-          );
-        } else {
-          message.error('获取项目信息失败');
+            );
+          } else {
+            message.error('获取项目信息失败');
+          }
         }
-      }
-    });
+      });
 
   }
 
@@ -119,7 +120,7 @@ export default () => {
       content: {
         dataIndex: 'updateTime',
         render: (text) => (
-          <div key="updateTime" style={{color: '#00000073'}}>{text}</div>
+          <div key="updateTime" style={{ color: '#00000073' }}>{text}</div>
         ),
       },
       subTitle: {
@@ -128,7 +129,7 @@ export default () => {
           return (
             <Space size={0}>
               <Tag color={'blue'} key={row.projectName}>
-                {row.type === '1' ? <UserOutlined/> : <TeamOutlined/>}
+                {row.type === '1' ? <UserOutlined /> : <TeamOutlined />}
               </Tag>
               {row.tags?.split(",").map((m: string, i: number) => {
                 return <Tag color={i % 2 == 0 ? "#5BD8A6" : "blue"} key={m + i}>{m}</Tag>
@@ -142,7 +143,7 @@ export default () => {
       },
       actions: {
         render: (text, row) => [
-          <OpenProject project={row} key={'OpenProject' + row.id}/>
+          <OpenProject project={row} key={'OpenProject' + row.id} />
         ],
         search: false,
       },

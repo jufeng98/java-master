@@ -11,7 +11,7 @@ const ExplainResult: React.FC<ExplainResultProps> = (props) => {
 
   const getColumns = () => {
     return props.tableResult.columns
-      .map((columnName: any) => ({
+      ?.map((columnName: any) => ({
         title: columnName,
         key: columnName,
         dataIndex: columnName,

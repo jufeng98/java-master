@@ -35,9 +35,7 @@ const Relation: React.FC<RelationProps> = (props) => {
     return window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
   }
 
-  const normalWidth = getWindowWidth() - 340
   const normalHeight = getWindowHeight() - 105
-  const [width, setWidth] = useState<number>(normalWidth);
   const [height, setHeight] = useState<number>(normalHeight);
 
   let fullFlag = false
@@ -63,7 +61,7 @@ const Relation: React.FC<RelationProps> = (props) => {
     if (e.code !== 'KeyN') {
       return
     }
-    if (!document.activeElement.id) {
+    if (!document.activeElement || !document.activeElement.id) {
       return
     }
     if (!document.activeElement.id.includes("canvas")) {
@@ -76,10 +74,8 @@ const Relation: React.FC<RelationProps> = (props) => {
 
   const toggleRelationSize = () => {
     if (document.fullscreenElement) {
-      setWidth(getWindowWidth())
       setHeight(getWindowHeight() - 10)
     } else {
-      setWidth(normalWidth - 0)
       setHeight(normalHeight - 10)
     }
     fullFlag = !fullFlag
@@ -95,8 +91,8 @@ const Relation: React.FC<RelationProps> = (props) => {
     }
   }, [])
 
-  let divRef = useRef(null)
-  let relationRef = useRef(null)
+  let divRef = useRef<any>(null)
+  let relationRef = useRef<any>(null)
 
   return (
     <div className={'fullscreen fullscreen-enabled'} ref={divRef}>
@@ -104,7 +100,7 @@ const Relation: React.FC<RelationProps> = (props) => {
         columnOrder={columnOrder}
         value={`map&${props.moduleEntity.module}`}
         height={height}
-        width={width}
+        width={getWindowWidth()}
         projectDispatch={projectDispatch}
       />
     </div>

@@ -143,7 +143,7 @@ const ReverseERD: React.FC<ReverseERDProps> = (props) => {
       <p className="ant-upload-drag-icon">
         <InboxOutlined/>
       </p>
-      <p className="ant-upload-text">点击或者拖拽ERD导出的json文件到此区域以上传</p>
+      <p className="ant-upload-text">点击或者拖拽ERD导出的加密txt文件到此区域以上传</p>
       <p className="ant-upload-hint">
         上传完毕后，系统会自动开始解析；每次仅支持解析一个ERD文件。
       </p>

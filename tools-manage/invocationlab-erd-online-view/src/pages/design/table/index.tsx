@@ -1,5 +1,5 @@
-import React from "react";
-import { FloatButton } from 'antd';
+import React, { useEffect } from "react";
+import { FloatButton, Modal } from 'antd';
 import "./index.scss";
 import TableTab from "@/pages/design/table/component/tab/TableTab";
 import useTabStore, { ModuleEntity, TabGroup } from "@/store/tab/useTabStore";
@@ -14,10 +14,26 @@ const Table: React.FC<TableProps> = (props) => {
   const tableTabs = useTabStore(state => state.tableTabs);
   const selectTabId = useTabStore(state => state.selectTabId);
   const tabDispatch = useTabStore(state => state.dispatch);
+  // @ts-ignore
   const { showErrorTipFloatButton } = useProjectStore()
 
   // console.log('tableTabs', tableTabs)
   // console.log('selectTabId', selectTabId)
+
+  useEffect(() => {
+    if (showErrorTipFloatButton) {
+      Modal.confirm({
+        title: '警告！！！',
+        content: '服务器数据已发生变化，为避免互相覆盖导致数据丢失，所有保存都将失败。请刷新页面后再重试！！！',
+        okText: '刷新页面(推荐)',
+        cancelText: '关闭弹窗',
+        onOk: () => {
+          window.location.reload()
+        },
+        onCancel: (close) => { close() }
+      });
+    }
+  }, [showErrorTipFloatButton])
 
   const getTab = (tab: ModuleEntity) => {
     if (tab.group === TabGroup.MODEL) {
@@ -149,8 +165,8 @@ const Table: React.FC<TableProps> = (props) => {
           } />
       }
       {
-        showErrorTipFloatButton && <FloatButton description="服务器数据已被人修改，所有保存都将失败。为避免数据互相覆盖导致丢失，请刷新页面后再重试！"
-          shape="square" style={{ right: 50, bottom: 20, width: 340, backgroundColor: "#00000000" }} />
+        showErrorTipFloatButton && <FloatButton description="服务器数据已发生变化，为避免互相覆盖导致数据丢失，所有保存都将失败。请刷新页面后再重试！"
+          shape="square" style={{ right: 230, top: 20, width: 340, height: 30, backgroundColor: "#00000000", zIndex: 9999, transform: "scale(1.2)" }} />
       }
     </>
   );

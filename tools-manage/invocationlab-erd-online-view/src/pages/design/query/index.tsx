@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import './index.less'
-import { Button, message, Select, Space, Spin, Drawer } from "antd";
+import { Button, message, Select, Space, Spin, Drawer, Modal } from "antd";
 import { ProCard } from "@ant-design/pro-components";
 import CodeEditor from "@/components/CodeEditor";
 import QueryResult from "@/pages/design/query/component/QueryResult";
-import { BarsOutlined, EyeOutlined, PlayCircleOutlined, SaveOutlined, SmileOutlined } from "@ant-design/icons";
+import { BarsOutlined, ConsoleSqlOutlined, ExclamationCircleOutlined, EyeOutlined, PlayCircleOutlined, SaveOutlined, SmileOutlined } from "@ant-design/icons";
 import useQueryStore from "@/store/query/useQueryStore";
 import shallow from "zustand/shallow";
-import _ from "lodash";
 import { useSearchParams } from "@@/exports";
 import * as cache from "@/utils/cache";
 import { CONSTANT } from "@/utils/constant";
@@ -45,6 +44,8 @@ const Query: React.FC<QueryProps> = (props) => {
     columns: [],
     dataSource: [],
     total: 0,
+    realTotal: 0,
+    callFromPagination: false,
     queryKey: 0,
     tableName: '',
     page: 1,
@@ -59,7 +60,7 @@ const Query: React.FC<QueryProps> = (props) => {
     total: 0
   });
   const [tab, setTab] = useState('result');
-  let [selectDB, setSelectDB] = useState('');
+  const [selectDB, setSelectDB] = useState('');
   const [sqlMode, setSqlMode] = useState('mysql');
   const [theme, setTheme] = useState('xcode');
   const [dbNameList, setDbNameList] = useState<[]>([]);
@@ -72,6 +73,7 @@ const Query: React.FC<QueryProps> = (props) => {
 
   const editorRef = useRef<any>(null);
   const btnRunRef = useRef<any>(null);
+  const btnSaveSqlRef = useRef<any>(null);
 
   useEffect(() => {
     let dbNamesStr: any = sessionStorage.getItem("queryDbNamesSqlKey:" + props.id)
@@ -91,9 +93,9 @@ const Query: React.FC<QueryProps> = (props) => {
     }
 
     setCodeLoading(true)
-    request.post('/ncnb/getDbs', { data: { projectId } })
+    request.post('/ncnb/getDbs', { data: { projectId }, timeout: 6000 })
       .then(res => {
-        if (!res.data) {
+        if (!res || !res.data) {
           return;
         }
         sessionStorage.setItem("queryDbNamesSqlKey:" + props.id, JSON.stringify(res.data))
@@ -131,14 +133,13 @@ const Query: React.FC<QueryProps> = (props) => {
   }, [])
 
   const onKeyDown = (e: KeyboardEvent) => {
-    let target = e.target as HTMLElement
+    let target: HTMLElement = e.target as HTMLElement
     if (e.ctrlKey && e.code === 'KeyC' && target && target.classList && target.classList.contains('ace_text-input')) {
       if (editorRef?.current?.getSelectValue()) {
         return
       }
       editorRef?.current?.selectLine()
-    }
-    if (e.ctrlKey && e.code === 'Enter') {
+    } else if (e.ctrlKey && e.code === 'Enter') {
       if (!editorRef?.current?.getSelectValue()) {
         editorRef?.current?.selectLine()
       }
@@ -147,45 +148,68 @@ const Query: React.FC<QueryProps> = (props) => {
         cancelable: true
       });
       btnRunRef?.current?.dispatchEvent(event)
+    } else if (e.ctrlKey && e.code === 'KeyQ') {
+      setOpen(true)
+    } else if (e.ctrlKey && e.code === 'KeyS') {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true
+      });
+      btnSaveSqlRef?.current?.dispatchEvent(event)
+      e.preventDefault()
     }
   }
 
-  const executeSql = (sql: string, page: number = 1, pageSize: number = 20) => {
+  const executeSql = (sql: string, page: number = 1, pageSize: number = 20, callFromPagination: boolean = false) => {
     const params = {
       queryId: props.id,
       projectId,
       sql,
-      dbName: selectDB,
+      selectDB: selectDB,
       page,
       pageSize
     }
     setLoading(true);
-    queryDispatch.exec(params).then(r => {
-      setLoading(false);
-      if (r?.code === 200) {
-        sessionStorage.setItem("executeSqlKey:" + props.id, sql)
-        sessionStorage.setItem("executePageSqlKey:" + props.id, r.data.page)
-        sessionStorage.setItem("executePageSizeSqlKey:" + props.id, r.data.pageSize)
-        setTableResult({
-          columns: r?.data.columns,
-          dataSource: r.data.tableData.records,
-          total: r.data.tableData.total,
-          queryKey: r.data.queryKey,
-          tableName: r.data.tableName,
-          page: r.data.page,
-          pageSize: r.data.pageSize,
-          showPagination: r.data.showPagination,
-          primaryKeys: r.data.primaryKeys,
-          tableColumns: r.data.tableColumns,
-        });
-        setTab("result");
-      }
-    });
+    queryDispatch.exec(params)
+      .then(r => {
+        if (r?.code === 200) {
+          sessionStorage.setItem("executeSqlKey:" + props.id, sql)
+          sessionStorage.setItem("executePageSqlKey:" + props.id, r.data.page)
+          sessionStorage.setItem("executePageSizeSqlKey:" + props.id, r.data.pageSize)
+          setTableResult({
+            columns: r?.data.columns,
+            dataSource: r.data.tableData.records,
+            total: r.data.tableData.total,
+            realTotal: r.data.tableData.realTotal,
+            callFromPagination: callFromPagination,
+            queryKey: r.data.queryKey,
+            tableName: r.data.tableName,
+            page: r.data.page,
+            pageSize: r.data.pageSize,
+            showPagination: r.data.showPagination,
+            primaryKeys: r.data.primaryKeys,
+            tableColumns: r.data.tableColumns,
+          });
+          setTab("result");
+        }
+      })
+      .finally(() => setLoading(false))
   }
 
   const executeSqlWhenPaginationChange = (page: number, pageSize: number) => {
     let sql: string = sessionStorage.getItem("executeSqlKey:" + props.id) || ""
-    executeSql(sql, page, pageSize)
+    executeSql(sql, page, pageSize, true)
+  }
+
+  const getTableRecordTotal = () => {
+    let sql: string = sessionStorage.getItem("executeSqlKey:" + props.id) || ""
+    const params = {
+      queryId: props.id,
+      projectId,
+      sql,
+      selectDB: selectDB,
+    }
+    return queryDispatch.getTableRecordTotal(params)
   }
 
   const exportSql = (type: string) => {
@@ -196,7 +220,7 @@ const Query: React.FC<QueryProps> = (props) => {
       queryId: props.id,
       projectId,
       sql,
-      dbName: selectDB,
+      selectDB: selectDB,
       page,
       pageSize,
       type
@@ -206,7 +230,7 @@ const Query: React.FC<QueryProps> = (props) => {
   }
 
   const run = () => {
-    let selectValue = editorRef?.current?.getSelectValue();
+    let selectValue: string = editorRef?.current?.getSelectValue();
     // console.log(267, selectValue);
     if (!selectValue) {
       editorRef?.current?.selectLine()
@@ -215,6 +239,22 @@ const Query: React.FC<QueryProps> = (props) => {
     if (!selectDB) {
       message.warning("未选中数据源");
       return
+    }
+    if (cache.isProEnv()) {
+      let tmpSql = selectValue.toLowerCase().trim()
+      if (tmpSql.startsWith("update") || tmpSql.startsWith("delete")) {
+        Modal.confirm({
+          title: '警告',
+          icon: <ExclamationCircleOutlined />,
+          content: '确定执行SQL: ' + selectValue + " ?",
+          okText: '确认',
+          cancelText: '取消',
+          onOk: () => {
+            executeSql(selectValue)
+          }
+        });
+        return
+      }
     }
     executeSql(selectValue)
   }
@@ -235,17 +275,19 @@ const Query: React.FC<QueryProps> = (props) => {
       data: {
         queryId: props.id,
         sql,
-        dbName: selectDB,
+        selectDB: selectDB,
         projectId,
         rows: records
       }
     })
       .then(res => {
         setLoading(false)
-        if (res.code !== 200) {
+        if (!res || res.code !== 200) {
           return
         }
-        message.success(res.msg)
+        message.success(res.msg + ",影响行数:" + res.data
+          .map((it: any) => it.tableData.records[0].affect_num)
+          .reduce((a: number, b: number) => a + b))
         executeSql(sql, current)
       })
   }
@@ -253,16 +295,24 @@ const Query: React.FC<QueryProps> = (props) => {
   const EDITOR_THEME = ['xcode', 'terminal',];
   const actions = <Space direction="vertical">
     <Space wrap>
-      <Button loading={codeLoading} size={"small"} icon={<SmileOutlined />} type="primary" onClick={() => {
-        setOpen(true);
-      }}>动态构建查询SQL</Button>
+      <Button loading={codeLoading} size={"small"} icon={<ConsoleSqlOutlined />} type="primary" onClick={() => {
+        setOpen(true)
+      }}>
+        动态构建查询SQL(Ctrl+Q)
+      </Button>
       <span style={{ marginRight: 8 }}>数据源</span>
       <Select
         key={'db'}
         size="small"
         style={{ width: 150, marginRight: 12 }}
         value={selectDB ? selectDB : "请选择数据源"}
-        onSelect={(e: any) => setSelectDB(e)}
+        onSelect={(e: any) => {
+          setSelectDB(e)
+          let queryInfo: any = sessionStorage.getItem("querySqlKey:" + props.id)
+          let obj = JSON.parse(queryInfo)
+          obj.selectDB = e
+          sessionStorage.setItem("querySqlKey:" + props.id, JSON.stringify(obj))
+        }}
         showSearch
       >
         {
@@ -301,11 +351,12 @@ const Query: React.FC<QueryProps> = (props) => {
         theme={theme}
         value={queryInfo.sqlInfo}
         onChange={(value) => {
-          let queryInfoCp = {
+          let queryInfoCp: any = {
             ...queryInfo,
             sqlInfo: value
           }
           setQueryInfo(queryInfoCp);
+          queryInfoCp.selectDB = selectDB
           sessionStorage.setItem("querySqlKey:" + props.id, JSON.stringify(queryInfoCp))
         }}
       />
@@ -340,29 +391,32 @@ const Query: React.FC<QueryProps> = (props) => {
             queryId: props.id,
             projectId,
             sql: selectValue,
-            dbName: selectDB,
+            selectDB: selectDB,
           }
-          queryDispatch.explain(params).then(r => {
-            setExplainTable({
-              columns: r?.data.columns,
-              dataSource: r?.data.tableData,
-              total: r?.data?.tableData?.length
-            });
-            setTab("plan");
-          });
+          setLoading(true)
+          queryDispatch.explain(params)
+            .then(r => {
+              setExplainTable({
+                columns: r?.data?.columns,
+                dataSource: r?.data?.tableData?.records,
+                total: r?.data?.tableData?.total
+              });
+              setTab("plan");
+            })
+            .finally(() => setLoading(false))
         }}>查看执行计划</Button>
-        <Button icon={<SaveOutlined />} size={"small"} onClick={() => {
+        <Button icon={<SaveOutlined />} size={"small"} ref={btnSaveSqlRef} onClick={() => {
           queryDispatch.updateSqlInfo({
             id: props.id,
             sqlInfo: queryInfo.sqlInfo,
             projectId,
             selectDB
           });
-        }}>保存SQL</Button>
+        }}>保存SQL(Ctrl+S)</Button>
       </Space>
     </Spin>
     <Spin spinning={loading}>
-      <ProCard size={'small'} layout="center" bordered style={{ height: 'calc(100vh - 326px)' }}
+      <ProCard size={'small'} layout="center" bordered style={{ height: 'calc(100vh - 394px)' }}
         wrap={true}
         tabs={{
           activeKey: tab,
@@ -372,6 +426,7 @@ const Query: React.FC<QueryProps> = (props) => {
               key: 'result',
               children: <QueryResult tableResult={tableResult} onRef={editorRef}
                 submitQueryTableChange={submitQueryTableChange}
+                getTableRecordTotal={getTableRecordTotal}
                 executeSqlWhenPaginationChange={executeSqlWhenPaginationChange}
                 exportSql={exportSql} />,
             },
@@ -395,7 +450,7 @@ const Query: React.FC<QueryProps> = (props) => {
       </ProCard>
     </Spin>
     <Drawer title="动态构建查询SQL" width={800} placement="right" onClose={() => { setOpen(false) }} open={open}>
-      <ConstructSqlForm selectDB={selectDB} closeDrawer={closeDrawer} />
+      <ConstructSqlForm selectDB={selectDB} closeDrawer={closeDrawer} open={open} />
     </Drawer>
   </>);
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { MenuProps, Spin } from 'antd';
+import { Spin } from 'antd';
+import './DataTable.less';
 import useProjectStore from "@/store/project/useProjectStore";
 import shallow from "zustand/shallow";
 import useTabStore, { TabGroup } from "@/store/tab/useTabStore";
@@ -19,6 +20,7 @@ import { ChartGraph, Data, TableFile } from "@icon-park/react";
 import CopyModule from "@/components/dialog/module/CopyModule";
 import CutModule from "@/components/dialog/module/CutModule";
 import PastModule from "@/components/dialog/module/PastModule";
+import SortModule from "@/components/dialog/module/SortModule";
 import CopyEntity from "@/components/dialog/entity/CopyEntity";
 import CutEntity from "@/components/dialog/entity/CutEntity";
 import PastEntity from "@/components/dialog/entity/PastEntity";
@@ -119,6 +121,9 @@ export const renderModuleRightContext = (payload: { name: string, chnname: strin
     <PastModule disable={false} />
   </Menu.Item>
   <Menu.Item>
+    <SortModule disable={false} />
+  </Menu.Item>
+  <Menu.Item>
     <RefreshModelModule disable={false} moduleInfo={payload} />
   </Menu.Item>
   <Menu.Item>
@@ -153,6 +158,7 @@ const DataTable: React.FC<DataTableProps> = (props) => {
   // @ts-ignore
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
 
+  // @ts-ignore
   const { loadingProjectDetail } = useProjectStore()
 
   useEffect(() => {
@@ -178,7 +184,7 @@ const DataTable: React.FC<DataTableProps> = (props) => {
     let otherHeight = 200;
     return frameHeight - otherHeight;
   }
-  
+
   return (<>
     {
       <Spin tip="拼命加载中" size="large" style={{ top: "18%", position: "fixed", transform: "scale(1.6)" }} spinning={loadingProjectDetail}>
@@ -269,18 +275,18 @@ const DataTable: React.FC<DataTableProps> = (props) => {
           </Dropdown>;
         }}
       />
-      :
-      <Empty
+        :
+        <Empty
         image="/invocationlab-erd-online-view/empty.svg"
-        imageStyle={{
-          height: 60,
-        }}
-        description={
-          <span>暂无数据</span>
-        }
-      >
-        <AddModule moduleDisable={false} trigger="ant" />
-      </Empty>
+          imageStyle={{
+            height: 60,
+          }}
+          description={
+            <span>暂无数据</span>
+          }
+        >
+          <AddModule moduleDisable={false} trigger="ant" />
+        </Empty>
     }
 
   </>);
