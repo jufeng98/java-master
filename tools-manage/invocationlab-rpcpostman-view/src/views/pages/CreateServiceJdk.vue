@@ -60,8 +60,8 @@
         data() {
             return {
                 dependency: `<dependency>
-    <groupId>cn.com.bluemoon</groupId>
-    <artifactId>mh-service-api</artifactId>
+    <groupId>org.javamaster</groupId>
+    <artifactId>service-api</artifactId>
 </dependency>`,
                 isCreating: false,
                 isRefresh: false,

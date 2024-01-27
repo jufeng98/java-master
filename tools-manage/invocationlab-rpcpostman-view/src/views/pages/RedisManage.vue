@@ -212,8 +212,8 @@
                 JDK序列化说明：
                 默认作为 String 类型来序列化。若内容带有类型提示: 如 123♣java.lang.Long => 将转换为 Long 类型来序列化；
                 若希望转换为复杂对象来序列化，则可以这样表示：
-                ["java.util.ArrayList",[{"@class":"cn.com.bluemoon.invocationlab.admin.rpcpostman.model.erd.AesReqVo","projectId":"2011yhfdsaa","opType":1,"value":898}]] 
-                => 将转换为为 ArrayList<AesReqVo> 类型来序列化(如果能找到对应的class且class实现了Serializable接口)
+                ["java.util.ArrayList",[{"@class":"org.javamaster.invocationlab.admin.model.erd.AesReqVo","projectId":"2011yhfdsaa","opType":1,"value":898}]] 
+                => 将转换为 ArrayList<AesReqVo> 类型来序列化(如果能找到对应的class且class实现了Serializable接口)
                 `,
                 cmOptions: {
                     mode: 'application/json',
