@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.service;
 
+import com.alibaba.druid.DbType;
 import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.CommonErdVo;
@@ -36,10 +37,11 @@ public interface DbService {
 
     void checkDb(DbsBean dbsBean);
 
-    List<String> getDbs(DbsBean dbsBean);
+    List<String> getDbNames(DbsBean dbsBean);
 
     List<Table> getTables(DbsBean dbsBean, String selectDB);
 
+    DbType getDbType();
 
     List<SqlExecResVo> execUpdate(DbsBean dbsBean, TokenVo tokenVo, CommonErdVo reqVo);
 

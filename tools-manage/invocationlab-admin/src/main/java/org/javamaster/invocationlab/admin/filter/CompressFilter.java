@@ -2,6 +2,7 @@ package org.javamaster.invocationlab.admin.filter;
 
 import com.google.common.collect.Sets;
 import lombok.Cleanup;
+import org.springframework.http.HttpHeaders;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,6 +31,13 @@ public class CompressFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
+
+        res.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "false");
+        res.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");
+        res.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "*");
+        res.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        res.addHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.CONTENT_DISPOSITION);
+
         String requestURI = req.getRequestURI();
         if (excludePaths.contains(requestURI)) {
             filterChain.doFilter(req, res);

@@ -25,6 +25,6 @@ public enum SqlTypeEnum {
                 return value;
             }
         }
-        return null;
+        throw new IllegalArgumentException(type);
     }
 }

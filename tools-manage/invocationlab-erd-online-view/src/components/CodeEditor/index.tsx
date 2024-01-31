@@ -2,12 +2,12 @@ import React, { Ref, useEffect, useImperativeHandle, useRef } from 'react';
 import AceEditor from "react-ace";
 import "./index.less";
 import 'ace-builds/src-noconflict/mode-sql';
-// import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-json';
 import "ace-builds/src-noconflict/mode-mysql";
-// import 'ace-builds/src-noconflict/mode-pgsql';
-// import 'ace-builds/src-noconflict/mode-sqlserver';
-// import "ace-builds/src-noconflict/mode-java";
-// import 'ace-builds/src-noconflict/ext-searchbox';
+import 'ace-builds/src-noconflict/mode-pgsql';
+import 'ace-builds/src-noconflict/mode-sqlserver';
+import "ace-builds/src-noconflict/mode-java";
+import 'ace-builds/src-noconflict/ext-searchbox';
 import "ace-builds/src-noconflict/ext-language_tools";
 import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 

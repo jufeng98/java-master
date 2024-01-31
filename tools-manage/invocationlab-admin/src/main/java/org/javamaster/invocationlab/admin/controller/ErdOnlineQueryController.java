@@ -1,5 +1,9 @@
 package org.javamaster.invocationlab.admin.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Triple;
 import org.javamaster.invocationlab.admin.annos.ErdRolesAllowed;
 import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.enums.RoleEnum;
@@ -14,10 +18,6 @@ import org.javamaster.invocationlab.admin.model.erd.Table;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.erd.Tree;
 import org.javamaster.invocationlab.admin.service.ErdOnlineQueryService;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,9 +30,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.util.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +89,7 @@ public class ErdOnlineQueryController {
     }
 
     @RequestMapping(value = {"/getDbs"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public ResultVo<List<String>> getDbs(@RequestBody JSONObject jsonObjectReq, HttpServletRequest request,
+    public ResultVo<List<String>> getDbs(@RequestBody JSONObject jsonObjectReq,
                                          @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
         String projectId = jsonObjectReq.getString("projectId");
         return ResultVo.success(erdOnlineQueryService.getDbs(projectId, tokenVo));
@@ -102,7 +102,7 @@ public class ErdOnlineQueryController {
     }
 
     @RequestMapping(value = {"/getTableColumns"}, method = {RequestMethod.GET, RequestMethod.POST})
-    public ResultVo<List<Column>> getTableColumns(@RequestBody CommonErdVo reqVo, HttpServletRequest request,
+    public ResultVo<List<Column>> getTableColumns(@RequestBody CommonErdVo reqVo,
                                                   @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
         return ResultVo.success(erdOnlineQueryService.getTableColumns(reqVo, tokenVo));
     }
@@ -144,14 +144,14 @@ public class ErdOnlineQueryController {
     }
 
     @ErdRolesAllowed(value = RoleEnum.ERD_SQL_EXECUTE, msg = "没有执行SQL的权限")
-    @RequestMapping(value = {"/queryInfo/exportSql"}, method = {RequestMethod.GET, RequestMethod.POST})
+    @PostMapping(value = "/queryInfo/exportSql")
     public ResponseEntity<byte[]> exportSql(@RequestBody CommonErdVo reqVo,
                                             @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
         reqVo.setIsExport(true);
         reqVo.setExplain(false);
         Triple<String, MediaType, byte[]> triple = erdOnlineQueryService.exportSql(reqVo, tokenVo);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentDispositionFormData("attachment", URLEncoder.encode(triple.getLeft(), StandardCharsets.UTF_8.name()));
+        headers.setContentDispositionFormData("attachment", UriUtils.encode(triple.getLeft(), StandardCharsets.UTF_8.name()));
         headers.setContentType(triple.getMiddle());
         return new ResponseEntity<>(triple.getRight(), headers, HttpStatus.OK);
     }

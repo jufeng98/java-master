@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.config;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.javamaster.invocationlab.admin.inteceptor.AppInterceptor;
 import org.javamaster.invocationlab.admin.serializer.BigDecimalToJsonSerializer;
 import org.javamaster.invocationlab.admin.serializer.BigIntegerToJsonSerializer;
@@ -15,9 +16,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -35,6 +39,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -55,6 +60,7 @@ public class MvcConfig implements WebMvcConfigurer {
                 .allowedOrigins("*")
                 .allowedHeaders("*")
                 .allowedMethods("*")
+                .exposedHeaders(HttpHeaders.CONTENT_DISPOSITION)
                 .allowCredentials(false)
                 .maxAge(3600);
     }
@@ -72,6 +78,21 @@ public class MvcConfig implements WebMvcConfigurer {
                 configMapper(objectMapper);
             }
         });
+    }
+
+    @SuppressWarnings("Convert2Lambda")
+    @Bean
+    public Converter<String, Date> dateConverter() {
+        return new Converter<String, Date>() {
+            @Override
+            public Date convert(@NotNull String source) {
+                try {
+                    return DateUtils.parseDate(source, STANDARD_PATTERN);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
 
     public static void configMapper(ObjectMapper objectMapper) {

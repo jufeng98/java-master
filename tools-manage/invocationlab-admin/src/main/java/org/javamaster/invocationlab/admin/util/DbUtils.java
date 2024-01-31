@@ -1,5 +1,9 @@
 package org.javamaster.invocationlab.admin.util;
 
+import com.google.common.collect.Lists;
+import com.zaxxer.hikari.HikariDataSource;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.DbsBean;
@@ -7,14 +11,6 @@ import org.javamaster.invocationlab.admin.model.erd.ErdOnlineModel;
 import org.javamaster.invocationlab.admin.model.erd.IndexsBean;
 import org.javamaster.invocationlab.admin.model.erd.PropertiesBean;
 import org.javamaster.invocationlab.admin.model.erd.Table;
-import com.google.common.collect.Lists;
-import com.zaxxer.hikari.HikariDataSource;
-import lombok.SneakyThrows;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.core.ConnectionCallback;
@@ -41,6 +37,12 @@ public class DbUtils {
     public static String resolveUrlDbName(String url) {
         URI uri = URI.create(url.substring(5));
         return uri.getPath().substring(1);
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    public static String resolveUrlDbName(JdbcTemplate jdbcTemplate) {
+        HikariDataSource dataSource = (HikariDataSource) jdbcTemplate.getDataSource();
+        return resolveUrlDbName(dataSource.getJdbcUrl());
     }
 
     private static HikariDataSource newBasicDataSource(PropertiesBean properties, String dbName) {
@@ -111,26 +113,28 @@ public class DbUtils {
         return Objects.requireNonNull(dbsBean);
     }
 
-    public static String getTableName(PlainSelect plainSelect) {
-        net.sf.jsqlparser.schema.Table table = (net.sf.jsqlparser.schema.Table) plainSelect.getFromItem();
-        return table.getName();
+    @SneakyThrows
+    public static List<Table> getTables(JdbcTemplate jdbcTemplate) {
+        List<Table> tables = Lists.newArrayList();
+
+        jdbcTemplate.execute((ConnectionCallback<Object>) con -> {
+            DatabaseMetaData databaseMetaData = con.getMetaData();
+            try (ResultSet rs = databaseMetaData.getTables(null, null, null,
+                    new String[]{"TABLE"})) {
+                while (rs.next()) {
+                    String viewName = rs.getString("TABLE_NAME");
+                    String remarks = rs.getString("REMARKS");
+                    tables.add(new Table(viewName, StringUtils.defaultString(remarks)));
+                }
+            }
+            return null;
+        });
+
+        return tables;
     }
 
     @SneakyThrows
-    public static String getTableName(String sql) {
-        PlainSelect plainSelect = parseSql(sql);
-        return getTableName(plainSelect);
-    }
-
-    @SneakyThrows
-    public static PlainSelect parseSql(String sql) {
-        Statement statement = CCJSqlParserUtil.parse(sql);
-        Select select = (Select) statement;
-        return (PlainSelect) select.getSelectBody();
-    }
-
-    @SneakyThrows
-    static Table getTableInfo(String tableName, DatabaseMetaData databaseMetaData) {
+    public static Table getTableInfo(String tableName, DatabaseMetaData databaseMetaData) {
         List<Table> tables;
         try (ResultSet rs = databaseMetaData.getTables(null, null, tableName, new String[]{"TABLE"})) {
             tables = Lists.newArrayList();

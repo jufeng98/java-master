@@ -24,8 +24,9 @@ export type QueryProps = {
 
 const Query: React.FC<QueryProps> = (props) => {
 
-  const { tables, } = useProjectStore(state => ({
-    tables: state.tables
+  const { tables, dbType } = useProjectStore(state => ({
+    tables: state.tables,
+    dbType: state.project.projectJSON?.profile?.dbs[0].select || 'MYSQL'
   }), shallow);
 
   //console.log(130, tables);
@@ -61,7 +62,7 @@ const Query: React.FC<QueryProps> = (props) => {
   });
   const [tab, setTab] = useState('result');
   const [selectDB, setSelectDB] = useState('');
-  const [sqlMode, setSqlMode] = useState('mysql');
+  const [sqlMode, setSqlMode] = useState('');
   const [theme, setTheme] = useState('xcode');
   const [dbNameList, setDbNameList] = useState<[]>([]);
 
@@ -122,6 +123,16 @@ const Query: React.FC<QueryProps> = (props) => {
       }
     })
   }
+
+  useEffect(() => {
+    if (dbType === 'MYSQL') {
+      setSqlMode('mysql')
+    } else if (dbType === 'PostgreSQL') {
+      setSqlMode('pgsql')
+    } else {
+      setSqlMode('sql')
+    }
+  }, [])
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -327,8 +338,9 @@ const Query: React.FC<QueryProps> = (props) => {
       <span style={{ marginRight: 8 }}>模式</span>
       <Select key={'model'} size="small" style={{ width: 90, marginRight: 12 }} value={sqlMode}
         onSelect={(e: any) => setSqlMode(e)}>
-        <Option key="mysql" value="mysql">MySQL</Option>
-        <Option key="sql" value="sql">SQL</Option>
+        <Option key="MySQL" value="mysql">MySQL</Option>
+        <Option key="PgSQL" value="pgsql">PgSQL</Option>
+        <Option key="SQL" value="sql">SQL</Option>
       </Select>
       <span style={{ marginRight: 8 }}>主题</span>
       <Select key={'topic'} size="small" style={{ marginRight: 16, width: 100 }} value={theme} onSelect={(e: any) => {

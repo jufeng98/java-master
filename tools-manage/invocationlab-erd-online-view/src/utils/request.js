@@ -158,31 +158,34 @@ export const exportSql = (reqDataObj, setLoading, url) => {
     data: JSON.stringify(reqDataObj),
     headers: { accept: "*/*", 'Content-Type': 'application/json' },
     responseType: 'blob',
-  })
-    .then(resData => {
-      let type;
-      if (reqDataObj.type.includes("sql")) {
-        type = "sql"
-      } else {
-        type = reqDataObj.type
+    getResponse: true
+  }).then(resData => {
+    const disposition = resData.response.headers.get('content-disposition');
+    if (!disposition) {
+      const reader = new FileReader();
+      reader.readAsText(resData.data, 'utf-8');
+      reader.onload = () => {
+        message.error(JSON.parse(reader.result).msg)
       }
-      var fileName = "下载-" + moment(new Date()).format("YYYY-MM-DD HH:mm:ss") + "." + type;
-      fileName = decodeURIComponent(fileName);
-      let blob = resData
-      let downloadElement = document.createElement('a')
-      // 创建下载的链接
-      let href = window.URL.createObjectURL(blob);
-      downloadElement.href = href;
-      // 下载后文件名
-      downloadElement.download = fileName;
-      document.body.appendChild(downloadElement);
-      // 点击下载
-      downloadElement.click();
-      // 下载完成移除元素
-      document.body.removeChild(downloadElement);
-      // 释放blob对象
-      window.URL.revokeObjectURL(href);
-    })
+      return
+    }
+    let fileName = decodeURIComponent(disposition.split(';')[2].split("=")[1]).replaceAll('"', '')
+
+    let blob = resData.data
+    let downloadElement = document.createElement('a')
+    // 创建下载的链接
+    let href = window.URL.createObjectURL(blob);
+    downloadElement.href = href;
+    // 下载后文件名
+    downloadElement.download = fileName;
+    document.body.appendChild(downloadElement);
+    // 点击下载
+    downloadElement.click();
+    // 下载完成移除元素
+    document.body.removeChild(downloadElement);
+    // 释放blob对象
+    window.URL.revokeObjectURL(href);
+  })
     .finally(() => setLoading(false))
 }
 

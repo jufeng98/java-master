@@ -4,7 +4,8 @@ import { GET } from "@/services/crud";
 import { useSearchParams } from "@@/exports";
 import * as cache from "@/utils/cache";
 import { CONSTANT } from "@/utils/constant";
-import { Pagination, message } from "antd";
+import { Pagination } from "antd";
+import * as QueryResultUtils from './QueryResultUtils';
 
 export type QueryHistoryProps = {
   queryId: string | number;
@@ -27,27 +28,45 @@ const QueryHistory: React.FC<QueryHistoryProps> = (props) => {
     {
       title: 'SQL',
       dataIndex: 'sqlInfo',
-      copyable: true,
       ellipsis: true,
+      render: (_: any, record: any) => {
+        return <span onDoubleClick={() => { QueryResultUtils.copyValue(record['sqlInfo']) }}>
+          {record['sqlInfo']}
+        </span>
+      }
     },
     {
       title: '所有参数',
       dataIndex: 'params',
+      ellipsis: true,
+      render: (_: any, record: any) => {
+        return <span onDoubleClick={() => { QueryResultUtils.copyValue(record['params']) }}>
+          {record['params']}
+        </span>
+      }
     },
     {
       title: '执行数据库',
+      width: 150,
+      ellipsis: true,
       dataIndex: 'dbName',
     },
     {
       title: '耗时(ms)',
+      width: 80,
+      ellipsis: true,
       dataIndex: 'duration',
     },
     {
       title: '执行时间',
+      width: 150,
+      ellipsis: true,
       dataIndex: 'createTime',
     },
     {
       title: '执行人',
+      width: 100,
+      ellipsis: true,
       dataIndex: 'creator',
     },
   ]
@@ -91,7 +110,7 @@ const QueryHistory: React.FC<QueryHistoryProps> = (props) => {
     <ProTable
       loading={loading}
       size={'small'}
-      scroll={{ x: 1300, y: 'calc(100vh - 478px)' }}
+      scroll={{ x: 1100, y: 'calc(100vh - 478px)' }}
       dataSource={records}
       columns={columns}
       search={false}

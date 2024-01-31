@@ -1,5 +1,14 @@
 package org.javamaster.invocationlab.admin.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.enums.CipherTypeEnum;
 import org.javamaster.invocationlab.admin.model.erd.AesReqVo;
@@ -16,15 +25,6 @@ import org.javamaster.invocationlab.admin.service.DbService;
 import org.javamaster.invocationlab.admin.service.ErdOnlineProjectService;
 import org.javamaster.invocationlab.admin.service.ErdOnlineQueryService;
 import org.javamaster.invocationlab.admin.util.AesUtils;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -128,7 +128,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
     public List<String> getDbs(String projectId, TokenVo tokenVo) throws Exception {
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
         DbService dbService = DbService.getInstance(dbsBean.getSelect());
-        return dbService.getDbs(dbsBean);
+        return dbService.getDbNames(dbsBean);
     }
 
     @Override

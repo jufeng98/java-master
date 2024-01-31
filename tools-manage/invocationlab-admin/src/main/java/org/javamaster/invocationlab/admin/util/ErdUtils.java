@@ -33,19 +33,20 @@ import static org.javamaster.invocationlab.admin.util.DbUtils.getTableInfo;
 public class ErdUtils {
 
     public static EntitiesBean tableToEntity(EntitiesBean entitiesBean, DatabaseMetaData databaseMetaData,
-                                              List<DatatypeBean> datatypeBeans, JdbcTemplate jdbcTemplate) {
+                                             List<DatatypeBean> datatypeBeans) {
         String tableName = entitiesBean.getTitle();
         Table table = getTableInfo(tableName, databaseMetaData);
         if (table == null) {
             return entitiesBean;
         }
         entitiesBean.setChnname(table.getRemarks());
+
         List<Column> columns = getTableColumns(tableName, databaseMetaData);
         entitiesBean.setFields(toFieldsBeans(columns, datatypeBeans));
+
         List<IndexsBean> indexesBeans = getTableIndexes(tableName, databaseMetaData);
         entitiesBean.setIndexs(indexesBeans);
-        List<Map<String, Object>> list = jdbcTemplate.queryForList("show create table " + tableName);
-        entitiesBean.setOriginalCreateTableSql(list.get(0).get("Create Table").toString());
+
         return entitiesBean;
     }
 
