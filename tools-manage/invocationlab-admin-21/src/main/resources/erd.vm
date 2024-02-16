@@ -1,0 +1,197 @@
+<html lang="en">
+<head>
+    <title>${projectName}</title>
+    <style>
+        .index {
+            font-weight: bold;
+            font-size: 25px;
+        }
+        .title {
+            font-weight: bold;
+            font-size: 25px;
+        }
+        li {
+            list-style: none;
+            padding: 5px;
+        }
+        .first-li {
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .second-li {
+            font-weight: bold;
+        }
+        .third-li {
+            font-weight: normal;
+        }
+        .block {
+            display: block;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-color: #E8E8E8;
+        }
+        tr:hover {
+            background: #ECF9FF;
+        }
+        td {
+            font-weight: normal;
+            padding: 5px;
+            white-space: nowrap;
+        }
+        a {
+            color: #000000;
+            background-color: transparent;
+            text-decoration: none;
+            outline: none;
+            cursor: pointer;
+        }
+        .module {
+            color: green;
+        }
+        .module-list {
+            color: #1890ff;
+        }
+    </style>
+</head>
+<body>
+
+#set($moduleList ="模块清单")
+#set($relation ="关联关系")
+#set($tableList ="表清单")
+#set($tableColumnList ="表列清单")
+#set($name ="名称")
+#set($code ="代码")
+#set($dataType ="数据类型")
+#set($main ="主键")
+#set($remark ="备注")
+
+<center class="index">目录</center>
+<ul>
+    #foreach($module in $modules)
+        <li class="first-li">
+            <a class="module" id="module-${module.name}-from" href="#module-${module.name}-to">
+                #set($velocityCount=$foreach.index + 1)
+                $velocityCount ${module.name} ${module.chnname}
+            </a>
+            <ul>
+                <li class="second-li">
+                    <a class="module-list" id="module-${module.name}-relation-from" href="#module-${module.name}-relation-to">
+                        1 ${relation}
+                    </a>
+                </li>
+                <li class="second-li">
+                    <a class="module-list" id="module-${module.name}-tableList-from" href="#module-${module.name}-tableList-to">
+                        2 ${tableList}
+                    </a>
+                </li>
+                <li class="second-li">
+                    <a class="module-list" id="module-${module.name}-tableColumnList-from" href="#module-${module.name}-tableColumnList-to">
+                        3 ${tableColumnList}
+                    </a>
+                    <ul>
+                        #foreach($entity in $module.entities)
+                            <li class="third-li">
+                                <a id="module-${module.name}-tableColumnList-${entity.title}-from" href="#module-${module.name}-tableColumnList-${entity.title}-to">
+                                    3.$velocityCount ${entity.title}【${entity.chnname}】
+                                </a>
+                            </li>
+                        #end
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    #end
+</ul>
+
+<ul>
+    #foreach($module in $modules)
+        <li class="first-li">
+            <a class="module" id="module-${module.name}-to" href="#module-${module.name}-from">
+                $velocityCount ${module.name} ${module.chnname}
+            </a>
+            <ul>
+                <li class="second-li">
+                <a class="module-list" class="block" id="module-${module.name}-relation-to" href="#module-${module.name}-relation-from">
+                    $velocityCount.1 ${relation}
+                </a>
+                #if($images.get(${module.name}))
+                    <img style="width: 700px;height:600px;" src="${images.get(${module.name})}" title="${module.name}-关系图"/>
+                #else
+                    <span>该模块未配置关系图</span>
+                #end
+                </li>
+                <hr/>
+                <li>
+                    <a class="module-list" id="module-${module.name}-tableList-to" href="module-${module.name}-tableList-from">
+                        $velocityCount.2  ${tableList}
+                    </a>
+                    <table border="1" cellspacing="0">
+                        <tr>
+                            <td>${name}</td>
+                            <td>${code}</td>
+                            <td>${remark}</td>
+                        </tr>
+                        #foreach($innerModule in $modules)
+                            #if(${innerModule.name} == ${module.name})
+                                #foreach($innerEntity in $innerModule.entities)
+                                    <tr>
+                                        <td>${innerEntity.chnname}</td>
+                                        <td>${innerEntity.title}</td>
+                                        <td>$!{innerEntity.remark}</td>
+                                    </tr>
+                                #end
+                            #end
+                        #end
+                    </table>
+                </li>
+                <hr/>
+                <li>
+                    <a class="module-list" id="module-${module.name}-tableColumnList-to" href="module-${module.name}-tableColumnList-from">
+                        $velocityCount.3 ${tableColumnList}
+                    </a>
+                    <ul style="padding: 0">
+                        #set($outerIndex = $velocityCount)
+                        #foreach($entity in $module.entities)
+                            <li>
+                                <a class="block" id="module-${module.name}-tableColumnList-${entity.title}-to" href="module-${module.name}-tableColumnList-${entity.title}-from">
+                                    $outerIndex.3.$velocityCount ${entity.title}【${entity.chnname}】
+                                </a>
+                                <table border="1" cellspacing="0">
+                                    <tr>
+                                        <td>${code}</td>
+                                        <td>${name}</td>
+                                        <td>${dataType}${databaseColumn}</td>
+                                        <td>${main}</td>
+                                        <td>${remark}</td>
+                                    </tr>
+                                    #foreach($innerModule in $modules)
+                                        #if(${innerModule.name} == ${module.name})
+                                            #foreach($innerEntity in $innerModule.entities)
+                                                #if(${innerEntity.title} == ${entity.title})
+                                                    #foreach($field in $innerEntity.fields)
+                                                        <tr>
+                                                            <td>${field.name}</td>
+                                                            <td style="font-size: 10px">${helperObj.htmlEscape(${field.chnname})}</td>
+                                                            <td>${helperObj.getColumnType($databases,$datatypes,${field.type})}</td>
+                                                            <td>#if(${field.pk})√#end</td>
+                                                            <td>$!{field.remark}</td>
+                                                        </tr>
+                                                    #end
+                                                #end
+                                            #end
+                                        #end
+                                    #end
+                                </table>
+                            </li>
+                        #end
+                    </ul>
+                </li>
+            </ul>
+            <hr/>
+        </li>
+    #end
+</ul>
+</body>
+</html>
