@@ -16,7 +16,7 @@ import java.util.List;
 
 
 @Slf4j
-public abstract class AbstractRedisStrategy implements RedisStrategy {
+public abstract class AbstractRedisDataTypeService implements RedisDataTypeService {
 
     public ValueVo createValueVo(RedisConnection connection, Pair<byte[], Class<?>> keyPair) {
         byte[] keyBytes = keyPair.getLeft();

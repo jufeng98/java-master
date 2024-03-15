@@ -7,7 +7,7 @@ import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import org.javamaster.invocationlab.admin.model.redis.Tree;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
 import org.javamaster.invocationlab.admin.redis.RedisHelper;
-import org.javamaster.invocationlab.admin.redis.RedisStrategy;
+import org.javamaster.invocationlab.admin.redis.RedisDataTypeService;
 import org.javamaster.invocationlab.admin.redis.TripleFunction;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.RedisService;
@@ -179,7 +179,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public ValueVo getValue(CommonRedisVo commonRedisVo) throws Exception {
-        return executeCommand(commonRedisVo, (connection, keyPair, redisStrategy) -> redisStrategy.getValue(connection, keyPair));
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> redisDataTypeService.getValue(connection, keyPair));
     }
 
     @Override
@@ -187,8 +187,8 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} save value:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        return executeCommand(commonRedisVo, (connection, keyPair, redisStrategy) -> {
-            redisStrategy.saveValue(connection, keyPair, commonRedisVo);
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> {
+            redisDataTypeService.saveValue(connection, keyPair, commonRedisVo);
             return commonRedisVo;
         });
     }
@@ -198,8 +198,8 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} del field:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        return executeCommand(commonRedisVo, (connection, keyPair, redisStrategy) -> {
-            Long affect = redisStrategy.delField(connection, keyPair, commonRedisVo);
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> {
+            Long affect = redisDataTypeService.delField(connection, keyPair, commonRedisVo);
             return "删除成功:" + affect;
         });
     }
@@ -209,8 +209,8 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} add field:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        return executeCommand(commonRedisVo, (connection, keyPair, redisStrategy) -> {
-            String affect = redisStrategy.addField(connection, keyPair, commonRedisVo);
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> {
+            String affect = redisDataTypeService.addField(connection, keyPair, commonRedisVo);
             return "新增成功:" + affect;
         });
     }
@@ -220,8 +220,8 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} set new ttl:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        return executeCommand(commonRedisVo, (connection, keyPair, redisStrategy) -> {
-            Boolean res = redisStrategy.setTtlIfNecessary(connection, keyPair, commonRedisVo.getRedisKeyTtl());
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> {
+            Boolean res = redisDataTypeService.setTtlIfNecessary(connection, keyPair, commonRedisVo.getRedisKeyTtl());
             return "设置结果:" + res;
         });
     }
@@ -242,10 +242,10 @@ public class RedisServiceImpl implements RedisService {
             }
 
             DataType dataType = DataType.fromCode(commonRedisVo.getRedisKeyType());
-            RedisStrategy redisStrategy = RedisStrategy.getInstance(dataType);
-            ValueVo valueVo = redisStrategy.addKey(connection, keyPair, commonRedisVo);
+            RedisDataTypeService redisDataTypeService = RedisDataTypeService.getInstance(dataType);
+            ValueVo valueVo = redisDataTypeService.addKey(connection, keyPair, commonRedisVo);
 
-            redisStrategy.setTtlIfNecessary(connection, keyPair, commonRedisVo.getRedisKeyTtl());
+            redisDataTypeService.setTtlIfNecessary(connection, keyPair, commonRedisVo.getRedisKeyTtl());
 
             return valueVo;
         });
@@ -256,8 +256,8 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} del key:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        return executeCommand(commonRedisVo, (connection, keyPair, redisStrategy) ->
-                "删除结果:" + redisStrategy.delKey(connection, keyPair));
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) ->
+                "删除结果:" + redisDataTypeService.delKey(connection, keyPair));
     }
 
     @Override
@@ -277,13 +277,13 @@ public class RedisServiceImpl implements RedisService {
                 throw new BizException("Redis key: " + commonRedisVo.getOldRedisKey() + " 已不存在!!!");
             }
 
-            RedisStrategy redisStrategy = RedisStrategy.getInstance(dataType);
-            return redisStrategy.renameKey(connection, oldKeyPair, keyPair, commonRedisVo);
+            RedisDataTypeService redisDataTypeService = RedisDataTypeService.getInstance(dataType);
+            return redisDataTypeService.renameKey(connection, oldKeyPair, keyPair, commonRedisVo);
         });
     }
 
     public static <U> U executeCommand(CommonRedisVo commonRedisVo,
-                                       TripleFunction<RedisConnection, Pair<byte[], Class<?>>, RedisStrategy, U> function) {
+                                       TripleFunction<RedisConnection, Pair<byte[], Class<?>>, RedisDataTypeService, U> function) {
         RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonRedisVo.getConnectId(), commonRedisVo.getRedisDbIndex());
 
         RedisHelper redisHelper = SpringUtils.getContext().getBean(RedisHelper.class);
@@ -296,8 +296,8 @@ public class RedisServiceImpl implements RedisService {
                 throw new BizException("Redis key: " + commonRedisVo.getRedisKey() + " 已不存在!!!");
             }
 
-            RedisStrategy redisStrategy = RedisStrategy.getInstance(dataType);
-            return function.apply(connection, keyPair, redisStrategy);
+            RedisDataTypeService redisDataTypeService = RedisDataTypeService.getInstance(dataType);
+            return function.apply(connection, keyPair, redisDataTypeService);
         });
     }
 

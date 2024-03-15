@@ -2,7 +2,7 @@ package org.javamaster.invocationlab.admin.redis.impl;
 
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
-import org.javamaster.invocationlab.admin.redis.AbstractRedisStrategy;
+import org.javamaster.invocationlab.admin.redis.AbstractRedisDataTypeService;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.util.SerializationUtils;
 import org.springframework.data.redis.connection.DataType;
@@ -11,7 +11,7 @@ import org.springframework.data.redis.connection.RedisStringCommands;
 
 import java.nio.charset.StandardCharsets;
 
-public class StringRedisStrategy extends AbstractRedisStrategy {
+public class StringRedisDataTypeService extends AbstractRedisDataTypeService {
 
     @Override
     public ValueVo getValue(RedisConnection connection, Pair<byte[], Class<?>> keyPair) {

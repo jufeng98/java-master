@@ -3,7 +3,7 @@ package org.javamaster.invocationlab.admin.redis.impl;
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.FieldVo;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
-import org.javamaster.invocationlab.admin.redis.AbstractRedisStrategy;
+import org.javamaster.invocationlab.admin.redis.AbstractRedisDataTypeService;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.util.SerializationUtils;
 import com.google.common.collect.Lists;
@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 import static org.javamaster.invocationlab.admin.util.SerializationUtils.serialize;
 
 
-public class HashRedisStrategy extends AbstractRedisStrategy {
+public class HashRedisDataTypeService extends AbstractRedisDataTypeService {
 
     @Override
     public ValueVo getValue(RedisConnection connection, Pair<byte[], Class<?>> keyPair) {

@@ -2,11 +2,11 @@ package org.javamaster.invocationlab.admin.redis;
 
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
-import org.javamaster.invocationlab.admin.redis.impl.HashRedisStrategy;
-import org.javamaster.invocationlab.admin.redis.impl.ListRedisStrategy;
-import org.javamaster.invocationlab.admin.redis.impl.SetRedisStrategy;
-import org.javamaster.invocationlab.admin.redis.impl.StringRedisStrategy;
-import org.javamaster.invocationlab.admin.redis.impl.ZSetRedisStrategy;
+import org.javamaster.invocationlab.admin.redis.impl.HashRedisDataTypeService;
+import org.javamaster.invocationlab.admin.redis.impl.ListRedisDataTypeService;
+import org.javamaster.invocationlab.admin.redis.impl.SetRedisDataTypeService;
+import org.javamaster.invocationlab.admin.redis.impl.StringRedisDataTypeService;
+import org.javamaster.invocationlab.admin.redis.impl.ZSetRedisDataTypeService;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -14,18 +14,18 @@ import org.springframework.data.redis.connection.RedisConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-public interface RedisStrategy {
-    Map<DataType, RedisStrategy> MAP = new HashMap<DataType, RedisStrategy>() {
+public interface RedisDataTypeService {
+    Map<DataType, RedisDataTypeService> MAP = new HashMap<DataType, RedisDataTypeService>() {
         {
-            put(DataType.STRING, new StringRedisStrategy());
-            put(DataType.HASH, new HashRedisStrategy());
-            put(DataType.LIST, new ListRedisStrategy());
-            put(DataType.SET, new SetRedisStrategy());
-            put(DataType.ZSET, new ZSetRedisStrategy());
+            put(DataType.STRING, new StringRedisDataTypeService());
+            put(DataType.HASH, new HashRedisDataTypeService());
+            put(DataType.LIST, new ListRedisDataTypeService());
+            put(DataType.SET, new SetRedisDataTypeService());
+            put(DataType.ZSET, new ZSetRedisDataTypeService());
         }
     };
 
-    static RedisStrategy getInstance(DataType dataType) {
+    static RedisDataTypeService getInstance(DataType dataType) {
         return MAP.get(dataType);
     }
 
