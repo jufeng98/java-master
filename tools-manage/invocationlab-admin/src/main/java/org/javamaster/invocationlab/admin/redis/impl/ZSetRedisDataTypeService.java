@@ -1,22 +1,24 @@
 package org.javamaster.invocationlab.admin.redis.impl;
 
+import lombok.val;
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.FieldVo;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
 import org.javamaster.invocationlab.admin.redis.AbstractRedisDataTypeService;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.util.SerializationUtils;
-import lombok.val;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Service("zset")
 public class ZSetRedisDataTypeService extends AbstractRedisDataTypeService {
 
     @Override

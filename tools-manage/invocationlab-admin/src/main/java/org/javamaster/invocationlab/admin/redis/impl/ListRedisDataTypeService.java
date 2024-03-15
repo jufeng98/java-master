@@ -1,15 +1,16 @@
 package org.javamaster.invocationlab.admin.redis.impl;
 
+import lombok.val;
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.FieldVo;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
 import org.javamaster.invocationlab.admin.redis.AbstractRedisDataTypeService;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.util.SerializationUtils;
-import lombok.val;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisListCommands;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static org.javamaster.invocationlab.admin.util.SerializationUtils.serialize;
 
+@Service("list")
 public class ListRedisDataTypeService extends AbstractRedisDataTypeService {
 
     @Override

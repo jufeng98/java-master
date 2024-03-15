@@ -8,9 +8,11 @@ import org.javamaster.invocationlab.admin.util.SerializationUtils;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisStringCommands;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 
+@Service("string")
 public class StringRedisDataTypeService extends AbstractRedisDataTypeService {
 
     @Override

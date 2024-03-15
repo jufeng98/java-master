@@ -1,22 +1,22 @@
 package org.javamaster.invocationlab.admin.service.impl;
 
+import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.javamaster.invocationlab.admin.config.BizException;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
 import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import org.javamaster.invocationlab.admin.model.redis.Tree;
 import org.javamaster.invocationlab.admin.model.redis.ValueVo;
-import org.javamaster.invocationlab.admin.redis.RedisHelper;
 import org.javamaster.invocationlab.admin.redis.RedisDataTypeService;
+import org.javamaster.invocationlab.admin.redis.RedisHelper;
 import org.javamaster.invocationlab.admin.redis.TripleFunction;
 import org.javamaster.invocationlab.admin.service.Pair;
 import org.javamaster.invocationlab.admin.service.RedisService;
 import org.javamaster.invocationlab.admin.util.RedisUtils;
 import org.javamaster.invocationlab.admin.util.SpringUtils;
-import com.google.common.collect.Lists;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -54,6 +54,8 @@ public class RedisServiceImpl implements RedisService {
     private RedisHelper redisHelper;
     @Autowired
     private RedisTemplate<String, Object> redisTemplateJackson;
+    @Autowired
+    private Map<String, RedisDataTypeService> redisDataTypeServiceMap;
 
     @Override
     public String pingConnect(ConnectionVo connectionVoReq) {
@@ -242,7 +244,7 @@ public class RedisServiceImpl implements RedisService {
             }
 
             DataType dataType = DataType.fromCode(commonRedisVo.getRedisKeyType());
-            RedisDataTypeService redisDataTypeService = RedisDataTypeService.getInstance(dataType);
+            RedisDataTypeService redisDataTypeService = redisDataTypeServiceMap.get(dataType.code());
             ValueVo valueVo = redisDataTypeService.addKey(connection, keyPair, commonRedisVo);
 
             redisDataTypeService.setTtlIfNecessary(connection, keyPair, commonRedisVo.getRedisKeyTtl());
@@ -273,17 +275,17 @@ public class RedisServiceImpl implements RedisService {
 
         return redisTemplate.execute((RedisCallback<ValueVo>) connection -> {
             DataType dataType = connection.keyCommands().type(oldKeyPair.getLeft());
-            if (dataType == DataType.NONE) {
+            if (dataType == null || dataType == DataType.NONE) {
                 throw new BizException("Redis key: " + commonRedisVo.getOldRedisKey() + " 已不存在!!!");
             }
 
-            RedisDataTypeService redisDataTypeService = RedisDataTypeService.getInstance(dataType);
+            RedisDataTypeService redisDataTypeService = redisDataTypeServiceMap.get(dataType.code());
             return redisDataTypeService.renameKey(connection, oldKeyPair, keyPair, commonRedisVo);
         });
     }
 
-    public static <U> U executeCommand(CommonRedisVo commonRedisVo,
-                                       TripleFunction<RedisConnection, Pair<byte[], Class<?>>, RedisDataTypeService, U> function) {
+    public <U> U executeCommand(CommonRedisVo commonRedisVo,
+                                TripleFunction<RedisConnection, Pair<byte[], Class<?>>, RedisDataTypeService, U> function) {
         RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonRedisVo.getConnectId(), commonRedisVo.getRedisDbIndex());
 
         RedisHelper redisHelper = SpringUtils.getContext().getBean(RedisHelper.class);
@@ -292,11 +294,11 @@ public class RedisServiceImpl implements RedisService {
 
         return redisTemplate.execute((RedisCallback<U>) connection -> {
             DataType dataType = connection.keyCommands().type(keyBytes);
-            if (dataType == DataType.NONE) {
+            if (dataType == null || dataType == DataType.NONE) {
                 throw new BizException("Redis key: " + commonRedisVo.getRedisKey() + " 已不存在!!!");
             }
 
-            RedisDataTypeService redisDataTypeService = RedisDataTypeService.getInstance(dataType);
+            RedisDataTypeService redisDataTypeService = redisDataTypeServiceMap.get(dataType.code());
             return function.apply(connection, keyPair, redisDataTypeService);
         });
     }
