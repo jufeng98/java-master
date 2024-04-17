@@ -87,7 +87,7 @@ public class BackupProjectTask {
 
     private static List<Pair<String, byte[]>> getProjects(StringRedisTemplate stringRedisTemplate) {
         return stringRedisTemplate.execute((RedisCallback<List<Pair<String, byte[]>>>) connection -> {
-            ScanOptions scanOptions = new ScanOptions.ScanOptionsBuilder()
+            ScanOptions scanOptions = ScanOptions.scanOptions()
                     .match(ERD_PREFIX + "20*").count(10000).build();
             try (Cursor<byte[]> cursor = connection.scan(scanOptions)) {
                 List<Pair<String, byte[]>> list = Lists.newArrayList();
@@ -98,7 +98,7 @@ public class BackupProjectTask {
                     list.add(Pair.of(key, bytes));
                 }
                 return list;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });

@@ -113,12 +113,14 @@ public class AppInterceptor extends HandlerInterceptorAdapter implements Handler
         }
 
         if (tokenVo == null && SpringUtils.isProEnv()
-                && (requestURI.startsWith("/dubbo") || requestURI.startsWith("/redis") || requestURI.contains("/getUserInfo"))) {
+                && (requestURI.startsWith("/dubbo") || requestURI.startsWith("/redis")
+                || requestURI.startsWith("/kafka") || requestURI.contains("/getUserInfo"))) {
             response.addHeader("ajax-header", "sessiontimeout");
             return false;
         }
 
-        if (SpringUtils.isProEnv() && (requestURI.startsWith("/dubbo") || requestURI.startsWith("/redis"))) {
+        if (SpringUtils.isProEnv() && (requestURI.startsWith("/dubbo") || requestURI.startsWith("/redis")
+                || requestURI.startsWith("/kafka"))) {
             StringRedisTemplate stringRedisTemplate = SpringUtils.getContext().getBean(StringRedisTemplate.class);
             Set<String> members = stringRedisTemplate.opsForSet().members(ErdConst.ANGEL_PRO_RPC_ALLOW);
             if (CollectionUtils.isEmpty(members)) {

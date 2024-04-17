@@ -9,6 +9,7 @@ import CreateJdk from '@/views/pages/CreateServiceJdk.vue'
 import Access from '@/views/pages/AccessService.vue'
 import Config from '@/views/pages/SystemConfig.vue'
 import RedisManage from '@/views/pages/RedisManage.vue'
+import KafkaManage from '@/views/pages/KafkaManage.vue'
 import ElImageTouchTest from '@/views/pages/ElImageTouchTest.vue'
 import CaseManage from '@/views/pages/CaseManage.vue'
 
@@ -96,6 +97,19 @@ export const constantRouterMap = [
                 component: RedisManage,
                 meta: { title: 'Redis工具', icon: 'table' },
                 name: 'redisManage'
+            },
+        ]
+    },
+    {
+        path: '/kafka',
+        component: Layout,
+        redirect: '/kafka/index',
+        children: [
+            {
+                path: 'index',
+                component: KafkaManage,
+                meta: { title: 'Kafka工具', icon: 'table' },
+                name: 'kafkaManage'
             },
         ]
     },

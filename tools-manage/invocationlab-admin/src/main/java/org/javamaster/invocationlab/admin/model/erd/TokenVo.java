@@ -29,4 +29,12 @@ public class TokenVo implements Serializable {
     private String email;
     private String mobileNo;
     private String env;
+
+    @Override
+    public String toString() {
+        return "TokenVo{" +
+                "userId='" + userId + '\'' +
+                ", userName='" + username + '\'' +
+                "}";
+    }
 }
