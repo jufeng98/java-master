@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.util;
 
+import org.bson.types.ObjectId;
 import org.javamaster.invocationlab.admin.serializer.BigDecimalToJsonSerializer;
 import org.javamaster.invocationlab.admin.serializer.LongToJsonSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import lombok.SneakyThrows;
+import org.javamaster.invocationlab.admin.serializer.ObjectIdSerializer;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -50,6 +52,7 @@ public class JsonUtils {
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(BigDecimal.class, BigDecimalToJsonSerializer.INSTANCE);
         simpleModule.addSerializer(Long.class, new LongToJsonSerializer());
+        simpleModule.addSerializer(ObjectId.class, ObjectIdSerializer.INSTANCE);
         mapper.registerModule(simpleModule);
 
         JavaTimeModule javaTimeModule = new JavaTimeModule();

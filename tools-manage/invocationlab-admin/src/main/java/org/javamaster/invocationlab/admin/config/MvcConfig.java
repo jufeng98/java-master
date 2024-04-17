@@ -1,11 +1,13 @@
 package org.javamaster.invocationlab.admin.config;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.bson.types.ObjectId;
 import org.javamaster.invocationlab.admin.inteceptor.AppInterceptor;
 import org.javamaster.invocationlab.admin.serializer.BigDecimalToJsonSerializer;
 import org.javamaster.invocationlab.admin.serializer.BigIntegerToJsonSerializer;
 import org.javamaster.invocationlab.admin.serializer.ByteArrayToJsonSerializer;
 import org.javamaster.invocationlab.admin.serializer.LongToJsonSerializer;
+import org.javamaster.invocationlab.admin.serializer.ObjectIdSerializer;
 import org.javamaster.invocationlab.admin.service.ErdOnlineUserService;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -106,6 +108,7 @@ public class MvcConfig implements WebMvcConfigurer {
         simpleModule.addSerializer(BigInteger.class, BigIntegerToJsonSerializer.INSTANCE);
         simpleModule.addSerializer(Long.class, new LongToJsonSerializer());
         simpleModule.addSerializer(byte[].class, new ByteArrayToJsonSerializer());
+        simpleModule.addSerializer(ObjectId.class, ObjectIdSerializer.INSTANCE);
         objectMapper.registerModule(simpleModule);
 
         objectMapper.setTimeZone(TimeZone.getDefault());

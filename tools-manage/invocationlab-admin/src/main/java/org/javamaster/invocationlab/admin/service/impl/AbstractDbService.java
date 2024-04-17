@@ -35,9 +35,12 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.consts.ErdConst;
 import org.javamaster.invocationlab.admin.enums.SqlTypeEnum;
+import org.javamaster.invocationlab.admin.model.erd.ApplyBean;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.CommonErdVo;
 import org.javamaster.invocationlab.admin.model.erd.DatatypeBean;
@@ -51,6 +54,9 @@ import org.javamaster.invocationlab.admin.model.erd.SqlExecResVo;
 import org.javamaster.invocationlab.admin.model.erd.Table;
 import org.javamaster.invocationlab.admin.model.erd.TableData;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
+import org.javamaster.invocationlab.admin.serializer.ArrayListConverter;
+import org.javamaster.invocationlab.admin.serializer.DocumentConverter;
+import org.javamaster.invocationlab.admin.serializer.ObjectIdConverter;
 import org.javamaster.invocationlab.admin.service.DbService;
 import org.javamaster.invocationlab.admin.util.DbUtils;
 import org.javamaster.invocationlab.admin.util.ErdUtils;
@@ -76,10 +82,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
@@ -186,7 +194,7 @@ public abstract class AbstractDbService implements DbService {
     protected void modifyQueryRow(Map<String, Object> rowMap) {
     }
 
-    protected void modifyRowForSpecialColumnType(Map<String, Object> rowMap) {
+    private static void modifyRowForSpecialColumnType(Map<String, Object> rowMap) {
         for (Map.Entry<String, Object> rowEntry : rowMap.entrySet()) {
             Object columnValue = rowEntry.getValue();
             if (columnValue instanceof Long
@@ -196,6 +204,20 @@ public abstract class AbstractDbService implements DbService {
             }
             rowMap.put(rowEntry.getKey(), columnValue);
         }
+    }
+
+    /**
+     * 去掉值为null的列
+     */
+    public static JSONObject removeNullColumns(LinkedHashMap<String, Object> reqRow) {
+        List<String> keys = reqRow.entrySet().stream()
+                .filter(entry -> entry.getValue() == null)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        keys.forEach(reqRow::remove);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.putAll(reqRow);
+        return jsonObject;
     }
 
     @Override
@@ -213,9 +235,10 @@ public abstract class AbstractDbService implements DbService {
         List<String> primaryKeyNames = filterPrimaryKeys(tableColumns);
 
         return transactionTemplate.execute(transactionStatus -> reqVo.getRows().stream()
-                .map(tmpRow -> {
-                    // 过滤掉值为null的列
-                    JSONObject row = JsonUtils.parseObject(JsonUtils.objectToString(tmpRow), JSONObject.class);
+                .map(reqRow -> {
+                    //noinspection unchecked
+                    JSONObject row = removeNullColumns((LinkedHashMap<String, Object>) reqRow);
+
                     Pair<String, List<Pair<Object, JdbcType>>> pairPrimary = primaryKeyConditions(row, columnMap, primaryKeyNames);
 
                     Pair<String, List<Pair<Object, JdbcType>>> tmpPair;
@@ -280,8 +303,8 @@ public abstract class AbstractDbService implements DbService {
 
         boolean noPrimaryKeyInRequest = primaryValues.stream().anyMatch(Objects::isNull);
         if (noPrimaryKeyInRequest) {
-            Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.KEY));
-            oldRow.remove(ErdConst.KEY);
+            Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.ERD_ROW_KEY));
+            oldRow.remove(ErdConst.ERD_ROW_KEY);
 
             String conditions = oldRow.keySet().stream()
                     .map(key -> key + "=?")
@@ -300,7 +323,7 @@ public abstract class AbstractDbService implements DbService {
     protected Pair<String, List<Pair<Object, JdbcType>>> handleEditOperation(ImmutableMap<String, Column> columnMap,
                                                                              Pair<String, List<Pair<Object, JdbcType>>> pairPrimary,
                                                                              JSONObject row, String tableName) {
-        Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.KEY));
+        Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.ERD_ROW_KEY));
         if (oldRow == null) {
             throw new ErdException("请重新刷新查询后再重试");
         }
@@ -334,7 +357,7 @@ public abstract class AbstractDbService implements DbService {
         List<Pair<Object, JdbcType>> primaryValues = pairPrimary.getRight();
         boolean noPrimaryKeyInRequest = primaryValues.stream().anyMatch(Objects::isNull);
         if (noPrimaryKeyInRequest) {
-            oldRow.remove(ErdConst.KEY);
+            oldRow.remove(ErdConst.ERD_ROW_KEY);
 
             String conditions = oldRow.keySet().stream()
                     .map(key -> key + "=?")
@@ -556,15 +579,15 @@ public abstract class AbstractDbService implements DbService {
                     .collect(Collectors.toList());
 
             columns.addAll(columnNames);
-            columns.add(ErdConst.KEY);
+            columns.add(ErdConst.ERD_ROW_KEY);
         } else {
             columns.addAll(list.get(0).keySet());
-            columns.add(ErdConst.KEY);
+            columns.add(ErdConst.ERD_ROW_KEY);
 
             int anInt = Integer.parseInt(RandomUtils.nextInt(1000000, 9999999) + "01");
             for (int i = 0; i < list.size(); i++) {
                 Map<String, Object> rowMap = list.get(i);
-                rowMap.put(ErdConst.KEY, anInt + i);
+                rowMap.put(ErdConst.ERD_ROW_KEY, anInt + i);
 
                 modifyQueryRow(rowMap);
 
@@ -615,7 +638,7 @@ public abstract class AbstractDbService implements DbService {
             throw new ErdException("请重新刷新查询后再重试");
         }
         List<Map<String, Object>> list = oldRecords.stream()
-                .filter(oldRecord -> oldRecord.get(ErdConst.KEY).equals(rowUniqueKey))
+                .filter(oldRecord -> oldRecord.get(ErdConst.ERD_ROW_KEY).equals(rowUniqueKey))
                 .collect(Collectors.toList());
         if (list.isEmpty()) {
             return null;
@@ -635,7 +658,7 @@ public abstract class AbstractDbService implements DbService {
     protected Pair<String, List<Pair<Object, JdbcType>>> primaryKeyConditions(JSONObject row,
                                                                               ImmutableMap<String, Column> columnMap,
                                                                               List<String> primaryKeyColumns) {
-        Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.KEY));
+        Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.ERD_ROW_KEY));
         if (oldRow == null) {
             return null;
         }
@@ -661,7 +684,7 @@ public abstract class AbstractDbService implements DbService {
 
     protected boolean filterUnRelateColumn(Map.Entry<String, Object> entry) {
         return !ErdConst.ROW_OPERATION_TYPE.equals(entry.getKey())
-                && !ErdConst.KEY.equals(entry.getKey())
+                && !ErdConst.ERD_ROW_KEY.equals(entry.getKey())
                 && !ErdConst.INDEX.equals(entry.getKey());
     }
 
@@ -702,7 +725,7 @@ public abstract class AbstractDbService implements DbService {
 
         List<Map<String, Object>> records = resVo.getTableData().getRecords();
         records.forEach(record -> {
-            record.remove(ErdConst.KEY);
+            record.remove(ErdConst.ERD_ROW_KEY);
             record.remove(ErdConst.INDEX);
         });
 
@@ -750,7 +773,7 @@ public abstract class AbstractDbService implements DbService {
         throw new IllegalArgumentException(type);
     }
 
-    protected String generateCsv(List<Map<String, Object>> records) {
+    public static String generateCsv(List<Map<String, Object>> records) {
         List<String> columnNames = new ArrayList<>(records.get(0).keySet());
 
         String s = records.stream()
@@ -758,14 +781,23 @@ public abstract class AbstractDbService implements DbService {
                         .map(value -> {
                             if (value == null) {
                                 return "(null)";
+                            }
+
+                            if (value instanceof String) {
+                                return String.format("\"%s\"", ((String) value).replace("\"", "\"\""));
+                            } else if (value instanceof Document) {
+                                return String.format("\"%s\"", ((Document) value).toJson().replace("\"", "\"\""));
+                            } else if (value instanceof ObjectId) {
+                                return String.format("\"%s\"", ((ObjectId) value).toHexString());
+                            } else if (value instanceof List) {
+                                @SuppressWarnings("unchecked")
+                                List<Document> list = (List<Document>) value;
+                                String str = list.stream()
+                                        .map(it -> it.toJson().replace("\"", "\"\""))
+                                        .collect(Collectors.joining(",", "[", "]"));
+                                return String.format("\"%s\"", str);
                             } else {
-                                if (value instanceof Date) {
-                                    return String.format("\"%s\"", value);
-                                } else if (value instanceof String) {
-                                    return String.format("\"%s\"", value);
-                                } else {
-                                    return value.toString();
-                                }
+                                return value.toString().replace("\"", "\"\"");
                             }
                         })
                         .collect(Collectors.joining("\t")))
@@ -829,6 +861,9 @@ public abstract class AbstractDbService implements DbService {
                                         if (value == null) {
                                             return "null";
                                         }
+
+                                        value = convertColumnValue(value);
+
                                         if (value instanceof Date) {
                                             return String.format("'%s'", value);
                                         } else if (value instanceof String) {
@@ -845,8 +880,19 @@ public abstract class AbstractDbService implements DbService {
                 .collect(Collectors.joining("\r\n"));
     }
 
+    private static Object convertColumnValue(Object columnValue) {
+        if (columnValue instanceof Long
+                || columnValue instanceof BigInteger
+                || columnValue instanceof BigDecimal) {
+            columnValue = columnValue.toString();
+        } else if (columnValue instanceof Date) {
+            columnValue = DateFormatUtils.format((Date) columnValue, STANDARD_PATTERN);
+        }
+        return columnValue;
+    }
+
     @SneakyThrows
-    protected byte[] excelBytes(List<Map<String, Object>> records, String tableName) {
+    protected static byte[] excelBytes(List<Map<String, Object>> records, String tableName) {
         List<List<Object>> list = records.stream()
                 .map(record -> {
                     modifyRowForSpecialColumnType(record);
@@ -864,6 +910,9 @@ public abstract class AbstractDbService implements DbService {
 
         ExcelWriter excelWriter = new ExcelWriterBuilder()
                 .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
+                .registerConverter(ObjectIdConverter.INSTANCE)
+                .registerConverter(ArrayListConverter.INSTANCE)
+                .registerConverter(DocumentConverter.INSTANCE)
                 .excelType(ExcelTypeEnum.XLS)
                 .autoCloseStream(true)
                 .file(outputStream)
@@ -899,7 +948,8 @@ public abstract class AbstractDbService implements DbService {
             DatabaseMetaData databaseMetaData = con.getMetaData();
             List<EntitiesBean> entitiesBeans = modulesBean.getEntities().stream()
                     .map(entitiesBean -> {
-                        EntitiesBean bean = ErdUtils.tableToEntity(entitiesBean, databaseMetaData, datatypeBeans);
+                        Predicate<Pair<ApplyBean, Column>> predicate = datatypePredicate();
+                        EntitiesBean bean = ErdUtils.tableToEntity(entitiesBean, databaseMetaData, datatypeBeans, predicate);
 
                         String tableName = entitiesBean.getTitle();
                         String ddl = getTableDdlSql(jdbcTemplate, tableName);
@@ -913,6 +963,8 @@ public abstract class AbstractDbService implements DbService {
             return modulesBean;
         });
     }
+
+    protected abstract Predicate<Pair<ApplyBean, Column>> datatypePredicate();
 
     protected abstract String getTableDdlSql(JdbcTemplate jdbcTemplate, String tableName);
 

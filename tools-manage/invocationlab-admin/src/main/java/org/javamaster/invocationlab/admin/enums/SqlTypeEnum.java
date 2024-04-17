@@ -12,6 +12,7 @@ public enum SqlTypeEnum {
     CREATE("create"),
     DROP("drop"),
     ALTER("alter"),
+    UNKNOWN("unknown"),
     ;
 
     public final String type;

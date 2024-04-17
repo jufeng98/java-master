@@ -3,6 +3,8 @@ package org.javamaster.invocationlab.admin.service.impl;
 import com.alibaba.druid.DbType;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.javamaster.invocationlab.admin.model.erd.ApplyBean;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.util.DbUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +15,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -51,6 +54,11 @@ public class PostgreSqlDbServiceImpl extends AbstractDbService {
         // 对于没有主键的表特殊处理,认为data_id就是主键
         dataIdColumns.get(0).setPrimaryKey(true);
         return tableColumns;
+    }
+
+    @Override
+    protected Predicate<Pair<ApplyBean, Column>> datatypePredicate() {
+        return pair -> pair.getLeft().getPostgreSQL().getType().equals(pair.getRight().getTypeName().toUpperCase());
     }
 
     @Override

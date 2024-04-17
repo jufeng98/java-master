@@ -21,6 +21,8 @@ public class ApplyBean {
     private SQLServerBean sQLServer;
     @JsonProperty("PostgreSQL")
     private PostgreSQLBean postgreSQL;
+    @JsonProperty("MongoDB")
+    private MongoDBBean mongoDB;
 
     @NoArgsConstructor
     @Data
@@ -51,4 +53,11 @@ public class ApplyBean {
     public static class PostgreSQLBean {
         private String type;
     }
+
+    @NoArgsConstructor
+    @Data
+    public static class MongoDBBean {
+        private String type;
+    }
+
 }

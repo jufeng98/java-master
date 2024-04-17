@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.DatabaseMetaData;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
@@ -33,7 +34,8 @@ import static org.javamaster.invocationlab.admin.util.DbUtils.getTableInfo;
 public class ErdUtils {
 
     public static EntitiesBean tableToEntity(EntitiesBean entitiesBean, DatabaseMetaData databaseMetaData,
-                                             List<DatatypeBean> datatypeBeans) {
+                                             List<DatatypeBean> datatypeBeans,
+                                             Predicate<Pair<ApplyBean, Column>> predicate) {
         String tableName = entitiesBean.getTitle();
         Table table = getTableInfo(tableName, databaseMetaData);
         if (table == null) {
@@ -42,7 +44,7 @@ public class ErdUtils {
         entitiesBean.setChnname(table.getRemarks());
 
         List<Column> columns = getTableColumns(tableName, databaseMetaData);
-        entitiesBean.setFields(toFieldsBeans(columns, datatypeBeans));
+        entitiesBean.setFields(toFieldsBeans(columns, datatypeBeans, predicate));
 
         List<IndexsBean> indexesBeans = getTableIndexes(tableName, databaseMetaData);
         entitiesBean.setIndexs(indexesBeans);
@@ -50,13 +52,16 @@ public class ErdUtils {
         return entitiesBean;
     }
 
-    public static List<FieldsBean> toFieldsBeans(List<Column> columns, List<DatatypeBean> datatypeBeans) {
+    public static List<FieldsBean> toFieldsBeans(List<Column> columns, List<DatatypeBean> datatypeBeans,
+                                                 Predicate<Pair<ApplyBean, Column>> predicate) {
         return columns.stream()
                 .map(column -> {
                     FieldsBean fieldsBean = new FieldsBean();
                     fieldsBean.setChnname(column.getRemarks());
                     fieldsBean.setName(column.getName());
-                    DatatypeBean datatypeBean = findDatatypeBean(datatypeBeans, column);
+
+                    DatatypeBean datatypeBean = findDatatypeBean(datatypeBeans, column, predicate);
+
                     fieldsBean.setTypeName(datatypeBean.getName());
                     fieldsBean.setType(datatypeBean.getCode());
                     fieldsBean.setDataType(datatypeBean.getApply().getMYSQL().getType());
@@ -81,9 +86,9 @@ public class ErdUtils {
                 .collect(Collectors.toList());
     }
 
-    public static DatatypeBean findDatatypeBean(List<DatatypeBean> datatypeBeans, Column column) {
+    public static DatatypeBean findDatatypeBean(List<DatatypeBean> datatypeBeans, Column column, Predicate<Pair<ApplyBean, Column>> predicate) {
         List<DatatypeBean> list = datatypeBeans.stream()
-                .filter(datatypeBean -> datatypeBean.getApply().getMYSQL().getType().equals(column.getTypeName()))
+                .filter(datatypeBean -> predicate.test(Pair.of(datatypeBean.getApply(), column)))
                 .collect(Collectors.toList());
         if (list.isEmpty()) {
             log.error("type not exists:{}", column);
