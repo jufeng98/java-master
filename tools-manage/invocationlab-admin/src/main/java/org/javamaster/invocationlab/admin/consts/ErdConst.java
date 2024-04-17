@@ -31,7 +31,7 @@ public class ErdConst {
 
     public static final String NULL_VALUE = "<null>";
     public static final String ROW_OPERATION_TYPE = "rowOperationType";
-    public static final String KEY = "key";
+    public static final String KEY = "erdRowKey";
     public static final String INDEX = "index";
     public static final AtomicInteger COUNTER = new AtomicInteger(0);
 }

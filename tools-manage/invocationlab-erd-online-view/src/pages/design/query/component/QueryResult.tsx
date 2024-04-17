@@ -66,7 +66,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
     }
     let noPrimaryKey = props.tableResult.primaryKeys.length === 0 && props.tableResult.columns.length > 0
     const columnsTmp2: any[] = props.tableResult.columns
-      .filter(columnName => columnName !== 'key')
+      .filter(columnName => columnName !== 'erdRowKey')
       .map((columnName: string, index: number) => {
         let field = QueryResultUtils.getSuitField(columnName, props.tableResult.tableColumns, fieldMapObj)
         return {
@@ -87,7 +87,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
             if (typeof record[columnName] === 'boolean') {
               return <span>{record[columnName] + ''}</span>;
             }
-            return <span style={delBtnStyle[record.key] || editBtnStyle[record.key]}
+            return <span style={delBtnStyle[record.erdRowKey] || editBtnStyle[record.erdRowKey]}
               onContextMenu={(e) => {
                 aesContextMenuRef?.current?.showContext(e)
                 e.preventDefault()
@@ -127,24 +127,24 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         fixed: 'right',
         render: (_: any, record: any, __: number, action: any) => [
           <a
-            style={delBtnStyle[record.key] || editBtnStyle[record.key]}
+            style={delBtnStyle[record.erdRowKey] || editBtnStyle[record.erdRowKey]}
             key="editable"
             onClick={(e) => {
               if (!record.rowOperationType) {
                 record.rowOperationType = 'preUpdate'
               }
-              action?.startEditable?.(record.key);
+              action?.startEditable?.(record.erdRowKey);
             }}
           >
             编辑
           </a>,
           <a
-            style={delBtnStyle[record.key] || editBtnStyle[record.key]}
+            style={delBtnStyle[record.erdRowKey] || editBtnStyle[record.erdRowKey]}
             key="delete"
             onClick={(_) => {
               setDelBtnStyle((it: {}) => {
                 let obj = Object.assign({}, it)
-                obj[record.key] = { color: "red" }
+                obj[record.erdRowKey] = { color: "red" }
                 return obj
               })
               record.rowOperationType = 'delete'
@@ -153,7 +153,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
             删除
           </a>,
           <a
-            style={delBtnStyle[record.key] || editBtnStyle[record.key]}
+            style={delBtnStyle[record.erdRowKey] || editBtnStyle[record.erdRowKey]}
             key="add"
             onClick={(_) => {
               let newRecord = JSON.parse(JSON.stringify(record))
@@ -164,7 +164,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
                   }
                 })
               newRecord.rowOperationType = 'preInsert'
-              newRecord.key = Math.floor(Math.random() * 100000000)
+              newRecord.erdRowKey = Math.floor(Math.random() * 100000000)
               tableRef?.current?.addEditRecord(newRecord)
             }}
           >
@@ -220,7 +220,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       size={'small'}
       scroll={{ x: 1300, y: 'calc(100vh - 540px)' }}
       headerTitle="可编辑表格(双击单元格复制其内容)"
-      rowKey="key"
+      rowKey="erdRowKey"
       columns={columns}
       value={dataSource}
       bordered
@@ -242,7 +242,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
           }
           setEditBtnStyle((it: {}) => {
             let obj = Object.assign({}, it)
-            obj[row.key] = style
+            obj[row.erdRowKey] = style
             return obj;
           })
         },
@@ -258,7 +258,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
         position: 'bottom',
         creatorButtonText: '新增',
         record: () => ({
-          key: Math.floor(Math.random() * 100000000),
+          erdRowKey: Math.floor(Math.random() * 100000000),
           rowOperationType: 'preInsert',
         }),
         onClick: () => {
