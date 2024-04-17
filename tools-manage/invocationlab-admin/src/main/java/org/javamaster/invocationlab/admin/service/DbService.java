@@ -1,7 +1,7 @@
 package org.javamaster.invocationlab.admin.service;
 
 import com.alibaba.druid.DbType;
-import org.javamaster.invocationlab.admin.config.ErdException;
+import org.apache.commons.lang3.tuple.Triple;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.CommonErdVo;
 import org.javamaster.invocationlab.admin.model.erd.DbsBean;
@@ -10,31 +10,11 @@ import org.javamaster.invocationlab.admin.model.erd.ModulesBean;
 import org.javamaster.invocationlab.admin.model.erd.SqlExecResVo;
 import org.javamaster.invocationlab.admin.model.erd.Table;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
-import org.javamaster.invocationlab.admin.service.impl.MySqlDbServiceImpl;
-import org.javamaster.invocationlab.admin.service.impl.PostgreSqlDbServiceImpl;
-import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.http.MediaType;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public interface DbService {
-    Map<String, DbService> DB_MAP = new HashMap<String, DbService>() {
-        {
-            put("MYSQL", new MySqlDbServiceImpl());
-            put("PostgreSQL", new PostgreSqlDbServiceImpl());
-        }
-    };
-
-    static DbService getInstance(String select) {
-        DbService dbService = DB_MAP.get(select);
-        if (dbService == null) {
-            throw new ErdException("暂时不支持当前数据库:" + select);
-        }
-        return dbService;
-    }
-
     void checkDb(DbsBean dbsBean);
 
     List<String> getDbNames(DbsBean dbsBean);

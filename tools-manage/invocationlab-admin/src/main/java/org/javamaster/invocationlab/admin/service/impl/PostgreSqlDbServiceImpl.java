@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.util.DbUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Service("PostgreSQL")
 public class PostgreSqlDbServiceImpl extends AbstractDbService {
 
     @Override

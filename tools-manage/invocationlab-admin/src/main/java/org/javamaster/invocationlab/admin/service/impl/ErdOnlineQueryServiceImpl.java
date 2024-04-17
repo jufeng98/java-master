@@ -33,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
 import static org.javamaster.invocationlab.admin.consts.ErdConst.PROJECT_QUERY_TREE;
@@ -53,6 +54,9 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private Map<String, DbService> dbServiceMap;
+
     public static final String INDEX = "index";
     public static final String KEY = "key";
 
@@ -127,7 +131,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
     @Override
     public List<String> getDbs(String projectId, TokenVo tokenVo) throws Exception {
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
         return dbService.getDbNames(dbsBean);
     }
 
@@ -137,7 +141,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         String selectDB = reqVo.getSelectDB();
 
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
 
         return dbService.getTables(dbsBean, selectDB);
     }
@@ -149,7 +153,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         String tableName = reqVo.getTableName();
 
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
 
         return dbService.getTableColumns(dbsBean, selectDB, tableName);
     }
@@ -219,7 +223,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         String projectId = reqVo.getProjectId();
 
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
 
         return dbService.execSql(reqVo, dbsBean, tokenVo);
     }
@@ -229,7 +233,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         String projectId = reqVo.getProjectId();
 
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
 
         return dbService.getTableRecordTotal(reqVo, dbsBean, tokenVo);
     }
@@ -239,7 +243,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         String projectId = reqVo.getProjectId();
 
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
         return dbService.execUpdate(dbsBean, tokenVo, reqVo);
     }
 
@@ -248,7 +252,7 @@ public class ErdOnlineQueryServiceImpl implements ErdOnlineQueryService {
         String projectId = reqVo.getProjectId();
 
         DbsBean dbsBean = erdProjectService.getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
 
         return dbService.exportSql(dbsBean, tokenVo, reqVo);
     }

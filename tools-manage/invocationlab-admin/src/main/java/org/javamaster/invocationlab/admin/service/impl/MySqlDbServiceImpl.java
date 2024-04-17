@@ -4,12 +4,14 @@ import com.alibaba.druid.DbType;
 import lombok.extern.slf4j.Slf4j;
 import org.javamaster.invocationlab.admin.util.DbUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Service("MYSQL")
 public class MySqlDbServiceImpl extends AbstractDbService {
 
     @Override

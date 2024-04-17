@@ -117,6 +117,8 @@ public class ErdOnlineProjectServiceImpl implements ErdOnlineProjectService {
     private ErdOnlineRoleService erdOnlineRoleService;
     @Autowired
     private WebSocketHandler webSocketHandler;
+    @Autowired
+    private Map<String, DbService> dbServiceMap;
 
     @Override
     public StatisticVo statistic() throws Exception {
@@ -534,7 +536,7 @@ public class ErdOnlineProjectServiceImpl implements ErdOnlineProjectService {
         resumeSensitiveInfo(erdOnlineModel, tokenVo.getUserId());
 
         DbsBean dbsBean = getDefaultDb(projectId, tokenVo);
-        DbService dbService = DbService.getInstance(dbsBean.getSelect());
+        DbService dbService = dbServiceMap.get(dbsBean.getSelect());
 
         ModulesBean modulesBean = dbService.refreshModule(erdOnlineModel, moduleName);
 
