@@ -27,7 +27,6 @@ public abstract class AbstractRedisDataTypeService implements RedisDataTypeServi
         ValueVo valueVo = ValueVo.builder()
                 .redisKeyTtl(ttl)
                 .redisKeyType(dataType().code())
-                .redisKeyType(dataType().code())
                 .redisKeyClazz(clazz)
                 .fieldCount(0)
                 .fieldVos(Collections.emptyList())

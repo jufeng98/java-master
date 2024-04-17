@@ -1,18 +1,19 @@
 package org.javamaster.invocationlab.admin.redis;
 
-import org.javamaster.invocationlab.admin.config.BizException;
-import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
-import org.javamaster.invocationlab.admin.service.Pair;
-import org.javamaster.invocationlab.admin.service.creation.impl.JdkCreator;
-import org.javamaster.invocationlab.admin.util.SerializationUtils;
-import org.javamaster.invocationlab.admin.util.SpringUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Triple;
+import org.javamaster.invocationlab.admin.config.BizException;
+import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
+import org.javamaster.invocationlab.admin.model.redis.Tree;
+import org.javamaster.invocationlab.admin.service.Pair;
+import org.javamaster.invocationlab.admin.service.creation.impl.JdkCreator;
+import org.javamaster.invocationlab.admin.util.RedisUtils;
+import org.javamaster.invocationlab.admin.util.SerializationUtils;
+import org.javamaster.invocationlab.admin.util.SpringUtils;
 import org.springframework.data.redis.connection.RedisClusterNode;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.jedis.JedisClusterConnection;
@@ -28,7 +29,6 @@ import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 import redis.clients.jedis.exceptions.JedisDataException;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.javamaster.invocationlab.admin.util.RedisUtils.redisNodes;
+import static org.javamaster.invocationlab.admin.util.RedisUtils.convertToRedisNodes;
 import static redis.clients.jedis.ScanParams.SCAN_POINTER_START_BINARY;
 
 @Component
@@ -83,8 +83,8 @@ public class RedisHelper {
         return new Pair<>(dbCount, map);
     }
 
-    public List<Triple<String, String, Class<?>>> getSingleDbKeys(Jedis jedis, int count, String pattern) {
-        List<Triple<String, String, Class<?>>> list = Lists.newArrayList();
+    public List<Tree> getSingleDbKeys(Jedis jedis, int count, String pattern) {
+        List<Tree> list = Lists.newArrayList();
         byte[] cursor = SCAN_POINTER_START_BINARY;
         ScanParams scanParams = new ScanParams();
         scanParams.count(count);
@@ -93,13 +93,27 @@ public class RedisHelper {
             ScanResult<byte[]> scanResult = jedis.scan(cursor, scanParams);
             List<byte[]> resultBytesList = scanResult.getResult();
             for (byte[] resultBytes : resultBytesList) {
+                String type = RedisUtils.handleType(jedis.type(resultBytes));
                 if (SerializationUtils.isJdkSerialize(resultBytes)) {
                     String base64 = Base64Utils.encodeToString(resultBytes);
                     Pair<String, Class<?>> pair = SerializationUtils.dealJdkDeserialize(resultBytes);
-                    list.add(Triple.of(pair.getLeft(), base64, pair.getRight()));
+                    Tree tree = Tree.builder()
+                            .label(type + pair.getLeft())
+                            .labelBase64(base64)
+                            .labelClass(pair.getRight())
+                            .typeLength(type.length())
+                            .isLeaf(true)
+                            .build();
+                    list.add(tree);
                 } else {
                     String key = new String(resultBytes, StandardCharsets.UTF_8);
-                    list.add(Triple.of(key, "", null));
+                    Tree tree = Tree.builder()
+                            .label(type + key)
+                            .labelBase64("")
+                            .typeLength(type.length())
+                            .isLeaf(true)
+                            .build();
+                    list.add(tree);
                 }
             }
             if (list.size() >= 100) {
@@ -110,10 +124,10 @@ public class RedisHelper {
         return list;
     }
 
-    public List<Triple<String, String, Class<?>>> getClusterDbKeys(JedisClusterConnection clusterConnection,
-                                                                   ConnectionVo connectionVo, int count, String pattern) {
-        List<Triple<String, String, Class<?>>> list = Lists.newArrayList();
-        Set<RedisNode> clusterNodes = redisNodes(connectionVo.getNodes());
+    public List<Tree> getClusterDbKeys(JedisClusterConnection clusterConnection, ConnectionVo connectionVo,
+                                       int count, String pattern) {
+        List<Tree> list = Lists.newArrayList();
+        Set<RedisNode> clusterNodes = convertToRedisNodes(connectionVo.getNodes());
         ScanOptions scanOptions = ScanOptions.scanOptions().count(count).match(pattern).build();
         Set<String> keys = Sets.newHashSet();
         outer:
@@ -135,14 +149,23 @@ public class RedisHelper {
                         key = new String(resultBytes, StandardCharsets.UTF_8);
                     }
                     if (!keys.contains(key)) {
-                        list.add(Triple.of(key, base64, clazz));
+                        @SuppressWarnings("ConstantConditions")
+                        String type = RedisUtils.handleType(clusterConnection.keyCommands().type(resultBytes).code());
+                        Tree tree = Tree.builder()
+                                .label(type + key)
+                                .labelBase64(base64)
+                                .labelClass(clazz)
+                                .typeLength(type.length())
+                                .isLeaf(true)
+                                .build();
+                        list.add(tree);
                         keys.add(key);
                     }
                     if (list.size() >= 100) {
                         break outer;
                     }
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

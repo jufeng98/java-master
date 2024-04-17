@@ -3,7 +3,6 @@ package org.javamaster.invocationlab.admin.service.impl;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.javamaster.invocationlab.admin.config.BizException;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.redis.CommonRedisVo;
@@ -63,7 +62,7 @@ public class RedisServiceImpl implements RedisService {
             connectionVoReq.setNodes(connectionVoReq.getHost());
             connectionVoReq.setHost("");
         }
-        JedisConnectionFactory factory = RedisUtils.getJedisConnectionFactory(connectionVoReq, Protocol.DEFAULT_DATABASE);
+        JedisConnectionFactory factory = RedisUtils.newJedisConnectionFactory(connectionVoReq, Protocol.DEFAULT_DATABASE);
         RedisConnection connection = null;
         try {
             connection = factory.getConnection();
@@ -71,6 +70,7 @@ public class RedisServiceImpl implements RedisService {
             if (connection != null) {
                 connection.close();
             }
+            factory.destroy();
         }
         return connectionVoReq.getHost() + "连接成功";
     }
@@ -96,9 +96,6 @@ public class RedisServiceImpl implements RedisService {
                     ConnectionVo connectionVo = (ConnectionVo) obj;
                     connectionVo.setPassword("");
                     connectionVo.setUser("");
-                    if (connectionVo.getCreateTime() == null) {
-                        connectionVo.setCreateTime(System.currentTimeMillis());
-                    }
                     return connectionVo;
                 })
                 .sorted(Comparator.comparing(ConnectionVo::getCreateTime))
@@ -107,7 +104,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public List<Tree> listDb(String connectId) {
-        RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(connectId, Protocol.DEFAULT_DATABASE);
+        RedisTemplate<Object, Object> redisTemplate = RedisUtils.redisTemplateSingleton(connectId, Protocol.DEFAULT_DATABASE);
         return redisTemplate.execute((RedisCallback<List<Tree>>) connection -> {
             Object redisConnection = connection.getNativeConnection();
             Pair<Integer, Map<Integer, Long>> pair;
@@ -121,13 +118,15 @@ public class RedisServiceImpl implements RedisService {
             Integer dbCount = pair.getLeft();
             Map<Integer, Long> map = pair.getRight();
             return IntStream.range(0, dbCount)
-                    .mapToObj(index -> Tree.builder()
-                            .redisDbIndex(index)
-                            .keyCount(-1L)
-                            .isLeaf(false)
-                            .label("DB" + index + "(" + map.get(index) + ")")
-                            .build())
-                    .filter(Objects::nonNull)
+                    .mapToObj(index -> {
+                        Long keyCount = map.get(index);
+                        return Tree.builder()
+                                .redisDbIndex(index)
+                                .keyCount(keyCount)
+                                .isLeaf(false)
+                                .label("DB" + index + "(" + keyCount + ")")
+                                .build();
+                    })
                     .collect(Collectors.toList());
         });
     }
@@ -138,15 +137,24 @@ public class RedisServiceImpl implements RedisService {
         if (pattern.equals("*")) {
             count = 100;
         }
-        RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(connectId, redisDbIndex);
         int finalCount = count;
-        List<Triple<String, String, Class<?>>> resList = redisTemplate.execute((RedisCallback<List<Triple<String, String, Class<?>>>>) connection -> {
-            List<Triple<String, String, Class<?>>> list = Lists.newArrayList();
+        RedisTemplate<Object, Object> redisTemplate = RedisUtils.redisTemplateSingleton(connectId, redisDbIndex);
+        List<Tree> resList = redisTemplate.execute((RedisCallback<List<Tree>>) connection -> {
+            List<Tree> list = Lists.newArrayList();
 
             if (!pattern.contains("*") && !pattern.contains("?")) {
-                Boolean exists = connection.exists(pattern.getBytes(StandardCharsets.UTF_8));
+                byte[] patternBytes = pattern.getBytes(StandardCharsets.UTF_8);
+                Boolean exists = connection.exists(patternBytes);
                 if (Boolean.TRUE.equals(exists)) {
-                    list.add(Triple.of(pattern, "", null));
+                    @SuppressWarnings("ConstantConditions")
+                    String type = RedisUtils.handleType(connection.type(patternBytes).code());
+                    Tree tree = Tree.builder()
+                            .label(type + pattern)
+                            .labelBase64("")
+                            .typeLength(type.length())
+                            .isLeaf(true)
+                            .build();
+                    list.add(tree);
                 }
                 return list;
             }
@@ -165,23 +173,20 @@ public class RedisServiceImpl implements RedisService {
             return list;
         });
 
-        if (Objects.requireNonNull(resList).size() > 200) {
+        //noinspection ConstantConditions
+        if (resList.size() > 200) {
             resList = resList.subList(0, 200);
         }
 
-        return resList.stream()
-                .sorted(Comparator.comparing(Triple::getLeft))
-                .map(triple -> Tree.builder()
-                        .label(triple.getLeft())
-                        .labelBase64(triple.getMiddle())
-                        .isLeaf(true)
-                        .build())
-                .collect(Collectors.toList());
+        resList.sort(Comparator.comparing(Tree::getLabel));
+
+        return resList;
     }
 
     @Override
     public ValueVo getValue(CommonRedisVo commonRedisVo) throws Exception {
-        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> redisDataTypeService.getValue(connection, keyPair));
+        return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService)
+                -> redisDataTypeService.getValue(connection, keyPair));
     }
 
     @Override
@@ -190,7 +195,8 @@ public class RedisServiceImpl implements RedisService {
         log.info("{}-{} save value:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
         return executeCommand(commonRedisVo, (connection, keyPair, redisDataTypeService) -> {
-            redisDataTypeService.saveValue(connection, keyPair, commonRedisVo);
+            Long aLong = redisDataTypeService.saveValue(connection, keyPair, commonRedisVo);
+            log.info("保存结果:{}", aLong);
             return commonRedisVo;
         });
     }
@@ -233,9 +239,11 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} add key:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonRedisVo.getConnectId(), commonRedisVo.getRedisDbIndex());
+        RedisTemplate<Object, Object> redisTemplate = RedisUtils.redisTemplateSingleton(commonRedisVo.getConnectId(),
+                commonRedisVo.getRedisDbIndex());
 
-        Pair<byte[], Class<?>> keyPair = redisHelper.convertKeyToBytes(commonRedisVo.getRedisKey(), commonRedisVo.getRedisKeyJdkSerialize());
+        Pair<byte[], Class<?>> keyPair = redisHelper.convertKeyToBytes(commonRedisVo.getRedisKey(),
+                commonRedisVo.getRedisKeyJdkSerialize());
         byte[] keyBytes = keyPair.getLeft();
 
         return redisTemplate.execute((RedisCallback<ValueVo>) connection -> {
@@ -267,9 +275,11 @@ public class RedisServiceImpl implements RedisService {
         TokenVo tokenVo = getTokenVo();
         log.info("{}-{} rename key:{}", tokenVo.getUserId(), tokenVo.getUsername(), commonRedisVo);
 
-        RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonRedisVo.getConnectId(), commonRedisVo.getRedisDbIndex());
+        RedisTemplate<Object, Object> redisTemplate = RedisUtils.redisTemplateSingleton(commonRedisVo.getConnectId(),
+                commonRedisVo.getRedisDbIndex());
 
-        Pair<byte[], Class<?>> keyPair = redisHelper.convertKeyToBytes(commonRedisVo.getRedisKey(), commonRedisVo.getRedisKeyJdkSerialize());
+        Pair<byte[], Class<?>> keyPair = redisHelper.convertKeyToBytes(commonRedisVo.getRedisKey(),
+                commonRedisVo.getRedisKeyJdkSerialize());
         Pair<byte[], Class<?>> oldKeyPair = redisHelper.convertKeyToBytes(commonRedisVo.getOldRedisKey(),
                 commonRedisVo.getRedisKeyBase64());
 
@@ -286,10 +296,12 @@ public class RedisServiceImpl implements RedisService {
 
     public <U> U executeCommand(CommonRedisVo commonRedisVo,
                                 TripleFunction<RedisConnection, Pair<byte[], Class<?>>, RedisDataTypeService, U> function) {
-        RedisTemplate<Object, Object> redisTemplate = RedisUtils.getRedisTemplate(commonRedisVo.getConnectId(), commonRedisVo.getRedisDbIndex());
+        RedisTemplate<Object, Object> redisTemplate = RedisUtils.redisTemplateSingleton(commonRedisVo.getConnectId(),
+                commonRedisVo.getRedisDbIndex());
 
         RedisHelper redisHelper = SpringUtils.getContext().getBean(RedisHelper.class);
-        Pair<byte[], Class<?>> keyPair = redisHelper.convertKeyToBytes(commonRedisVo.getRedisKey(), commonRedisVo.getRedisKeyBase64());
+        Pair<byte[], Class<?>> keyPair = redisHelper.convertKeyToBytes(commonRedisVo.getRedisKey(),
+                commonRedisVo.getRedisKeyBase64());
         byte[] keyBytes = keyPair.getLeft();
 
         return redisTemplate.execute((RedisCallback<U>) connection -> {

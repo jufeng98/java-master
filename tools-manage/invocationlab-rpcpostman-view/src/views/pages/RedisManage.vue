@@ -68,7 +68,9 @@
                             </el-input>
                         </el-col>
                         <el-col :span="2">
-                            <el-button @click="setNewTtl" type="primary">设置TTL</el-button>
+                            <el-tooltip class="item" effect="dark" content="-1表示永不过期" placement="top">
+                              <el-button @click="setNewTtl" type="primary">设置TTL</el-button>
+                            </el-tooltip>
                         </el-col>
                         <el-col :span="2">
                             <el-button @click="reloadValue" type="primary">刷新value</el-button>

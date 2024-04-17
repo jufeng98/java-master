@@ -1,6 +1,8 @@
 package org.javamaster.invocationlab.admin.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.model.redis.ConnectionVo;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
@@ -8,7 +10,9 @@ import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,16 +22,23 @@ import static org.javamaster.invocationlab.admin.service.impl.RedisServiceImpl.H
 /**
  * @author yudong
  */
-@SuppressWarnings({"unchecked"})
 public class RedisUtils {
 
     public static ConnectionVo getConnectionVo(String connectId) {
-            RedisTemplate<String, Object> redisTemplateJackson = (RedisTemplate<String, Object>) SpringUtils.getContext()
-                    .getBean("redisTemplateJackson");
-        return (ConnectionVo) redisTemplateJackson.opsForHash().get(HASH_KEY_DBS, connectId);
+        StringRedisTemplate stringRedisTemplate = SpringUtils.getContext().getBean(StringRedisTemplate.class);
+        ObjectMapper objectMapper = SpringUtils.getContext().getBean(ObjectMapper.class);
+        String jsonStr = (String) stringRedisTemplate.opsForHash().get(HASH_KEY_DBS, connectId);
+        if (StringUtils.isBlank(jsonStr)) {
+            throw new ErdException("连接" + connectId + "不存在");
+        }
+        try {
+            return objectMapper.readValue(jsonStr, ConnectionVo.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static RedisTemplate<Object, Object> getRedisTemplate(String connectId, Integer db) {
+    public static RedisTemplate<Object, Object> redisTemplateSingleton(String connectId, Integer db) {
         ConnectionVo connectionVo = getConnectionVo(connectId);
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) SpringUtils.getContext()
                 .getAutowireCapableBeanFactory();
@@ -36,7 +47,7 @@ public class RedisUtils {
             //noinspection unchecked
             return (RedisTemplate<Object, Object>) beanFactory.getBean(id);
         }
-        JedisConnectionFactory connectionFactory = getJedisConnectionFactory(connectionVo, db);
+        JedisConnectionFactory connectionFactory = newJedisConnectionFactory(connectionVo, db);
         RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.afterPropertiesSet();
@@ -44,19 +55,19 @@ public class RedisUtils {
         return redisTemplate;
     }
 
-    public static JedisConnectionFactory getJedisConnectionFactory(ConnectionVo connectionVo, Integer db) {
+    public static JedisConnectionFactory newJedisConnectionFactory(ConnectionVo connectionVo, Integer db) {
         JedisConnectionFactory connectionFactory;
         if (StringUtils.isNotBlank(connectionVo.getNodes())) {
-            connectionFactory = getJedisConnectionFactoryCluster(connectionVo.getNodes(), connectionVo.getPassword());
+            connectionFactory = newJedisConnectionFactoryCluster(connectionVo.getNodes(), connectionVo.getPassword());
         } else {
-            connectionFactory = getJedisConnectionFactorySingle(connectionVo.getHost(), connectionVo.getPort(),
+            connectionFactory = newJedisConnectionFactory(connectionVo.getHost(), connectionVo.getPort(),
                     db, connectionVo.getPassword());
         }
         connectionFactory.getConnection();
         return connectionFactory;
     }
 
-    private static JedisConnectionFactory getJedisConnectionFactorySingle(String host, Integer port, Integer db, String pwd) {
+    private static JedisConnectionFactory newJedisConnectionFactory(String host, Integer port, Integer db, String pwd) {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setHostName(host);
         configuration.setPort(port);
@@ -67,7 +78,7 @@ public class RedisUtils {
         return jedisConnectionFactory;
     }
 
-    public static Set<RedisNode> redisNodes(String nodes) {
+    public static Set<RedisNode> convertToRedisNodes(String nodes) {
         return Arrays.stream(nodes.split(","))
                 .map(s -> {
                     String[] split = s.split(":");
@@ -76,8 +87,8 @@ public class RedisUtils {
                 .collect(Collectors.toSet());
     }
 
-    private static JedisConnectionFactory getJedisConnectionFactoryCluster(String nodes, String pwd) {
-        Set<RedisNode> nodesSet = redisNodes(nodes);
+    private static JedisConnectionFactory newJedisConnectionFactoryCluster(String nodes, String pwd) {
+        Set<RedisNode> nodesSet = convertToRedisNodes(nodes);
         RedisClusterConfiguration clusterConfiguration = new RedisClusterConfiguration();
         clusterConfiguration.setClusterNodes(nodesSet);
         clusterConfiguration.setPassword(pwd);
@@ -86,4 +97,7 @@ public class RedisUtils {
         return jedisConnectionFactory;
     }
 
+    public static String handleType(String type) {
+        return "(" + type + ")";
+    }
 }
