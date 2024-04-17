@@ -1,5 +1,7 @@
 package org.javamaster.invocationlab.admin.consts;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author yudong
  */
@@ -24,4 +26,12 @@ public class ErdConst {
     public static final String ANGEL_PRO_RPC_ALLOW = ERD_PREFIX + "angelProRpcAllow";
 
     public static final String QUERY_RES = ERD_PREFIX + "queryRes";
+    public static final String EXEC_COLLECTION_NAME = ERD_PREFIX + "queryTableName";
+    public static final String MONGO_KEY_NAME = "_id";
+
+    public static final String NULL_VALUE = "<null>";
+    public static final String ROW_OPERATION_TYPE = "rowOperationType";
+    public static final String KEY = "key";
+    public static final String INDEX = "index";
+    public static final AtomicInteger COUNTER = new AtomicInteger(0);
 }

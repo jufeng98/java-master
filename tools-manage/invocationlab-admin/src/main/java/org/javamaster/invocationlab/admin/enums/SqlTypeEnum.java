@@ -5,6 +5,7 @@ package org.javamaster.invocationlab.admin.enums;
  * @date 2023/9/3
  */
 public enum SqlTypeEnum {
+    SELECT("select"),
     DELETE("delete"),
     UPDATE("update"),
     INSERT("insert"),

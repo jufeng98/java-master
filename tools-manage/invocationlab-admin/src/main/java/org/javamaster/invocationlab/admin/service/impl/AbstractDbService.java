@@ -36,6 +36,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 import org.javamaster.invocationlab.admin.config.ErdException;
+import org.javamaster.invocationlab.admin.consts.ErdConst;
 import org.javamaster.invocationlab.admin.enums.SqlTypeEnum;
 import org.javamaster.invocationlab.admin.model.erd.Column;
 import org.javamaster.invocationlab.admin.model.erd.CommonErdVo;
@@ -79,7 +80,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
@@ -90,11 +90,6 @@ import static org.javamaster.invocationlab.admin.util.JsonUtils.STANDARD_PATTERN
 
 @Slf4j
 public abstract class AbstractDbService implements DbService {
-    protected final AtomicInteger atomicInteger = new AtomicInteger(0);
-    protected final String KEY = "key";
-    protected final String INDEX = "index";
-    protected final String NULL_VALUE = "<null>";
-    protected final String ROW_OPERATION_TYPE = "rowOperationType";
     private static final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
 
     protected String getCheckSql() {
@@ -114,6 +109,7 @@ public abstract class AbstractDbService implements DbService {
             JdbcTemplate jdbcTemplate = jdbcTemplateSingleton(propertiesBean, urlDbName);
             jdbcTemplate.execute(getCheckSql());
         } catch (Exception e) {
+            log.error("checkDb error", e);
             throw new ErdException(e.getMessage());
         }
     }
@@ -223,7 +219,7 @@ public abstract class AbstractDbService implements DbService {
                     Pair<String, List<Pair<Object, JdbcType>>> pairPrimary = primaryKeyConditions(row, columnMap, primaryKeyNames);
 
                     Pair<String, List<Pair<Object, JdbcType>>> tmpPair;
-                    SqlTypeEnum sqlTypeEnum = SqlTypeEnum.getByType(row.getString(ROW_OPERATION_TYPE));
+                    SqlTypeEnum sqlTypeEnum = SqlTypeEnum.getByType(row.getString(ErdConst.ROW_OPERATION_TYPE));
                     if (sqlTypeEnum == SqlTypeEnum.DELETE) {
                         tmpPair = handleDeleteOperation(columnMap, pairPrimary, row, tableName);
                     } else if (sqlTypeEnum == SqlTypeEnum.UPDATE) {
@@ -237,7 +233,7 @@ public abstract class AbstractDbService implements DbService {
                     String actualSql = tmpPair.getLeft();
                     List<Pair<Object, JdbcType>> fieldValues = tmpPair.getRight();
 
-                    int index = row.getIntValue(INDEX);
+                    int index = row.getIntValue(ErdConst.INDEX);
                     return executeUpdateSql(jdbcTemplate, actualSql, tokenVo, reqVo.getQueryId(), fieldValues, index);
                 })
                 .collect(Collectors.toList()));
@@ -284,8 +280,8 @@ public abstract class AbstractDbService implements DbService {
 
         boolean noPrimaryKeyInRequest = primaryValues.stream().anyMatch(Objects::isNull);
         if (noPrimaryKeyInRequest) {
-            Map<String, Object> oldRow = getOldQueryMap(row.get(KEY));
-            oldRow.remove(KEY);
+            Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.KEY));
+            oldRow.remove(ErdConst.KEY);
 
             String conditions = oldRow.keySet().stream()
                     .map(key -> key + "=?")
@@ -304,7 +300,7 @@ public abstract class AbstractDbService implements DbService {
     protected Pair<String, List<Pair<Object, JdbcType>>> handleEditOperation(ImmutableMap<String, Column> columnMap,
                                                                              Pair<String, List<Pair<Object, JdbcType>>> pairPrimary,
                                                                              JSONObject row, String tableName) {
-        Map<String, Object> oldRow = getOldQueryMap(row.get(KEY));
+        Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.KEY));
         if (oldRow == null) {
             throw new ErdException("请重新刷新查询后再重试");
         }
@@ -322,7 +318,7 @@ public abstract class AbstractDbService implements DbService {
                     Column column = columnMap.get(columnName);
                     JdbcType jdbcType = JdbcType.forCode(column.getType());
 
-                    if (NULL_VALUE.equals(columnValue)) {
+                    if (ErdConst.NULL_VALUE.equals(columnValue)) {
                         fieldValues.add(Pair.of(null, jdbcType));
                     } else {
                         Object val = convertToSuitableObj(column, columnValue);
@@ -338,7 +334,7 @@ public abstract class AbstractDbService implements DbService {
         List<Pair<Object, JdbcType>> primaryValues = pairPrimary.getRight();
         boolean noPrimaryKeyInRequest = primaryValues.stream().anyMatch(Objects::isNull);
         if (noPrimaryKeyInRequest) {
-            oldRow.remove(KEY);
+            oldRow.remove(ErdConst.KEY);
 
             String conditions = oldRow.keySet().stream()
                     .map(key -> key + "=?")
@@ -371,7 +367,7 @@ public abstract class AbstractDbService implements DbService {
 
                     names.add(columnName);
 
-                    if (NULL_VALUE.equals(columnValue)) {
+                    if (ErdConst.NULL_VALUE.equals(columnValue)) {
                         fieldValues.add(Pair.of(null, jdbcType));
                     } else {
                         Object val = convertToSuitableObj(column, columnValue);
@@ -393,7 +389,7 @@ public abstract class AbstractDbService implements DbService {
         log.info("{}-{} execute dml sql:\n{},\nparams:{}", tokenVo.getUserId(), tokenVo.getUsername(), sql, fieldValues);
         long start = System.currentTimeMillis();
 
-        @SuppressWarnings("DataFlowIssue")
+        @SuppressWarnings({"DataFlowIssue", "ConstantConditions"})
         int num = jdbcTemplate.execute(sql, (PreparedStatementCallback<Integer>) ps -> {
             for (int i = 0; i < fieldValues.size(); i++) {
                 Pair<Object, JdbcType> valuePair = fieldValues.get(i);
@@ -413,7 +409,7 @@ public abstract class AbstractDbService implements DbService {
         resVo.setColumns(Sets.newHashSet("affect_num"));
         resVo.setTableColumns(Collections.emptyMap());
         resVo.setPrimaryKeys(Collections.emptyList());
-        resVo.setQueryKey(atomicInteger.incrementAndGet());
+        resVo.setQueryKey(ErdConst.COUNTER.incrementAndGet());
 
         TableData tableData = new TableData();
         tableData.setTotal(1);
@@ -521,7 +517,7 @@ public abstract class AbstractDbService implements DbService {
         resVo.setColumns(Sets.newHashSet("affect_num"));
         resVo.setTableColumns(Collections.emptyMap());
         resVo.setPrimaryKeys(Collections.emptyList());
-        resVo.setQueryKey(atomicInteger.incrementAndGet());
+        resVo.setQueryKey(ErdConst.COUNTER.incrementAndGet());
 
         TableData tableData = new TableData();
         tableData.setTotal(1);
@@ -539,10 +535,9 @@ public abstract class AbstractDbService implements DbService {
     }
 
     protected SqlExecResVo executeDqlSql(JdbcTemplate jdbcTemplate, TokenVo tokenVo, boolean useNoneDefaultDb, CommonErdVo reqVo) {
-        String sql = reqVo.getSql();
-        Pair<String, Triple<Boolean, String, List<String>>> pair = modifyQuerySql(sql, jdbcTemplate, reqVo);
+        Pair<String, Triple<Boolean, String, List<String>>> pair = modifyQuerySql(jdbcTemplate, reqVo);
 
-        sql = pair.getLeft();
+        String sql = pair.getLeft();
         boolean showPagination = pair.getRight().getLeft();
         List<String> primaryKeys = pair.getRight().getRight();
 
@@ -561,15 +556,15 @@ public abstract class AbstractDbService implements DbService {
                     .collect(Collectors.toList());
 
             columns.addAll(columnNames);
-            columns.add(KEY);
+            columns.add(ErdConst.KEY);
         } else {
             columns.addAll(list.get(0).keySet());
-            columns.add(KEY);
+            columns.add(ErdConst.KEY);
 
             int anInt = Integer.parseInt(RandomUtils.nextInt(1000000, 9999999) + "01");
             for (int i = 0; i < list.size(); i++) {
                 Map<String, Object> rowMap = list.get(i);
-                rowMap.put(KEY, anInt + i);
+                rowMap.put(ErdConst.KEY, anInt + i);
 
                 modifyQueryRow(rowMap);
 
@@ -581,7 +576,7 @@ public abstract class AbstractDbService implements DbService {
 
         SqlExecResVo resVo = new SqlExecResVo();
         resVo.setColumns(columns);
-        resVo.setQueryKey(atomicInteger.incrementAndGet());
+        resVo.setQueryKey(ErdConst.COUNTER.incrementAndGet());
         resVo.setPage(reqVo.getPage());
         resVo.setPageSize(reqVo.getPageSize());
         resVo.setShowPagination(showPagination);
@@ -620,7 +615,7 @@ public abstract class AbstractDbService implements DbService {
             throw new ErdException("请重新刷新查询后再重试");
         }
         List<Map<String, Object>> list = oldRecords.stream()
-                .filter(oldRecord -> oldRecord.get(KEY).equals(rowUniqueKey))
+                .filter(oldRecord -> oldRecord.get(ErdConst.KEY).equals(rowUniqueKey))
                 .collect(Collectors.toList());
         if (list.isEmpty()) {
             return null;
@@ -640,7 +635,7 @@ public abstract class AbstractDbService implements DbService {
     protected Pair<String, List<Pair<Object, JdbcType>>> primaryKeyConditions(JSONObject row,
                                                                               ImmutableMap<String, Column> columnMap,
                                                                               List<String> primaryKeyColumns) {
-        Map<String, Object> oldRow = getOldQueryMap(row.get(KEY));
+        Map<String, Object> oldRow = getOldQueryMap(row.get(ErdConst.KEY));
         if (oldRow == null) {
             return null;
         }
@@ -665,9 +660,9 @@ public abstract class AbstractDbService implements DbService {
     }
 
     protected boolean filterUnRelateColumn(Map.Entry<String, Object> entry) {
-        return !ROW_OPERATION_TYPE.equals(entry.getKey())
-                && !KEY.equals(entry.getKey())
-                && !INDEX.equals(entry.getKey());
+        return !ErdConst.ROW_OPERATION_TYPE.equals(entry.getKey())
+                && !ErdConst.KEY.equals(entry.getKey())
+                && !ErdConst.INDEX.equals(entry.getKey());
     }
 
     protected boolean filterUnChangeColumn(Map.Entry<String, Object> rowEntry, Map<String, Object> oldRowMap) {
@@ -707,8 +702,8 @@ public abstract class AbstractDbService implements DbService {
 
         List<Map<String, Object>> records = resVo.getTableData().getRecords();
         records.forEach(record -> {
-            record.remove(KEY);
-            record.remove(INDEX);
+            record.remove(ErdConst.KEY);
+            record.remove(ErdConst.INDEX);
         });
 
         String type = reqVo.getType();
@@ -921,9 +916,14 @@ public abstract class AbstractDbService implements DbService {
 
     protected abstract String getTableDdlSql(JdbcTemplate jdbcTemplate, String tableName);
 
-    protected Pair<String, Triple<Boolean, String, List<String>>> modifyQuerySql(String sql,
-                                                                                 JdbcTemplate jdbcTemplate,
+    /**
+     * 修改查询sql
+     *
+     * @return Pair<修改后的SQL, Triple < 是否缺少limit, 表名, 表主键列表>>
+     */
+    protected Pair<String, Triple<Boolean, String, List<String>>> modifyQuerySql(JdbcTemplate jdbcTemplate,
                                                                                  CommonErdVo reqVo) {
+        String sql = reqVo.getSql();
         SQLStatement sqlStatement = SQLUtils.parseSingleStatement(sql, getDbType());
         if (!(sqlStatement instanceof SQLSelectStatement)) {
             return Pair.of(sql, Triple.of(false, null, Lists.newArrayList()));

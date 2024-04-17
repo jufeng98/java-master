@@ -1,7 +1,9 @@
 package org.javamaster.invocationlab.admin.model.erd;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author yudong
@@ -9,6 +11,8 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Table {
     private String name;
     private String remarks;
