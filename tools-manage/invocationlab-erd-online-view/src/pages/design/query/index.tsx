@@ -16,6 +16,7 @@ import useProjectStore from "@/store/project/useProjectStore";
 import ExplainResult from "@/pages/design/query/component/ExplainResult";
 import QueryHistory from "@/pages/design/query/component/QueryHistory";
 import ConstructSqlForm from "@/pages/design/query/component/ConstructSqlForm";
+import ConstructSqlFormMongoDB from "./component/ConstructSqlFormMongoDB";
 
 const { Option, OptGroup } = Select;
 export type QueryProps = {
@@ -129,6 +130,8 @@ const Query: React.FC<QueryProps> = (props) => {
       setSqlMode('mysql')
     } else if (dbType === 'PostgreSQL') {
       setSqlMode('pgsql')
+    } else if (dbType === 'MongoDB') {
+      setSqlMode('javascript')
     } else {
       setSqlMode('sql')
     }
@@ -303,6 +306,14 @@ const Query: React.FC<QueryProps> = (props) => {
       })
   }
 
+  const pickDrawerForm = () => {
+    if (dbType === 'MongoDB') {
+      return <ConstructSqlFormMongoDB selectDB={selectDB} closeDrawer={closeDrawer} open={open} />
+    } else {
+      return <ConstructSqlForm selectDB={selectDB} closeDrawer={closeDrawer} open={open} />
+    }
+  }
+
   const EDITOR_THEME = ['xcode', 'terminal',];
   const actions = <Space direction="vertical">
     <Space wrap>
@@ -341,6 +352,7 @@ const Query: React.FC<QueryProps> = (props) => {
         <Option key="MySQL" value="mysql">MySQL</Option>
         <Option key="PgSQL" value="pgsql">PgSQL</Option>
         <Option key="SQL" value="sql">SQL</Option>
+        <Option key="JavaScript" value="javascript">MongoDB Shell</Option>
       </Select>
       <span style={{ marginRight: 8 }}>主题</span>
       <Select key={'topic'} size="small" style={{ marginRight: 16, width: 100 }} value={theme} onSelect={(e: any) => {
@@ -383,6 +395,9 @@ const Query: React.FC<QueryProps> = (props) => {
           if (!selectValue) {
             editorRef?.current?.selectLine()
             selectValue = editorRef?.current?.getSelectValue();
+          }
+          if (sqlMode === 'javascript') {
+            return
           }
           const formatSqlInfo = format(selectValue || '', { language: sqlMode });
           console.log(130, formatSqlInfo);
@@ -462,7 +477,7 @@ const Query: React.FC<QueryProps> = (props) => {
       </ProCard>
     </Spin>
     <Drawer title="动态构建查询SQL" width={800} placement="right" onClose={() => { setOpen(false) }} open={open}>
-      <ConstructSqlForm selectDB={selectDB} closeDrawer={closeDrawer} open={open} />
+      {pickDrawerForm()}
     </Drawer>
   </>);
 };

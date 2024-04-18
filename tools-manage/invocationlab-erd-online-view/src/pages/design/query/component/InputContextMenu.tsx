@@ -25,25 +25,45 @@ const dateReg = /^[1-2]\d{3}-[0-1]{0,1}\d-[0-3]{0,1}\d$/
 const timeReg = /^\d{2}:\d{2}:\d{2}$/
 
 const InputContextMenu: React.FC<{
-  value?: string;
-  onChange?: (value: string) => void;
-  cellValue: string | null | undefined;
+  value?: Object;
+  onChange?: (value: Object) => void;
+  cellValue: Object | null | undefined;
 }> = ({ onChange, cellValue }) => {
   const [inputValue, setInputValue] = useState<string>()
+  const [cellValueType, setCellValueType] = useState<string>()
   const contextMenuRef = useRef<any>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    onChange?.(e.target.value)
+    setInputValue(e.target.value)
+    if (cellValueType === 'object') {
+      try {
+        onChange?.(JSON.parse(e.target.value))
+      } catch (ex: any) {
+        console.log(ex.message)
+      }
+    } else if (cellValueType === 'number') {
+      onChange?.(parseFloat(e.target.value))
+    } else if (cellValueType === 'boolean') {
+      if (e.target.value === 'false') {
+        onChange?.(false)
+      } else {
+        onChange?.(true)
+      }
+    } else {
+      onChange?.(e.target.value)
+    }
   };
 
   useEffect(() => {
+    setCellValueType(typeof cellValue)
     if (cellValue === null) {
       setInputValue('<null>');
     } else if (cellValue === undefined) {
       setInputValue('');
+    } else if (typeof cellValue === 'object') {
+      setInputValue(JSON.stringify(cellValue))
     } else {
-      setInputValue(cellValue);
+      setInputValue(cellValue + '');
     }
   }, [])
 

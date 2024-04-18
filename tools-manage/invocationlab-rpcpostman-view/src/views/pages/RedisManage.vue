@@ -1,5 +1,5 @@
 <template>
-    <el-container style="margin:6px;" v-loading="loading">
+    <el-container style="margin:6px;" v-loading="loadings.length">
         <el-header>
             <el-row :gutter="20">
                 <el-col :span="3">
@@ -30,7 +30,7 @@
                     </el-tooltip>
                 </el-header>
                 <el-tree lazy :data="redisDbs" :props="defaultProps" :load="loadKeys" @node-expand="nodeExpand"
-                    @node-click="nodeClick"></el-tree>
+                    @node-click="nodeClick" highlight-current></el-tree>
             </div>
             <el-container style="margin: 10px">
                 <div style="margin: 6px;">
@@ -69,7 +69,7 @@
                         </el-col>
                         <el-col :span="2">
                             <el-tooltip class="item" effect="dark" content="-1表示永不过期" placement="top">
-                              <el-button @click="setNewTtl" type="primary">设置TTL</el-button>
+                                <el-button @click="setNewTtl" type="primary">设置TTL</el-button>
                             </el-tooltip>
                         </el-col>
                         <el-col :span="2">
@@ -81,7 +81,7 @@
                     </el-row>
 
                     <el-table v-if="fieldVos.length>0" :data="fieldVos" @row-click="fieldRowClick" border
-                        style="width: 98%" height="170">
+                        style="width: 98%" height="170" :key="tableKey" highlight-current-row>
                         <el-table-column prop="fieldKey" label="field" v-if="commonVo.redisKeyType === 'hash'">
                         </el-table-column>
                         <el-table-column prop="fieldValue" label="value" show-overflow-tooltip>
@@ -122,7 +122,7 @@
         </el-container>
 
         <el-dialog title="新增连接" :visible.sync="dialogVisible" v-if="dialogVisible" :close-on-click-modal="false">
-            <el-form ref="form" :model="connectInfo" label-width="80px">
+            <el-form ref="form" :model="connectInfo" label-width="80px" v-loading="loadings.length">
                 <el-form-item label="连接名称">
                     <el-input v-model="connectInfo.name"></el-input>
                 </el-form-item>
@@ -143,7 +143,8 @@
             </el-form>
         </el-dialog>
 
-        <el-dialog title="新增key" top="1vh" :visible.sync="dialogKeyVisible" v-if="dialogKeyVisible" :close-on-click-modal="false">
+        <el-dialog title="新增key" top="1vh" :visible.sync="dialogKeyVisible" v-if="dialogKeyVisible"
+            :close-on-click-modal="false" v-loading="loadings.length">
             <el-form ref="form1" :model="addFieldObj" label-width="80px">
                 <el-form-item label="key">
                     <el-input v-model="commonVo.redisKey"></el-input>
@@ -176,7 +177,8 @@
             </el-form>
         </el-dialog>
 
-        <el-dialog title="新增" :visible.sync="dialogFieldVisible" v-if="dialogFieldVisible" :close-on-click-modal="false">
+        <el-dialog title="新增" :visible.sync="dialogFieldVisible" v-if="dialogFieldVisible" :close-on-click-modal="false"
+            v-loading="loadings.length">
             <el-form ref="form2" :model="addFieldObj" label-width="80px">
                 <el-form-item label="score" v-if="commonVo.redisKeyType === 'zset'">
                     <el-input v-model="addFieldObj.score"></el-input>
@@ -209,13 +211,14 @@
         name: 'redisHelper',
         data() {
             return {
+                tableKey: 1,
                 redisConnected: {},
                 desc: `
                 JDK序列化说明：
                 默认作为 String 类型来序列化。若内容带有类型提示: 如 123♣java.lang.Long => 将转换为 Long 类型来序列化；
                 若希望转换为复杂对象来序列化，则可以这样表示：
-                ["java.util.ArrayList",[{"@class":"org.javamaster.invocationlab.admin.model.erd.AesReqVo","projectId":"2011yhfdsaa","opType":1,"value":898}]] 
-                => 将转换为 ArrayList<AesReqVo> 类型来序列化(如果能找到对应的class且class实现了Serializable接口)
+                ["java.util.ArrayList",[{"@class":"cn.com.bluemoon.invocationlab.admin.rpcpostman.model.erd.AesReqVo","projectId":"2011yhfdsaa","opType":1,"value":898}]] 
+                => 将转换为为 ArrayList<AesReqVo> 类型来序列化(如果能找到对应的class且class实现了Serializable接口)
                 `,
                 cmOptions: {
                     mode: 'application/json',
@@ -247,7 +250,7 @@
                     },
                     theme: "eclipse"//monokai eclipse zenburn
                 },
-                loading: false,
+                loadings: [],
                 connectInfo: {
                     connectId: '',
                     nodes: '',
@@ -331,6 +334,7 @@
                 }
             },
             saveConnect() {
+                this.loadings.push('')
                 request({
                     url: '/redis/saveConnect',
                     method: 'post',
@@ -341,7 +345,7 @@
                         this.dialogVisible = false;
                         this.listConnects()
                     }
-                })
+                }).finally(() => this.loadings.pop())
             },
             pingConnect() {
                 request({
@@ -373,7 +377,7 @@
                     this.$message.warning("请选择连接");
                     return
                 }
-                this.loading = true
+                this.loadings.push('')
                 request({
                     url: '/redis/listDb/' + this.commonVo.connectId,
                     method: 'get',
@@ -384,7 +388,7 @@
                         this.initUrl()
                         this.redisConnected[this.commonVo.connectId] = true
                     }
-                }).finally(() => this.loading = false)
+                }).finally(() => this.loadings.pop())
             },
             loadKeys(node, resolve) {
                 if (!this.commonVo.connectId) {
@@ -399,7 +403,7 @@
                 if (this.currentRedisDbIndex === null) {
                     return
                 }
-                this.loading = true
+                this.loadings.push('')
                 request({
                     url: '/redis/listKeys/' + this.commonVo.connectId + "/" + this.currentRedisDbIndex + "?pattern=" + this.pattern,
                     method: 'get',
@@ -407,7 +411,7 @@
                     if (res.data.code === 0) {
                         this.nodeResolves[this.currentRedisDbIndex].resolve(res.data.data)
                     }
-                }).finally(() => this.loading = false)
+                }).finally(() => this.loadings.pop())
             },
             nodeExpand(data) {
                 this.currentRedisDbIndex = data.redisDbIndex
@@ -418,9 +422,10 @@
                     this.commonVo.redisDbIndex = data.redisDbIndex
                     this.currentRedisDbIndex = data.redisDbIndex
                 } else if (node.level == 2) {
-                    this.commonVo.redisKey = data.label
+                    let key = data.label.substring(data.typeLength)
+                    this.commonVo.redisKey = key
                     this.commonVo.redisKeyBase64 = data.labelBase64
-                    this.commonVo.oldRedisKey = data.label
+                    this.commonVo.oldRedisKey = key
                     this.commonVo.redisDbIndex = node.parent.data.redisDbIndex
                     this.currentRedisDbIndex = node.parent.data.redisDbIndex
                     this.reloadValue();
@@ -457,7 +462,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.loading = true
+                    this.loadings.push('')
                     request({
                         url: '/redis/renameKey',
                         method: 'post',
@@ -472,14 +477,14 @@
                     })
                 }).catch(() => {
 
-                }).finally(() => this.loading = false)
+                }).finally(() => this.loadings.pop())
 
             },
             reloadValue() {
                 if (!this.commonVo.redisKey) {
                     return
                 }
-                this.loading = true
+                this.loadings.push('')
                 request({
                     url: '/redis/getValue',
                     method: 'post',
@@ -488,8 +493,9 @@
                     if (res.data.code === 0) {
                         let valueVo = res.data.data
                         this.fillCommonData(res.data.data)
+                        ++this.tableKey
                     }
-                }).finally(() => this.loading = false)
+                }).finally(() => this.loadings.pop())
             },
             fillCommonData(valueVo) {
                 this.commonVo.redisValue = valueVo.redisValue || ''
@@ -508,7 +514,7 @@
                 this.dialogKeyVisible = true;
             },
             addKey() {
-                this.loading = true
+                this.loadings.push('')
                 let reqObj = Object.assign({}, this.commonVo, this.addFieldObj)
                 reqObj.redisDbIndex = this.currentRedisDbIndex
                 reqObj.redisKeyJdkSerialize = this.redisKeyJdkSerialize
@@ -525,7 +531,7 @@
                         Object.assign(this.commonVo, res.data.data)
                         this.dialogKeyVisible = false
                     }
-                }).finally(() => this.loading = false)
+                }).finally(() => this.loadings.pop())
             },
             delKey() {
                 if (!this.commonVo.redisKey) {
@@ -536,7 +542,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.loading = true
+                    this.loadings.push('')
                     request({
                         url: '/redis/delKey',
                         method: 'post',
@@ -548,7 +554,7 @@
                             this.commonVo.redisValue = ''
                             this.listKeys();
                         }
-                    }).finally(() => this.loading = false)
+                    }).finally(() => this.loadings.pop())
                 }).catch(() => {
                 });
             },
@@ -569,7 +575,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.loading = true
+                    this.loadings.push('')
                     request({
                         url: '/redis/delField',
                         method: 'post',
@@ -579,7 +585,7 @@
                             this.$message.success(res.data.data);
                             this.reloadValue()
                         }
-                    }).finally(() => this.loading = false)
+                    }).finally(() => this.loadings.pop())
                 }).catch(() => {
                 });
             },
@@ -587,7 +593,7 @@
                 Object.assign(this.commonVo, this.addFieldObj)
                 this.commonVo.redisValueJdkSerialize = this.redisValueJdkSerialize
                 this.commonVo.fieldKeyJdkSerialize = this.fieldKeyJdkSerialize
-                this.loading = true
+                this.loadings.push('')
                 request({
                     url: '/redis/addField',
                     method: 'post',
@@ -598,7 +604,7 @@
                         this.dialogFieldVisible = false
                         this.reloadValue()
                     }
-                }).finally(() => this.loading = false)
+                }).finally(() => this.loadings.pop())
             },
             setNewTtl() {
                 if (!this.commonVo.redisKeyTtl) {
@@ -609,7 +615,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.loading = true
+                    this.loadings.push('')
                     request({
                         url: '/redis/setNewTtl',
                         method: 'post',
@@ -619,7 +625,7 @@
                             this.$message.success(res.data.data);
                             this.reloadValue()
                         }
-                    }).finally(() => this.loading = false)
+                    }).finally(() => this.loadings.pop())
                 }).catch(() => {
                 });
             },
@@ -632,7 +638,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.loading = true
+                    this.loadings.push('')
                     request({
                         url: '/redis/saveValue',
                         method: 'post',
@@ -642,7 +648,7 @@
                             this.$message.success('保存成功');
                             this.reloadValue();
                         }
-                    }).finally(() => this.loading = false)
+                    }).finally(() => this.loadings.pop())
                 }).catch(() => {
                 });
             },

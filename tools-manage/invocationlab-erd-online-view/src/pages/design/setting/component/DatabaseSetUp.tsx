@@ -49,6 +49,10 @@ const DatabaseSetUp: React.FC<DatabaseSetUpProps> = (props) => {
       url: 'jdbc:postgresql://IP地址:端口号/数据库名',
       driver_class_name: 'org.postgresql.Driver',
     },
+    mongodb: {
+      url: 'mongodb://IP地址1:端口号1,IP地址2:端口号2/数据库名',
+      driver_class_name: 'com.dbschema.MongoJdbcDriver',
+    },
   };
 
   const defaultDatabase = _.find(database, { "defaultDatabase": true })?.code || database[0]?.code || 'MYSQL';
@@ -267,11 +271,13 @@ const DatabaseSetUp: React.FC<DatabaseSetUpProps> = (props) => {
               fieldProps={{
                 onBlur: (e) => {
                   let url: string = e.target.value
-                  if (!url.includes('useInformationSchema')) {
-                    if (url.includes("?")) {
-                      url += "&useInformationSchema=true";
-                    } else {
-                      url += "?useInformationSchema=true";
+                  if(!url.includes('mongodb')) {
+                    if (!url.includes('useInformationSchema')) {
+                      if (url.includes("?")) {
+                        url += "&useInformationSchema=true";
+                      } else {
+                        url += "?useInformationSchema=true";
+                      }
                     }
                   }
                   projectDispatch.updateDbs('properties', {
@@ -364,8 +370,8 @@ const DatabaseSetUp: React.FC<DatabaseSetUpProps> = (props) => {
             <ProFormText.Password
               width="lg"
               name="cipherKey"
-              label="cipherKey"     
-              placeholder="数据库加解密密码"         
+              label="cipherKey"
+              placeholder="数据库加解密密码"
               fieldProps={{
                 onBlur: (e) => {
                   projectDispatch.updateDbs('properties', {

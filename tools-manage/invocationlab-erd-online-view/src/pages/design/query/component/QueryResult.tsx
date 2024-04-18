@@ -81,19 +81,28 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
           ellipsis: true,
           width: 153,
           render: (_: any, record: any) => {
-            if (record[columnName] === null) {
+            const columnValue = record[columnName]
+            if (columnValue === null) {
               return <span style={{ fontWeight: '100' }}>{"<null>"}</span>
             }
-            if (typeof record[columnName] === 'boolean') {
-              return <span>{record[columnName] + ''}</span>;
+            if (typeof columnValue === 'boolean') {
+              const tmpValue = columnValue + ''
+              return <span onDoubleClick={() => { QueryResultUtils.copyValue(tmpValue) }}>
+                {tmpValue}
+              </span>;
+            } else if (typeof columnValue === 'object') {
+              const tmpValue = JSON.stringify(columnValue, null, 4)
+              return <span onDoubleClick={() => { QueryResultUtils.copyValue(tmpValue) }}>
+                {tmpValue}
+              </span>
             }
             return <span style={delBtnStyle[record.erdRowKey] || editBtnStyle[record.erdRowKey]}
               onContextMenu={(e) => {
                 aesContextMenuRef?.current?.showContext(e)
                 e.preventDefault()
               }}
-              onDoubleClick={() => { QueryResultUtils.copyValue(record[columnName]) }}>
-              {record[columnName]}
+              onDoubleClick={() => { QueryResultUtils.copyValue(columnValue) }}>
+              {columnValue}
             </span>
           },
           renderFormItem: (row: any) => {
@@ -218,7 +227,7 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
       actionRef={tableRef}
       components={QueryResultUtils.components}
       size={'small'}
-      scroll={{ x: 1300, y: 'calc(100vh - 540px)' }}
+      scroll={{ x: 1100, y: 'calc(100vh - 540px)' }}
       headerTitle="可编辑表格(双击单元格复制其内容)"
       rowKey="erdRowKey"
       columns={columns}
@@ -318,7 +327,10 @@ const QueryResult: React.FC<QueryResultProps> = (props) => {
             message.warning("没有数据!");
             return
           }
-          let list = dataSource.filter((row: any) => row.rowOperationType && !row.rowOperationType.includes('pre'))
+          let list = dataSource.filter((row: any) => {
+            return row.rowOperationType && !row.rowOperationType.includes('pre')
+          }
+          )
           // console.log("submit table change:", list);
           if (list.length === 0) {
             message.warning("表格数据没有发生变动!");

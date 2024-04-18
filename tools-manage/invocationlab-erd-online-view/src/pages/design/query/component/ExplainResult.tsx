@@ -1,5 +1,6 @@
 import { ProTable } from "@ant-design/pro-components";
 import React from "react";
+import * as QueryResultUtils from './QueryResultUtils';
 
 export type ExplainResultProps = {
   tableResult: { columns: any, dataSource: any, total: number };
@@ -18,7 +19,19 @@ const ExplainResult: React.FC<ExplainResultProps> = (props) => {
         ellipsis: true,
         width: 150,
         render: (text: any, record: any) => {
-          return record[columnName] === null ? <span style={{ fontWeight: '100' }}>{"<null>"}</span> : record[columnName]
+          const columnValue = record[columnName]
+          if (columnValue === null) {
+            return <span style={{ fontWeight: '100' }}>{"<null>"}</span>
+          } else if (typeof columnValue === 'object') {
+            const tmpValue = JSON.stringify(columnValue, null, 4)
+            return <span onDoubleClick={() => { QueryResultUtils.copyValue(tmpValue) }}>
+              {tmpValue}
+            </span>
+          } else {
+            return <span style={{ fontWeight: '100' }}>
+              {columnValue}
+            </span>
+          }
         }
       }))
   }
@@ -26,7 +39,7 @@ const ExplainResult: React.FC<ExplainResultProps> = (props) => {
   return (<>
     <ProTable
       size={'small'}
-      scroll={{ x: 1300, y: 'calc(100vh - 500px)' }}
+      scroll={{ x: 1100, y: 'calc(100vh - 500px)' }}
       dataSource={props.tableResult.dataSource}
       rowKey="id"
       pagination={{
