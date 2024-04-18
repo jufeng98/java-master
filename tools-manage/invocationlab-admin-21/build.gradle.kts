@@ -67,6 +67,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("com.jcraft:jsch:0.1.54")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 
 dependencyManagement {
