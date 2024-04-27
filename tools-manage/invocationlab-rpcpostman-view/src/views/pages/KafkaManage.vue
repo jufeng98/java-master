@@ -27,8 +27,8 @@
                         <template slot="prepend">过滤</template>
                     </el-input>
                 </el-header>
-                <el-tree :data="kafkaTrees" :props="defaultProps" @node-click="nodeClick" highlight-current ref="tree"
-                    :filter-node-method="filterNode"></el-tree>
+                <el-tree :data="kafkaTrees" :props="defaultProps" @node-click="nodeClick" highlight-current
+                    ref="dbTreeRef" :filter-node-method="filterNode"></el-tree>
             </div>
             <el-container style="margin: 10px">
                 <div style="margin: 6px;">
@@ -73,7 +73,7 @@
                     </el-form>
 
                     <el-table @row-click="msgRowClick" :data="topicDetails" border style="width: 98%" height="220"
-                        highlight-current-row>
+                        highlight-current-row ref="msgTableRef">
                         <el-table-column type="index" label="行号" width="50">
                         </el-table-column>
                         <el-table-column prop="partition" label="分区" width="70">
@@ -215,6 +215,9 @@
         name: 'kafkaManage',
         data() {
             return {
+                scrollTopLeft: 0,
+                scrollTopRight: 0,
+                scrollTopCm: 0,
                 searchTopicObj: {
                     timestamp: null,
                     partition: undefined,
@@ -292,7 +295,7 @@
         },
         watch: {
             pattern(val) {
-                this.$refs.tree.filter(val);
+                this.$refs.dbTreeRef.filter(val);
             }
         },
         methods: {
@@ -367,7 +370,7 @@
                         this.initUrl()
                         this.$nextTick(() => {
                             if (this.pattern) {
-                                this.$refs.tree.filter(this.pattern)
+                                this.$refs.dbTreeRef.filter(this.pattern)
                             }
                         })
                     }
@@ -554,6 +557,27 @@
                     }
                 }).finally(() => this.loadings.pop())
             },
+        },
+        deactivated() {
+            if (this.$refs.dbTreeRef) {
+                this.scrollTopLeft = this.$refs.dbTreeRef.$el.scrollTop
+            }
+            if (this.$refs.msgTableRef) {
+                this.scrollTopRight = this.$refs.msgTableRef.$el.getElementsByClassName('el-table__body-wrapper')[0].scrollTop
+            }
+            this.scrollTopCm = this.$refs.myCm.codemirror.getScrollerElement().scrollTop
+        },
+        activated() {
+            window.pageVue = this
+            if (this.$refs.dbTreeRef) {
+                this.$refs.dbTreeRef.$el.scrollTo(0, this.scrollTopLeft)
+            }
+            if (this.$refs.msgTableRef) {
+                setTimeout(() => {
+                    this.$refs.msgTableRef.$el.getElementsByClassName('el-table__body-wrapper')[0].scrollTo(0, this.scrollTopRight)
+                }, 100);
+            }
+            this.$refs.myCm.codemirror.getScrollerElement().scrollTo(0, this.scrollTopCm)
         },
         mounted() {
             window.pageVue = this

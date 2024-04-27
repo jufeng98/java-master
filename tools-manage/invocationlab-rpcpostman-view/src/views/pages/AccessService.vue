@@ -79,7 +79,7 @@
                     <el-form-item label-width="10px">
                         <el-button class="cpLink my-button" plain type="info" v-clipboard:error="onError"
                             style="width: 130px;"
-                            v-clipboard:copy="pageArray[pageIndex].provider+'#'+pageArray[pageIndex].methodName" 
+                            v-clipboard:copy="pageArray[pageIndex].provider+'#'+pageArray[pageIndex].methodName"
                             v-clipboard:success="onCopy">
                             复制(接口和方法名)
                         </el-button>
@@ -129,9 +129,6 @@
                         <el-tabs v-model="pageActiveName" @tab-click="tabSwitch" style="height: 16px;">
                             <el-tab-pane v-for="item in tabMapOptions" :key="item.index" :label="item.name"
                                 :name="item.name">
-                                <!--<keep-alive>
-                                <tab-pane v-if="pageActiveName==item.index" :type="item.name"/>
-                            </keep-alive>-->
                             </el-tab-pane>
                         </el-tabs>
                     </el-form-item>
@@ -142,26 +139,26 @@
             <el-row v-show="pageArray[pageIndex].requestResponseShow">
                 <el-col :span="11">
                     <el-alert title="请求内容：" type="info" :closable="false">
-                        <el-button type="info" size="mini" v-on:click="format">格式化</el-button>
+                        <el-button type="info" size="mini" v-on:click="formatContentReq">格式化</el-button>
                         <el-tag type="info">F11全屏</el-tag>
                         <el-tag type="info">Ctrl-F搜索</el-tag>
                         <el-tag type="info">Ctrl-G跳转到下一个搜索目标</el-tag>
                         <el-tag type="info">Alt-G跳转到指定行</el-tag>
                     </el-alert>
 
-                    <codemirror ref="myCm" v-model="pageArray[pageIndex].request" :options="cmOptions"
+                    <codemirror ref="myCmReq" v-model="pageArray[pageIndex].request" :options="cmOptionsReq"
                         style="width:610px">
                     </codemirror>
                 </el-col>
                 <el-col style="margin-left:10px" :span="11" v-show="pageArray[pageIndex].requestResponseShow">
                     <el-alert title="响应结果：" type="info" :closable="false">
-                        <el-button type="info" size="mini" v-on:click="format1">格式化</el-button>
+                        <el-button type="info" size="mini" v-on:click="formatContentRes">格式化</el-button>
                         <el-tag type="info">F11全屏</el-tag>
                         <el-tag type="info">Ctrl-F搜索</el-tag>
                         <el-tag type="info">Ctrl-G跳转到下一个搜索目标</el-tag>
                         <el-tag type="info">Alt-G跳转到指定行</el-tag>
                     </el-alert>
-                    <codemirror ref="myCm1" v-model="pageArray[pageIndex].response" :options="readOnlycmOptions"
+                    <codemirror ref="myCmRes" v-model="pageArray[pageIndex].response" :options="cmOptionsRes"
                         style="width:610px;">
                     </codemirror>
                 </el-col>
@@ -193,7 +190,6 @@
 </template>
 
 <script>
-
     import '../../utils/formatting';
     import { getAllZk } from '@/api/common';
     import { refresh } from '@/api/create';
@@ -211,6 +207,8 @@
         components: { BackToTop },
         data() {
             return {
+                scrollTopCmReq: 0,
+                scrollTopCmRes: 0,
                 cachePageName: "allPages",
                 loadings: [],
                 myBackToTopStyle: {
@@ -222,7 +220,6 @@
                     'line-height': '45px', // 请保持与高度一致以垂直居中 Please keep consistent with height to center vertically
                     background: '#e7eaf1'// 按钮的背景颜色 The background color of the button
                 },
-
                 tabMapOptions: [
                     {
                         name: '查询界面A',
@@ -249,73 +246,53 @@
                 pageActiveName: '查询界面A',
                 pageArray: [],
                 pageIndex: 0,
-
                 pageItem: {
-
                     isSending: false,
-
                     testScriptShow: true,
                     testScriptShowName: '显示测试脚本',
                     testScriptHideName: '隐藏测试脚本',
-
                     requestResponseShow: true,
                     requestResponseShowName: '显示请求响应窗口',
                     requestResponseHideName: '隐藏请求响应窗口',
-
                     zkServiceShow: true,
                     zkServiceShowName: '显示服务名称',
                     zkServiceHideName: '隐藏服务名称',
-
                     autoTriggerWatch: true,
                     zk: '',
                     zkList: [],
-
                     serviceName: '',
                     serviceNames: [],
-
                     methodNames: [],
                     methodName: '',
-
                     dialogFormVisible: false,
                     groupOnlyNames: ['dsg', 'abc'],
                     groupName: '',
                     caseName: '',
-
                     providerNameMap: {},
                     providers: [],
                     //是interfaceKey
                     provider: "",
                     //暂时不能解决同步加上这个
                     providerName: '',
-
                     ips: [],
                     ip: '',
-
                     groupWithCase: [],
                     groupNames: [],
                     request: '',
                     response: '',
-
                 },
-                readOnlycmOptions: {
-
+                cmOptionsRes: {
                     readOnly: true,
-                    // codemirror options
                     mode: 'application/json',
-
                     styleActiveLine: false,
                     lineNumbers: true,
-
                     line: true,
-
                     lint: true,
                     foldGutter: true,
                     lineWrapping: true,
                     gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
-
                     smartIndent: true,
                     indentWithTabs: true,
-                    // autofocus: true,
                     matchBrackets: true,
                     scrollbarStyle: null,
                     extraKeys: {
@@ -330,23 +307,17 @@
                     },
                     theme: "eclipse"//monokai eclipse zenburn
                 },
-                cmOptions: {
-                    // codemirror options
+                cmOptionsReq: {
                     mode: 'application/json',
-
                     styleActiveLine: false,
                     lineNumbers: true,
-
                     line: true,
-
                     lint: true,
                     foldGutter: true,
                     lineWrapping: true,
                     gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
-
                     smartIndent: true,
                     indentWithTabs: true,
-                    // autofocus: true,
                     matchBrackets: true,
                     scrollbarStyle: null,
                     extraKeys: {
@@ -431,7 +402,6 @@
                 });
             },
             tabSwitch(tab, event) {
-                console.log("当前元素:", tab.index);
                 this.pageIndex = tab.index;
                 this.queryGroupWithCase();
                 this.queryAllGroupOnlyNames();
@@ -462,10 +432,9 @@
 
                         this.pageArray[this.pageIndex].groupName = data.groupName;
                         this.pageArray[this.pageIndex].caseName = data.caseName;
-                        this.formatContent();
+                        this.formatContentReq();
                     } else {
                         this.$message.error("保存失败");
-                        console.log("查询caseDetail失败,", res.data.error);
                     }
                 }).finally(() => {
                     this.loadings.pop()
@@ -476,23 +445,21 @@
                     this.getMethods();
                 });
             },
-            format() {
-                this.formatContent();
-            },
-            formatContent() {
-                var totalLines = this.codemirror.lineCount();
-                this.codemirror.autoFormatRange(
+            formatContentReq() {
+                var totalLines = this.codemirrorReq.lineCount();
+                this.codemirrorReq.autoFormatRange(
                     { line: 0, ch: 0 },
-                    { line: totalLines }, this.pageArray[this.pageIndex].request);
-            },
-            format1() {
-                this.formatContent1();
-            },
-            formatContent1() {
-                var totalLines = this.codemirror1.lineCount();
-                this.codemirror1.autoFormatRange({ line: 0, ch: 0 },
                     { line: totalLines },
-                    this.pageArray[this.pageIndex].response);
+                    this.pageArray[this.pageIndex].request
+                );
+            },
+            formatContentRes() {
+                var totalLines = this.codemirrorRes.lineCount();
+                this.codemirrorRes.autoFormatRange(
+                    { line: 0, ch: 0 },
+                    { line: totalLines },
+                    this.pageArray[this.pageIndex].response
+                );
             },
             send() {
                 if (!this.pageArray[this.pageIndex].zk ||
@@ -558,7 +525,7 @@
                     let ms = res.data;
                     this.pageArray[this.pageIndex].response = JSON.stringify(ms);
 
-                    this.formatContent1();
+                    this.formatContentRes();
 
                     this.pageArray[this.pageIndex].isSending = false;
                 }).catch((err) => {
@@ -649,7 +616,7 @@
                         this.$message.error("请求异常:" + error);
                     } else {
                         this.pageArray[this.pageIndex].request = JSON.stringify(ms);
-                        this.formatContent();
+                        this.formatContentReq();
                         loading.close();
                     }
                 });
@@ -850,14 +817,34 @@
                         pageItem.providers.push(item);
                     }
                 }
+            },
+            deleteService(e) {
+                if (e.ctrlKey && e.clientX < 600 && e.clientY < 80) {
+                    this.$prompt('请输入要删除服务名', '提示', {
+                        confirmButtonText: '确定',
+                    }).then(({ value }) => {
+                        delService({ zkServiceName: value })
+                            .then(res => {
+                                if (res.data.code === 0) {
+                                    this.$message.success(res.data.data);
+                                } else {
+                                    this.$message.error(res.data.msg);
+                                }
+                            })
+                    }).catch(() => {
+                    });
+                }
+            },
+            addDeleteServiceListener() {
+                window.addEventListener("click", this.deleteService);
             }
         },
+        destroyed() {
+            window.removeEventListener('click', this.deleteService)
+        },
         async beforeMount() {
-            console.log("加载之前", this.$route.query);
             let pageArrayStr = AppUtils.getItem(this.cachePageName);
             if (!pageArrayStr) {
-                console.log("初始化新数组");
-
                 this.pageArray = [];
                 //初始化所有的数组
                 this.pageArray.push(this.pageItem);
@@ -877,7 +864,6 @@
                 for (let i = 0; i < this.tabMapOptions.length; i++) {
                     let ms = resZk.data.data;
                     this.pageArray[i].zkList = ms;
-                    console.log("查询zk列表", ms);
 
                     let code = resCase.data.code;
                     if (code == 0) {
@@ -897,7 +883,6 @@
                 AppUtils.setItem(this.cachePageName, JSON.stringify(this.pageArray));
             } else {
                 this.pageArray = JSON.parse(pageArrayStr);
-                console.log("已有值重新加载");
                 //加载缓存的值,设置创建服务的参数
                 //这个操作不能在复制到其他元素之前执行!
                 //设置创建服务传递进来的参数
@@ -919,36 +904,29 @@
             } else {
                 this.$message.error("查询所有用例的组名失败");
             }
-            console.log("页面数组:", this.pageArray);
         },
         async mounted() {
-            window.addEventListener("dblclick", (e) => {
-                if (e.ctrlKey && e.clientX < 600 && e.clientY < 30) {
-                    this.$prompt('请输入要删除服务名', '提示', {
-                        confirmButtonText: '确定',
-                    }).then(({ value }) => {
-                        delService({zkServiceName: value})
-                            .then(res => {
-                                if (res.data.code === 0) {
-                                    this.$message.success(res.data.data);
-                                } else {
-                                    this.$message.error(res.data.msg);
-                                }   
-                            })
-                    }).catch(() => {
-                    });
-                }
-            });
+            window.pageVue = this
+            this.addDeleteServiceListener()
         },
-        destroyed: function () {
+        deactivated() {
+            this.scrollTopCmReq = this.codemirrorReq.getScrollerElement().scrollTop
+            this.scrollTopCmRes = this.codemirrorRes.getScrollerElement().scrollTop
+        },
+        activated() {
+            window.pageVue = this
+            this.codemirrorReq.getScrollerElement().scrollTo(0, this.scrollTopCmReq)
+            this.codemirrorRes.getScrollerElement().scrollTo(0, this.scrollTopCmRes)
+        },
+        destroyed() {
             AppUtils.setItem(this.cachePageName, JSON.stringify(this.pageArray));
         },
         computed: {
-            codemirror() {
-                return this.$refs.myCm.codemirror
+            codemirrorReq() {
+                return this.$refs.myCmReq.codemirror
             },
-            codemirror1() {
-                return this.$refs.myCm1.codemirror
+            codemirrorRes() {
+                return this.$refs.myCmRes.codemirror
             }
         },
         watch: {
@@ -979,7 +957,7 @@
     /deep/ .CodeMirror-scroll {
         padding: 0 !important;
         margin: 0 !important;
-        height: 320px;
+        height: 355px;
         width: 610px;
         overflow-x: hidden !important;
         overflow-y: auto !important;

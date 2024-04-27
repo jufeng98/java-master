@@ -30,7 +30,7 @@
                     </el-tooltip>
                 </el-header>
                 <el-tree lazy :data="redisDbs" :props="defaultProps" :load="loadKeys" @node-expand="nodeExpand"
-                    @node-click="nodeClick" highlight-current></el-tree>
+                    @node-click="nodeClick" highlight-current ref="dbTreeRef"></el-tree>
             </div>
             <el-container style="margin: 10px">
                 <div style="margin: 6px;">
@@ -81,7 +81,9 @@
                     </el-row>
 
                     <el-table v-if="fieldVos.length>0" :data="fieldVos" @row-click="fieldRowClick" border
-                        style="width: 98%" height="170" :key="tableKey" highlight-current-row>
+                        style="width: 98%" ref="fieldTableRef" height="170" :key="tableKey" highlight-current-row>
+                        <el-table-column type="index" label="行号" width="50">
+                        </el-table-column>
                         <el-table-column prop="fieldKey" label="field" v-if="commonVo.redisKeyType === 'hash'">
                         </el-table-column>
                         <el-table-column prop="fieldValue" label="value" show-overflow-tooltip>
@@ -208,16 +210,19 @@
     import request from '@/utils/request'
 
     export default {
-        name: 'redisHelper',
+        name: 'redisManage',
         data() {
             return {
+                scrollTopLeft: 0,
+                scrollTopRight: 0,
+                scrollTopCm: 0,
                 tableKey: 1,
                 redisConnected: {},
                 desc: `
                 JDK序列化说明：
                 默认作为 String 类型来序列化。若内容带有类型提示: 如 123♣java.lang.Long => 将转换为 Long 类型来序列化；
                 若希望转换为复杂对象来序列化，则可以这样表示：
-                ["java.util.ArrayList",[{"@class":"cn.com.bluemoon.invocationlab.admin.rpcpostman.model.erd.AesReqVo","projectId":"2011yhfdsaa","opType":1,"value":898}]] 
+                ["java.util.ArrayList",[{"@class":"cn.com.bluemoon.invocationlab.admin.rpcpostman.model.erd.AesReqVo","projectId":"2011yhfdsaa","opType":1,"value":898}]]
                 => 将转换为为 ArrayList<AesReqVo> 类型来序列化(如果能找到对应的class且class实现了Serializable接口)
                 `,
                 cmOptions: {
@@ -652,6 +657,27 @@
                 }).catch(() => {
                 });
             },
+        },
+        deactivated() {
+            if (this.$refs.dbTreeRef) {
+                this.scrollTopLeft = this.$refs.dbTreeRef.$el.scrollTop
+            }
+            if (this.$refs.fieldTableRef) {
+                this.scrollTopRight = this.$refs.fieldTableRef.$el.getElementsByClassName('el-table__body-wrapper')[0].scrollTop
+            }
+            this.scrollTopCm = this.$refs.myCm.codemirror.getScrollerElement().scrollTop
+        },
+        activated() {
+            window.pageVue = this
+            if (this.$refs.dbTreeRef) {
+                this.$refs.dbTreeRef.$el.scrollTo(0, this.scrollTopLeft)
+            }
+            if (this.$refs.fieldTableRef) {
+                setTimeout(() => {
+                    this.$refs.fieldTableRef.$el.getElementsByClassName('el-table__body-wrapper')[0].scrollTo(0, this.scrollTopRight)
+                }, 100);
+            }
+            this.$refs.myCm.codemirror.getScrollerElement().scrollTo(0, this.scrollTopCm)
         },
         mounted() {
             window.pageVue = this
