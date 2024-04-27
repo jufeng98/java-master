@@ -9,6 +9,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import lombok.SneakyThrows;
 import org.bson.Document;
+import org.javamaster.invocationlab.admin.config.BizException;
+import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.model.erd.DbsBean;
 import org.javamaster.invocationlab.admin.model.erd.IndexsBean;
 import org.javamaster.invocationlab.admin.model.erd.PropertiesBean;
@@ -63,6 +65,8 @@ public class MongoUtils {
             T result = callback.apply(connection);
             CONNECTION_POOL.put(connection);
             return result;
+        } catch (ErdException | BizException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

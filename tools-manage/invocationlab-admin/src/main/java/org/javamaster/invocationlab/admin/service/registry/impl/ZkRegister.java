@@ -1,5 +1,6 @@
 package org.javamaster.invocationlab.admin.service.registry.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.javamaster.invocationlab.admin.service.registry.Register;
 import org.javamaster.invocationlab.admin.service.registry.entity.InterfaceMetaInfo;
 import org.javamaster.invocationlab.admin.util.BuildUtils;
@@ -117,8 +118,12 @@ public class ZkRegister implements Register {
             int port = dubboUrl.getPort();
             String addr = host + ":" + port;
             String version = dubboUrl.getParameter("version", "");
-            String methods = dubboUrl.getParameter("methods");
             String group = dubboUrl.getParameter(Constants.GROUP_KEY, "default");
+            String methods = dubboUrl.getParameter("methods");
+            if (StringUtils.isBlank(methods)) {
+                logger.info("methods empty:{}", dubboUrl);
+                return;
+            }
             String[] methodArray = methods.split(",");
             Set<String> methodSets = new HashSet<>();
             Collections.addAll(methodSets, methodArray);

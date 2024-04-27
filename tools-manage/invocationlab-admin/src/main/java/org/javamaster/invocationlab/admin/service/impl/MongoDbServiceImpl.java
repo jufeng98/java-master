@@ -13,10 +13,12 @@ import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.javamaster.invocationlab.admin.config.BizException;
 import org.javamaster.invocationlab.admin.config.ErdException;
 import org.javamaster.invocationlab.admin.consts.ErdConst;
 import org.javamaster.invocationlab.admin.enums.SqlTypeEnum;
@@ -42,6 +44,7 @@ import org.javamaster.invocationlab.admin.util.MongoUtils;
 import org.javamaster.invocationlab.admin.util.SessionUtils;
 import org.javamaster.invocationlab.admin.util.SpringUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -57,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.javamaster.invocationlab.admin.consts.ErdConst.ERD_PREFIX;
@@ -122,37 +126,61 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
         SqlTypeEnum sqlTypeEnum = SqlTypeEnum.getByType(row.getString(ErdConst.ROW_OPERATION_TYPE));
         String primaryKeyValue = (String) row.get(ErdConst.MONGO_KEY_NAME);
 
-        Document rowDoc = Document.parse(row.toJSONString());
-
-        delKeys(rowDoc);
-
-        if (sqlTypeEnum == SqlTypeEnum.UPDATE && rowDoc.isEmpty()) {
-            throw new ErdException("数据无变化,未做任何更新操作!");
-        }
-
         String collectionName = SessionUtils.getFromSession(ErdConst.EXEC_COLLECTION_NAME);
+        if (StringUtils.isBlank(collectionName)) {
+            throw new BizException("请刷新查询在重试");
+        }
 
         long start = System.currentTimeMillis();
         int num = MongoUtils.executeMongo(collectionName, connection, collection -> {
             switch (sqlTypeEnum) {
                 case INSERT:
-                    log.info("{}-{} execute insert action:\n{}", tokenVo.getUserId(), tokenVo.getUsername(), rowDoc);
+                    Document insertDoc;
 
-                    collection.insertOne(rowDoc);
+                    Document doc = collection.find().first();
+                    if (doc == null) {
+                        handleInsertRow(row);
+
+                        insertDoc = Document.parse(row.toJSONString());
+                    } else {
+                        insertDoc = convertRowToDoc(row, doc, false);
+                    }
+
+                    String json = insertDoc.toJson();
+                    log.info("{}-{} execute insert action:\n{}", tokenVo.getUserId(), tokenVo.getUsername(), json);
+
+                    collection.insertOne(insertDoc);
+
+                    String command1 = String.format("db.%s.insertOne(%s)", collectionName, json);
+                    addSqlToExecuteHistory(command1, connection.getUrl(), tokenVo, queryId, System.currentTimeMillis() - start);
                     return 1;
                 case UPDATE:
+                    Document oldDoc = getOldQueryDocument(row.get(ErdConst.ERD_ROW_KEY));
+
+                    Document updateDoc = convertRowToDoc(row, oldDoc, true);
+
+                    if (updateDoc.isEmpty()) {
+                        throw new ErdException("数据无变化,未做任何更新操作!");
+                    }
+
                     Document filter = new Document().append(ErdConst.MONGO_KEY_NAME, new ObjectId(primaryKeyValue));
-                    Document updated = new Document().append("$set", rowDoc);
+                    Document updated = new Document().append("$set", updateDoc);
                     log.info("{}-{} execute update action:\nfilter:{}\r\nupdated:{}", tokenVo.getUserId(), tokenVo.getUsername(),
                             filter, updated);
 
                     UpdateResult updateResult = collection.updateOne(filter, updated);
+
+                    String command2 = String.format("db.%s.updateOne({\"_id\":ObjectId(\"%s\")},%s)", collectionName, primaryKeyValue, updated.toJson());
+                    addSqlToExecuteHistory(command2, connection.getUrl(), tokenVo, queryId, System.currentTimeMillis() - start);
                     return (int) updateResult.getModifiedCount();
                 case DELETE:
                     Document filterDel = new Document().append(ErdConst.MONGO_KEY_NAME, new ObjectId(primaryKeyValue));
                     log.info("{}-{} execute del action:\n{}", tokenVo.getUserId(), tokenVo.getUsername(), filterDel);
 
                     DeleteResult deleteResult = collection.deleteOne(filterDel);
+
+                    String command3 = String.format("db.%s.deleteOne({\"_id\":ObjectId(\"%s\")})", collectionName, primaryKeyValue);
+                    addSqlToExecuteHistory(command3, connection.getUrl(), tokenVo, queryId, System.currentTimeMillis() - start);
                     return (int) deleteResult.getDeletedCount();
                 default:
                     throw new ErdException("参数有误:" + sqlTypeEnum);
@@ -177,7 +205,6 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
 
         resVo.setTableData(tableData);
 
-        addSqlToExecuteHistory(rowDoc.toJson(), connection.getUrl(), tokenVo, queryId, cost);
         return resVo;
     }
 
@@ -197,32 +224,96 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
         return new Document(oldRow);
     }
 
-    private void delKeys(Document row) {
-        Document oldDoc = getOldQueryDocument(row.get(ErdConst.ERD_ROW_KEY));
+    private void handleInsertRow(JSONObject row) {
+        List<String> nullKeys = Lists.newArrayList();
 
         List<String> delKeys = row.entrySet().stream()
                 .filter(entry -> {
+                    String key = entry.getKey();
+
                     boolean isNull = Objects.equals(entry.getValue(), ErdConst.NULL_VALUE);
                     if (isNull) {
-                        // 过滤到值为null的
-                        return true;
+                        nullKeys.add(key);
+                        return false;
                     }
-                    if (oldDoc != null) {
-                        // 过滤掉值没有变化的
-                        boolean isEquals = Objects.equals(oldDoc.get(entry.getKey()), entry.getValue());
-                        if (isEquals) {
-                            return true;
-                        }
-                    }
-                    return ErdConst.ROW_OPERATION_TYPE.equals(entry.getKey())
-                            || ErdConst.ERD_ROW_KEY.equals(entry.getKey())
-                            || ErdConst.MONGO_KEY_NAME.equals(entry.getKey())
-                            || ErdConst.INDEX.equals(entry.getKey());
+
+                    return isHelperColumnName(key);
                 })
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+
         for (String delKey : delKeys) {
             row.remove(delKey);
+        }
+
+        for (String nullKey : nullKeys) {
+            row.put(nullKey, null);
+        }
+    }
+
+    private boolean isHelperColumnName(String name) {
+        return ErdConst.ROW_OPERATION_TYPE.equals(name)
+                || ErdConst.ERD_ROW_KEY.equals(name)
+                || ErdConst.MONGO_KEY_NAME.equals(name)
+                || ErdConst.INDEX.equals(name);
+    }
+
+    private Document convertRowToDoc(Map<String, Object> row, Document oldDoc, boolean checkValueEquals) {
+        Document doc = new Document();
+        row.forEach((key, value) -> {
+            if (isHelperColumnName(key)) {
+                return;
+            }
+
+            if (ErdConst.NULL_VALUE.equals(value)) {
+                doc.put(key, null);
+                return;
+            }
+
+            Object oldValue = oldDoc.get(key);
+            if (oldValue == null) {
+                doc.put(key, value);
+                return;
+            }
+
+            Object actualValue = convertValue(oldValue, value);
+
+            if (checkValueEquals) {
+                if (oldValue instanceof Date) {
+                    // Date类型的比较直接忽略毫秒,作为字符串来进行比较
+                    if (Objects.equals(DateFormatUtils.format((Date) oldValue, STANDARD_PATTERN), value)) {
+                        return;
+                    }
+                }
+                if (Objects.equals(oldValue, actualValue)) {
+                    return;
+                }
+            }
+
+            doc.put(key, actualValue);
+        });
+        return doc;
+    }
+
+    private Object convertValue(Object oldValue, Object value) {
+        if (oldValue instanceof Document) {
+            //noinspection unchecked
+            return convertRowToDoc((Map<String, Object>) value, (Document) oldValue, false);
+        } else if (oldValue instanceof List) {
+            List<?> oldList = (List<?>) oldValue;
+            List<?> list = (List<?>) value;
+
+            List<Object> newList = Lists.newArrayList();
+            for (int i = 0; i < list.size(); i++) {
+                Object oldVal = oldList.get(i);
+                Object val = list.get(i);
+                Object newVal = convertValue(oldVal, val);
+                newList.add(newVal);
+            }
+            return newList;
+        } else {
+            ConversionService conversionService = SpringUtils.getContext().getBean(ConversionService.class);
+            return conversionService.convert(value, oldValue.getClass());
         }
     }
 
@@ -230,11 +321,11 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
     public List<Column> getTableColumns(DbsBean dbsBean, String selectDB, String tableName) {
         return MongoUtils.executeMongo(dbsBean, connection -> {
             MongoCollection<Document> collection = connection.getService().getDatabase(selectDB).getCollection(tableName);
-            Document first = collection.find().first();
-            if (first == null) {
+            Document doc = collection.find().first();
+            if (doc == null) {
                 return Collections.emptyList();
             }
-            return first.entrySet().stream()
+            return doc.entrySet().stream()
                     .map(entry -> {
                         String key = entry.getKey();
                         Object value = entry.getValue();
@@ -271,7 +362,7 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
             Pair<SqlTypeEnum, String> pair = checkSqlType(reqVo.getSql());
             if (pair.getLeft() == SqlTypeEnum.SELECT
                     || pair.getLeft() == SqlTypeEnum.UNKNOWN) {
-                return execDqlSql(connection, reqVo, tokenVo, pair.getLeft(), pair.getRight());
+                return execDqlSql(connection, reqVo, tokenVo, pair.getLeft(), pair.getRight(), dbsBean);
             } else if (pair.getLeft() == SqlTypeEnum.INSERT
                     || pair.getLeft() == SqlTypeEnum.UPDATE
                     || pair.getLeft() == SqlTypeEnum.DROP) {
@@ -322,7 +413,7 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
     }
 
     private SqlExecResVo execDqlSql(MongoConnection connection, CommonErdVo reqVo, TokenVo tokenVo,
-                                    SqlTypeEnum sqlTypeEnum, String collectionName) throws Exception {
+                                    SqlTypeEnum sqlTypeEnum, String collectionName, DbsBean dbsBean) throws Exception {
         Pair<String, Boolean> pair = modifyQuerySql(reqVo, sqlTypeEnum);
         String sql = pair.getLeft();
 
@@ -367,11 +458,24 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
                     records.add(Maps.newHashMap(Collections.singletonMap(sql, obj)));
                 }
             }
-        }
-        log.info("{}-{} execute dql sql res size:{}", tokenVo.getUserId(), tokenVo.getUsername(), records.size());
 
-        if (resVo.getColumns() == null) {
-            throw new ErdException("collection不存在或结果集为空");
+            log.info("{}-{} execute dql sql res size:{}", tokenVo.getUserId(), tokenVo.getUsername(), records.size());
+
+            if (resVo.getColumns() == null) {
+                List<Table> tables = getTables(dbsBean, reqVo.getSelectDB());
+
+                boolean notExists = tables.stream().noneMatch(it -> it.getName().equals(collectionName));
+                if (notExists) {
+                    throw new ErdException("collection: " + collectionName + " 不存在");
+                }
+
+                List<Column> tableColumns = getTableColumns(dbsBean, reqVo.getSelectDB(), collectionName);
+
+                Set<String> names = tableColumns.stream()
+                        .map(Column::getName)
+                        .collect(Collectors.toSet());
+                resVo.setColumns(names);
+            }
         }
 
         int anInt = Integer.parseInt(RandomUtils.nextInt(1000000, 9999999) + "01");

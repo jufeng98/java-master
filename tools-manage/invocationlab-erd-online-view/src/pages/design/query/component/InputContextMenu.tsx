@@ -40,6 +40,7 @@ const InputContextMenu: React.FC<{
         onChange?.(JSON.parse(e.target.value))
       } catch (ex: any) {
         console.log(ex.message)
+        onChange?.(e.target.value)
       }
     } else if (cellValueType === 'number') {
       onChange?.(parseFloat(e.target.value))
