@@ -489,6 +489,7 @@ public class KafkaServiceImpl implements KafkaService {
                         .isLeaf(true)
                         .kafkaNodeType("Broker")
                         .build())
+                .sorted(Comparator.comparing(KafkaTree::getLabel))
                 .collect(Collectors.toList());
 
         return KafkaTree.builder()
@@ -511,6 +512,7 @@ public class KafkaServiceImpl implements KafkaService {
                         .isLeaf(true)
                         .kafkaNodeType("Topic")
                         .build())
+                .sorted(Comparator.comparing(KafkaTree::getLabel))
                 .collect(Collectors.toList());
 
         return KafkaTree.builder()
@@ -533,6 +535,7 @@ public class KafkaServiceImpl implements KafkaService {
                         .isLeaf(true)
                         .kafkaNodeType("Consumer")
                         .build())
+                .sorted(Comparator.comparing(KafkaTree::getLabel))
                 .collect(Collectors.toList());
 
         return KafkaTree.builder()
