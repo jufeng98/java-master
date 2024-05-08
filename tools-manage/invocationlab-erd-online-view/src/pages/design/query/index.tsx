@@ -176,6 +176,7 @@ const Query: React.FC<QueryProps> = (props) => {
 
   const executeSql = (sql: string, page: number = 1, pageSize: number = 20, callFromPagination: boolean = false) => {
     const params = {
+      dbType,
       queryId: props.id,
       projectId,
       sql,
@@ -415,6 +416,7 @@ const Query: React.FC<QueryProps> = (props) => {
             return
           }
           const params = {
+            dbType,
             queryId: props.id,
             projectId,
             sql: selectValue,

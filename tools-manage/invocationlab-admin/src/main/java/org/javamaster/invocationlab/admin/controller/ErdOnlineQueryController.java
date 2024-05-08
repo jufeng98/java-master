@@ -2,6 +2,7 @@ package org.javamaster.invocationlab.admin.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Triple;
 import org.javamaster.invocationlab.admin.annos.ErdRolesAllowed;
@@ -18,6 +19,7 @@ import org.javamaster.invocationlab.admin.model.erd.Table;
 import org.javamaster.invocationlab.admin.model.erd.TokenVo;
 import org.javamaster.invocationlab.admin.model.erd.Tree;
 import org.javamaster.invocationlab.admin.service.ErdOnlineQueryService;
+import org.javamaster.invocationlab.admin.util.MongoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,8 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.util.UriUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -115,6 +119,26 @@ public class ErdOnlineQueryController {
         reqVo.setExplain(request.getRequestURI().contains("explain"));
         reqVo.setSql(reqVo.getSql().trim());
         return ResultVo.success(erdOnlineQueryService.execSql(reqVo, tokenVo));
+    }
+
+    @ErdRolesAllowed(value = RoleEnum.ERD_SQL_EXECUTE, msg = "没有执行SQL的权限")
+    @PostMapping({"/queryInfo/execMongo", "/queryInfo/explainMongo"})
+    public void execSqlMongo(@RequestBody CommonErdVo reqVo, HttpServletRequest request,
+                             HttpServletResponse response, @SessionAttribute("tokenVo") TokenVo tokenVo) throws Exception {
+        reqVo.setIsExport(false);
+        reqVo.setExplain(request.getRequestURI().contains("explain"));
+        reqVo.setSql(reqVo.getSql().trim());
+
+        ResultVo<SqlExecResVo> resultVo = ResultVo.success(erdOnlineQueryService.execSql(reqVo, tokenVo));
+
+        String jsonStr = MongoUtils.mongoObjectMapper.writeValueAsString(resultVo);
+
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+        @Cleanup
+        PrintWriter writer = response.getWriter();
+        writer.write(jsonStr);
+        writer.flush();
     }
 
     @ErdRolesAllowed(value = RoleEnum.ERD_SQL_EXECUTE, msg = "没有执行SQL的权限")

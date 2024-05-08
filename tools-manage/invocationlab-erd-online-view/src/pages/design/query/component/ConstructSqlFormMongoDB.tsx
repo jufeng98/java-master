@@ -134,6 +134,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
 
     let sql = `db.${tableNameChoose}.find( ${JSON.stringify(queryObj)}, ${JSON.stringify(projectionObj)}).sort(${JSON.stringify(sortObj)})`
     sql = sql.replace('"ObjectIdStart', 'ObjectId("').replace('ObjectIdEnd"', '")')
+      .replace('"DateStart', 'ISODate("').replace('DateEnd"', '")')
     return sql
   }
 
@@ -165,6 +166,9 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
     if (column.name === '_id') {
       obj[querySymbol] = `ObjectIdStart${obj[querySymbol]}ObjectIdEnd`
     }
+    if (column.typeName === 'DATE') {
+      obj[querySymbol] = `DateStart${obj[querySymbol]}DateEnd`
+    }
 
     return obj
   }
@@ -176,7 +180,7 @@ const ConstructSqlForm: React.FC<ConstructSqlFormProps> = (props) => {
     } else if (lowerType.includes("int")) {
       return currentValue ? parseFloat(currentValue) : ""
     } else if (lowerType.includes("date")) {
-      return currentValue ? currentValue : moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+      return currentValue ? currentValue : moment(new Date()).format("YYYY-MM-DDTHH:mm:ss.SSS") + "Z"
     } else {
       return currentValue ? currentValue : ""
     }

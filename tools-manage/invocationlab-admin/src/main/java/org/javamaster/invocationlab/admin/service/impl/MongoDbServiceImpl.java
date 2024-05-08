@@ -54,6 +54,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -312,7 +313,7 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
             }
             return newList;
         } else {
-            ConversionService conversionService = SpringUtils.getContext().getBean(ConversionService.class);
+            ConversionService conversionService = MongoUtils.getConversionServiceSingle();
             return conversionService.convert(value, oldValue.getClass());
         }
     }
@@ -326,30 +327,70 @@ public class MongoDbServiceImpl implements MongoDbService, DisposableBean {
                 return Collections.emptyList();
             }
             return doc.entrySet().stream()
-                    .map(entry -> {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        boolean primary = key.equals(ErdConst.MONGO_KEY_NAME);
-                        Column column = new Column();
-                        column.setName(key);
-                        if (value != null) {
-                            Class<?> aClass = value.getClass();
-                            column.setTypeName(aClass.getSimpleName().toUpperCase());
-                        } else {
-                            column.setTypeName(String.class.getSimpleName().toUpperCase());
-                        }
-                        column.setDigits(0);
-                        column.setPrecRadix(10);
-                        column.setNullable(primary ? 0 : 1);
-                        column.setRemarks("");
-                        column.setCharOctetLength(0);
-                        column.setIsNullable(primary ? "NO" : "YES");
-                        column.setIsAutoincrement("NO");
-                        column.setPrimaryKey(primary);
-                        return column;
-                    })
+                    .map(entry -> convertToColumns(entry.getKey(), entry.getValue(), true))
+                    .flatMap(Collection::stream)
                     .collect(Collectors.toList());
         });
+    }
+
+    private List<Column> convertToColumns(String name, Object value, boolean needColumn) {
+        List<Column> columnList = Lists.newArrayList();
+
+        if (value instanceof Document) {
+            Document doc = (Document) value;
+
+            if (needColumn) {
+                Column column = createColumn(name, doc);
+                columnList.add(column);
+            }
+
+            List<Column> columns = doc.entrySet().stream()
+                    .map(it -> convertToColumns(name + "." + it.getKey(), it.getValue(), needColumn))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+            columnList.addAll(columns);
+        } else if (value instanceof List) {
+            List<?> list = (List<?>) value;
+
+            boolean b = !list.isEmpty() && !(list.get(0) instanceof Document);
+
+            Column column = createColumn(name, list);
+            columnList.add(column);
+
+            List<Column> columns = list.stream()
+                    .map(it -> convertToColumns(name, it, b))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+            columnList.addAll(columns);
+        } else {
+            Column column = createColumn(name, value);
+            columnList.add(column);
+        }
+
+        return columnList;
+    }
+
+    private Column createColumn(String name, Object value) {
+        boolean primary = name.equals(ErdConst.MONGO_KEY_NAME);
+        Column column = new Column();
+        column.setName(name);
+        if (value != null) {
+            Class<?> aClass = value.getClass();
+            column.setTypeName(aClass.getSimpleName().toUpperCase());
+        } else {
+            column.setTypeName(Void.class.getSimpleName().toUpperCase());
+        }
+        column.setDigits(0);
+        column.setPrecRadix(10);
+        column.setNullable(primary ? 0 : 1);
+        column.setRemarks("");
+        column.setCharOctetLength(0);
+        column.setIsNullable(primary ? "NO" : "YES");
+        column.setIsAutoincrement("NO");
+        column.setPrimaryKey(primary);
+        return column;
     }
 
     @Override

@@ -47,9 +47,15 @@ const useQueryStore = create<QueryState>(
         return GET('/ncnb/queryHistory', model);
       },
       explain: (model) => {
+        if (model.selectDB === 'MongoDB') {
+          return POST('/ncnb/queryInfo/explainMongo', model);
+        }
         return POST('/ncnb/queryInfo/explain', model);
       },
       exec: (model) => {
+        if (model.dbType === 'MongoDB') {
+          return POST('/ncnb/queryInfo/execMongo', model);
+        }
         return POST('/ncnb/queryInfo/exec', model);
       },
       getTableRecordTotal: (model) => {
