@@ -11,7 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.StreamUtils;
-import org.w3c.dom.*;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
@@ -28,9 +32,15 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -74,6 +84,12 @@ public class MySqlMybatisGenerator {
             if (source != null) {
                 properties.putAll(source);
             }
+
+            String tk = PropertiesUtils.getProp("tk.plugin.class");
+            if (StringUtils.isBlank(tk)) {
+                properties.setProperty("tk.plugin.class", "org.javamaster.mybatis.generator.plugin.TkMapperPlugin");
+            }
+
             inputStream = addTableToXml();
             inputStream.mark(inputStream.available());
             logger.info("xml content:\r\n{}", StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8));
@@ -128,13 +144,14 @@ public class MySqlMybatisGenerator {
                         .evaluate("/generatorConfiguration/context/plugin[@type='org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin']", rootEle, XPathConstants.NODE);
                 parentNode.removeChild(node);
             }
-            if (!tkMybatis) {
-                Node node = (Node) xPath
-                        .evaluate("/generatorConfiguration/context/plugin[@type='org.javamaster.mybatis.generator.plugin.TkMapperPlugin']", rootEle, XPathConstants.NODE);
-                parentNode.removeChild(node);
-            } else {
+            if (tkMybatis) {
                 Node node = parentNode.getAttributes().getNamedItem("targetRuntime");
                 node.setNodeValue("MyBatis3Simple");
+            } else {
+                String ex = "/generatorConfiguration/context/plugin[@type='%s']";
+                ex = String.format(ex, PropertiesUtils.getProp("tk.plugin.class"));
+                Node node = (Node) xPath.evaluate(ex, rootEle, XPathConstants.NODE);
+                parentNode.removeChild(node);
             }
 
             String jdbcUrl = PropertiesUtils.getProp("jdbc.url");
@@ -177,9 +194,7 @@ public class MySqlMybatisGenerator {
     private static void changeDatabaseTinyintToInteger(XPath xPath, Document doc) throws Exception {
         Element rootEle = doc.getDocumentElement();
         boolean close = PropertiesUtils.getPropAsBoolean("disable.tinyint.to.integer", "true");
-        if (close) {
-            return;
-        }
+
         try (Connection connection = DriverManager.getConnection(PropertiesUtils.getProp("jdbc.url"),
                 PropertiesUtils.getProp("jdbc.user"), PropertiesUtils.getProp("jdbc.password"))) {
             NodeList nodeList = (NodeList) xPath.evaluate("//table", rootEle, XPathConstants.NODESET);
@@ -193,15 +208,24 @@ public class MySqlMybatisGenerator {
                 ResultSet rs = databaseMetaData.getColumns(null, null, tableName, null);
                 while (rs.next()) {
                     int dataType = rs.getInt("DATA_TYPE");
-                    if (Types.TINYINT != dataType && Types.BIT != dataType) {
-                        continue;
+                    if (!close && (Types.TINYINT == dataType || Types.BIT == dataType)) {
+                        String columnName = rs.getString("COLUMN_NAME");
+                        Element columnOverrideEle = doc.createElement("columnOverride");
+                        columnOverrideEle.setAttribute("column", columnName);
+                        columnOverrideEle.setAttribute("javaType", "Integer");
+                        columnOverrideEle.setAttribute("jdbcType", "INTEGER");
+                        tableEle.appendChild(columnOverrideEle);
                     }
-                    String columnName = rs.getString("COLUMN_NAME");
-                    Element columnOverrideEle = doc.createElement("columnOverride");
-                    columnOverrideEle.setAttribute("column", columnName);
-                    columnOverrideEle.setAttribute("javaType", "Integer");
-                    columnOverrideEle.setAttribute("jdbcType", "INTEGER");
-                    tableEle.appendChild(columnOverrideEle);
+
+                    String typeName = rs.getString("TYPE_NAME");
+                    if (Objects.equals(typeName, "INT UNSIGNED")) {
+                        String columnName = rs.getString("COLUMN_NAME");
+                        Element columnOverrideEle = doc.createElement("columnOverride");
+                        columnOverrideEle.setAttribute("column", columnName);
+                        columnOverrideEle.setAttribute("javaType", "Long");
+                        columnOverrideEle.setAttribute("jdbcType", "BIGINT");
+                        tableEle.appendChild(columnOverrideEle);
+                    }
                 }
             }
         }

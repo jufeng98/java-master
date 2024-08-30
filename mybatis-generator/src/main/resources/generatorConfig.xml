@@ -17,7 +17,7 @@
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorOverridePlugin"/>
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisEnumsPlugin"/>
         <plugin type="org.javamaster.mybatis.generator.plugin.MybatisGeneratorPlugin"/>
-        <plugin type="org.javamaster.mybatis.generator.plugin.TkMapperPlugin">
+        <plugin type="${tk.plugin.class}">
             <property name="mappers" value="${package.Mapper}"/>
         </plugin>
 
