@@ -16,7 +16,7 @@
     </contributors>
 
     <properties>
-        <spring.version>5.1.9.RELEASE</spring.version>
+        <spring.version>6.0.0</spring.version>
         <springboot.version>2.1.6.RELEASE</springboot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
